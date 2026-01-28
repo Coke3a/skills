@@ -1,5 +1,5 @@
 ---
-name: rust-clean-arch
+name: rust-clean-coke-architecture-patterns
 description: Applies Rust Clean Architecture patterns (route->usecase->repository) with domain entities/value objects, ORM repository implementations, and usecase-centric error handling for backend and worker services. Use when scaffolding, refactoring, or reviewing Rust services that need route/usecase/repository layering, ORM data access, and explicit error handling.
 ---
 
