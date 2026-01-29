@@ -1,5 +1,5 @@
 // Split each section into the file path noted; keep only one section per file.
-// domain/errors.rs
+// src/domain/errors.rs
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -8,10 +8,10 @@ pub enum DomainError {
     InvalidField { field: &'static str, reason: &'static str },
 }
 
-// infra/errors.rs
-use thiserror::Error as InfraErrorDerive;
+// src/domain/repositories/errors.rs
+use thiserror::Error as RepoErrorDerive;
 
-#[derive(Debug, InfraErrorDerive)]
+#[derive(Debug, RepoErrorDerive)]
 pub enum RepoError {
     #[error("db op failed: {op}")]
     Db {
@@ -21,10 +21,10 @@ pub enum RepoError {
     },
 }
 
-// usecases/errors.rs
+// src/usecases/errors.rs
 use axum::http::StatusCode;
 use thiserror::Error as UsecaseErrorDerive;
-use crate::infra::errors::RepoError;
+use crate::domain::repositories::RepoError;
 
 #[derive(Debug, UsecaseErrorDerive)]
 pub enum UsecaseError {
@@ -69,7 +69,7 @@ impl UsecaseError {
     }
 }
 
-// backend/axum_http/errors.rs
+// src/handlers/errors.rs
 use serde::Serialize;
 use crate::usecases::errors::UsecaseError;
 

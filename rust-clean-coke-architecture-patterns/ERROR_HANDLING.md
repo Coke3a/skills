@@ -1,10 +1,10 @@
 # Error handling
 
 ## Layered error types
-- **DomainError** (crates/domain): invariant and validation failures from value objects/entities.
-- **RepoError / InfraError** (crates/infra): database/IO failures with rich context (op name, ids, constraints).
-- **UsecaseError** (backend/worker usecases): orchestration errors that describe user-facing meaning.
-- **ApiError** (routes): thin mapping to HTTP; should not contain business logic.
+- **DomainError** (`src/domain`): invariant and validation failures from value objects/entities.
+- **RepoError** (`src/domain/repositories`): database/IO failures with rich context (op name, ids, constraints).
+- **UsecaseError** (`src/usecases`): orchestration errors that describe user-facing meaning.
+- **ApiError** (`src/handlers`): thin mapping to HTTP; should not contain business logic.
 
 ## Rule: handle at the usecase layer
 - Lower layers return rich errors with complete context.

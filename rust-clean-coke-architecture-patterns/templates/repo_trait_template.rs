@@ -1,20 +1,9 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
-use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
-use crate::infra::errors::RepoError;
-
-#[derive(Debug, Clone)]
-pub struct ProjectFilters {
-    pub owner_id: Option<uuid::Uuid>,
-    pub status: Option<ProjectStatus>,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Page {
-    pub limit: i64,
-    pub offset: i64,
-}
+use crate::domain::{Project, ProjectId, ProjectName};
+use crate::domain::value_objects::{Page, ProjectFilters};
+use crate::domain::repositories::RepoError;
 
 #[async_trait]
 pub trait ProjectRepository: Send + Sync {

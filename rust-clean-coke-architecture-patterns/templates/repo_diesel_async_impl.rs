@@ -9,8 +9,8 @@ use uuid::Uuid;
 
 use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
 use crate::domain::errors::DomainError;
-use crate::infra::errors::RepoError;
 use crate::domain::repositories::project::{Page, ProjectFilters, ProjectRepository};
+use crate::domain::repositories::RepoError;
 use crate::infra::db::postgres::{PgPool, schema::projects};
 
 pub struct ProjectPostgres {

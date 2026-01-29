@@ -2,11 +2,11 @@
 
 ## Scaffold a new feature
 1) Define domain entities and value objects
-- [ ] Add value objects in `crates/domain/value_objects` with validation in constructors.
-- [ ] Add entity structs in `crates/domain/entities` with invariant-preserving methods.
+- [ ] Add value objects in `src/domain/value_objects` with validation in constructors.
+- [ ] Add entity structs in `src/domain/entities` with invariant-preserving methods.
 
 2) Define the repository port
-- [ ] Add a trait in `crates/domain/repositories`.
+- [ ] Add a trait in `src/domain/repositories/*`.
 - [ ] Return `Option<T>` for not-found; use `Result<T, RepoError>` for failures.
 
 3) Implement the usecase
@@ -16,29 +16,25 @@
 - [ ] Map repo errors into `UsecaseError`.
 
 4) Implement the infra repository
-- [ ] Add Diesel queries in `crates/infra/db/repositories`.
+- [ ] Add Diesel queries in `src/infra/db/repositories/*`.
 - [ ] Map DB rows to domain entities via a small mapping layer.
 - [ ] Enrich errors with operation context.
 
-5) Wire route -> usecase (backend)
-- [ ] Add an axum route file under `backend/src/axum_http/routers`.
+5) Wire handler -> usecase
+- [ ] Add an axum handler file under `src/handlers`.
 - [ ] Parse request DTOs and call the usecase.
 - [ ] Map `UsecaseError` to HTTP status codes.
 
-6) Add worker job usecase (if needed)
-- [ ] Implement a `run` method with params/result structs.
-- [ ] Inject repo/client dependencies via `Arc`.
-
-7) Add tests
+6) Add tests
 - [ ] Domain unit tests for value objects and entity methods.
 - [ ] Usecase tests with mocks/fakes for repository traits.
 
-8) Observability
+7) Observability
 - [ ] Add `#[tracing::instrument]` to usecase entry points.
 - [ ] Log structured fields; avoid secrets/PII.
 
-9) Final review checklist
-- [ ] Routes contain no business logic.
+8) Final review checklist
+- [ ] Handlers contain no business logic.
 - [ ] Usecases own error semantics.
 - [ ] Repositories only do IO.
 - [ ] DTOs are separate from domain entities.

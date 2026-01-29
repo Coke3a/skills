@@ -1,4 +1,5 @@
 use crate::domain::errors::DomainError;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProjectName(String);
@@ -49,5 +50,35 @@ impl ProjectStatus {
                 reason: "unknown",
             }),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProjectFilters {
+    pub owner_id: Option<Uuid>,
+    pub status: Option<ProjectStatus>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Page {
+    pub limit: i64,
+    pub offset: i64,
+}
+
+impl Page {
+    pub fn new(limit: i64, offset: i64) -> Result<Self, DomainError> {
+        if limit <= 0 {
+            return Err(DomainError::InvalidField {
+                field: "limit",
+                reason: "must be positive",
+            });
+        }
+        if offset < 0 {
+            return Err(DomainError::InvalidField {
+                field: "offset",
+                reason: "must be zero or positive",
+            });
+        }
+        Ok(Self { limit, offset })
     }
 }

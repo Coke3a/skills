@@ -1,6 +1,6 @@
 use axum::{Json, http::StatusCode, response::IntoResponse};
 
-use crate::axum_http::errors::ApiError;
+use crate::handlers::errors::ApiError;
 use crate::usecases::errors::UsecaseError;
 
 pub fn map_usecase_error(err: UsecaseError) -> impl IntoResponse {

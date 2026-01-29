@@ -2,12 +2,12 @@
 
 ## Default ORM stack
 - Diesel + diesel_async (async-safe) with a pooled `AsyncPgConnection`.
-- Keep ORM details in crates/infra; repositories expose async trait methods.
-- Define `PgPool` in `infra::db::postgres` so routes and repos share a single pool type.
+- Keep ORM details in `src/infra/db/repositories/*`; repositories expose async trait methods.
+- Define `PgPool` in `infra::db::postgres` so handlers and repos share a single pool type.
 
 ## Repository port pattern
-- Define the trait in crates/domain (port).
-- Implement the trait in crates/infra using Diesel queries.
+- Define the trait in `src/domain/repositories/*` (port/interface).
+- Implement the trait in `src/infra/db/repositories/*` using Diesel queries (method repository).
 - Not-found is represented as `Option<T>` (default).
 
 ## Full working example (generic domain)
@@ -106,7 +106,7 @@ impl Project {
 }
 ```
 
-### Infra errors
+### Repository errors (domain)
 ```rust
 use thiserror::Error;
 
@@ -127,7 +127,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
-use crate::infra::errors::RepoError;
+use crate::domain::repositories::RepoError;
 
 #[derive(Debug, Clone)]
 pub struct ProjectFilters {
@@ -180,7 +180,7 @@ use crate::domain::{
     ProjectRepository,
     DomainError,
 };
-use crate::infra::errors::RepoError;
+use crate::domain::repositories::RepoError;
 use crate::infra::db::postgres::{PgPool, schema::projects};
 
 pub struct ProjectPostgres {

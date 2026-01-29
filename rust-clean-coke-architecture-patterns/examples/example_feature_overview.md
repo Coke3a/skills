@@ -3,12 +3,12 @@
 Feature: Projects (generic CRUD example)
 
 File placement:
-- `crates/domain/entities/project.rs` -> `Project`, `ProjectId`
-- `crates/domain/value_objects/project.rs` -> `ProjectName`, `ProjectStatus`
-- `crates/domain/repositories/project.rs` -> `ProjectRepository` trait
-- `crates/infra/db/repositories/project.rs` -> Diesel impl
-- `backend/src/usecases/project.rs` -> `ProjectUseCase`
-- `backend/src/axum_http/routers/project.rs` -> routes
+- `src/domain/entities/project.rs` -> `Project`, `ProjectId`
+- `src/domain/value_objects/project.rs` -> `ProjectName`, `ProjectStatus`
+- `src/domain/repositories/project.rs` -> `ProjectRepository` trait
+- `src/infra/db/repositories/project.rs` -> Diesel impl
+- `src/usecases/project.rs` -> `ProjectUseCase`
+- `src/handlers/project.rs` -> handlers
 
 Flow:
 1) Route parses request DTOs.

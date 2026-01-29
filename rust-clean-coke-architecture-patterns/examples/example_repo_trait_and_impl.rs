@@ -7,7 +7,7 @@ use diesel_async::pooled_connection::bb8::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use uuid::Uuid;
 
-use crate::infra::errors::RepoError;
+use crate::domain::repositories::RepoError;
 use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
 use crate::infra::db::postgres::schema::projects;
 

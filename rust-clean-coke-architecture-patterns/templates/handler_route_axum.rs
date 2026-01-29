@@ -9,11 +9,9 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::axum_http::errors::ApiError;
+use crate::handlers::errors::ApiError;
 use crate::usecases::errors::UsecaseError;
 use crate::domain::repositories::project::ProjectRepository;
-use crate::infra::db::postgres::PgPool;
-use crate::infra::db::repositories::project::ProjectPostgres;
 use crate::usecases::project::ProjectUseCase;
 use crate::dto::{CreateProjectRequest, ProjectResponse};
 
@@ -22,14 +20,14 @@ pub struct AuthUser {
     pub user_id: Uuid,
 }
 
-pub fn routes(pool: Arc<PgPool>) -> Router {
-    let repo = ProjectPostgres::new(pool.as_ref().clone());
-    let usecase = ProjectUseCase::new(Arc::new(repo));
-
+pub fn routes<R>(usecase: Arc<ProjectUseCase<R>>) -> Router
+where
+    R: ProjectRepository + Send + Sync + 'static,
+{
     Router::new()
-        .route("/projects", post(create_project))
-        .route("/projects/:id", get(get_project))
-        .with_state(Arc::new(usecase))
+        .route("/projects", post(create_project::<R>))
+        .route("/projects/:id", get(get_project::<R>))
+        .with_state(usecase)
 }
 
 pub async fn create_project<R>(

@@ -4,9 +4,9 @@
 **Input:** "Create a new Project feature with list and create endpoints."
 
 **Expected:**
-- Files placed in backend/usecases, backend/axum_http/routers, crates/domain, crates/infra.
-- Route uses usecase input/output structs; no business logic in router.
-- Repository trait in crates/domain; ORM impl in crates/infra.
+- Files placed in `src/usecases`, `src/handlers`, `src/domain`, `src/infra`.
+- Handler uses usecase input/output structs; no business logic in handler.
+- Repository trait in `src/domain`; ORM impl in `src/infra`.
 - Usecase owns error enum and maps repo errors to user-facing variants.
 
 **Pass/Fail checklist:**

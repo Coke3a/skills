@@ -9,7 +9,7 @@ use axum::{
 };
 use uuid::Uuid;
 
-use crate::axum_http::errors::ApiError;
+use crate::handlers::errors::ApiError;
 use crate::usecases::errors::UsecaseError;
 use crate::domain::repositories::project::ProjectRepository;
 use crate::dto::{CreateProjectRequest, ProjectResponse};
