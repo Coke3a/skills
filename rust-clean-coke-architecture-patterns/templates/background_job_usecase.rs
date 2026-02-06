@@ -1,71 +1,97 @@
+// ============================================
+// Usecase: src/usecases/background/heartbeat_sweeper.rs
+// ============================================
 use std::sync::Arc;
+use std::time::Duration;
 
-use chrono::{DateTime, Utc};
-use tracing::instrument;
+use chrono::Utc;
+use tracing::{error, warn};
 
-use crate::usecases::errors::UsecaseError;
-use crate::domain::repositories::project::{Page, ProjectFilters, ProjectRepository};
+use crate::domain::repositories::ForwardingSessionRepository;
+use crate::usecases::UsecaseError;
 
-#[derive(Debug, Clone)]
-pub struct ReindexProjectsParams {
-    pub owner_id: Option<uuid::Uuid>,
-    pub limit: i64,
-    pub dry_run: bool,
+pub struct HeartbeatSweeperUseCase {
+    session_repo: Arc<dyn ForwardingSessionRepository>,
 }
 
-#[derive(Debug, Default)]
-pub struct ReindexProjectsResult {
-    pub scanned: usize,
-    pub indexed: usize,
-    pub skipped: usize,
-    pub started_at: DateTime<Utc>,
-    pub finished_at: DateTime<Utc>,
-}
-
-pub struct ReindexProjectsUseCase<R>
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    repo: Arc<R>,
-}
-
-impl<R> ReindexProjectsUseCase<R>
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    pub fn new(repo: Arc<R>) -> Self {
-        Self { repo }
+impl HeartbeatSweeperUseCase {
+    pub fn new(session_repo: Arc<dyn ForwardingSessionRepository>) -> Self {
+        Self { session_repo }
     }
 
-    #[instrument(skip(self), fields(owner_id = ?params.owner_id, limit = params.limit, dry_run = params.dry_run))]
-    pub async fn run(&self, params: ReindexProjectsParams) -> Result<ReindexProjectsResult, UsecaseError> {
-        let started_at = Utc::now();
+    pub async fn sweep_stale_sessions(&self, timeout: Duration, limit: i64) -> Result<usize, UsecaseError> {
+        let cutoff = Utc::now() - timeout;
+        let stale = self.session_repo.find_stale_sessions(&cutoff, limit).await?;
 
-        let filters = ProjectFilters {
-            owner_id: params.owner_id,
-            status: None,
-        };
-
-        let page = Page { limit: params.limit, offset: 0 };
-        let projects = self.repo.list(filters, page).await.map_err(UsecaseError::Infra)?;
-
-        let mut result = ReindexProjectsResult {
-            scanned: projects.len(),
-            started_at,
-            ..Default::default()
-        };
-
-        for _project in projects {
-            if params.dry_run {
-                result.skipped += 1;
+        let mut count = 0;
+        for mut session in stale {
+            if let Err(e) = session.mark_disconnected() {
+                warn!(
+                    session_id = %session.id(),
+                    status = %session.status(),
+                    error = %e,
+                    "Failed to mark stale session as disconnected (state transition error)"
+                );
                 continue;
             }
 
-            // Replace with actual indexing/storage call.
-            result.indexed += 1;
+            match self.session_repo.update_if_active(&session).await {
+                Ok(updated) => {
+                    if updated { count += 1; }
+                }
+                Err(e) => {
+                    error!(session_id = %session.id(), error = %e, "Failed to persist disconnected session");
+                    continue;
+                }
+            }
         }
 
-        result.finished_at = Utc::now();
-        Ok(result)
+        Ok(count)
     }
+}
+
+// ============================================
+// Handler spawner: src/handlers/heartbeat/mod.rs
+// ============================================
+use std::sync::Arc;
+use std::time::Duration;
+
+use tokio::task::JoinHandle;
+use tokio_util::sync::CancellationToken;
+use tracing::{error, info};
+
+use crate::usecases::HeartbeatSweeperUseCase;
+
+pub fn spawn(
+    usecase: Arc<HeartbeatSweeperUseCase>,
+    cancel: CancellationToken,
+    sweep_interval_secs: u64,
+    timeout_secs: u64,
+    batch_limit: i64,
+) -> JoinHandle<()> {
+    tokio::spawn(async move {
+        info!("Heartbeat sweeper started");
+
+        let mut interval = tokio::time::interval(Duration::from_secs(sweep_interval_secs));
+
+        loop {
+            tokio::select! {
+                _ = cancel.cancelled() => {
+                    info!("Heartbeat sweeper shutting down");
+                    break;
+                }
+                _ = interval.tick() => {
+                    match usecase.sweep_stale_sessions(Duration::from_secs(timeout_secs), batch_limit).await {
+                        Ok(count) if count > 0 => {
+                            info!(count, "Disconnected stale sessions");
+                        }
+                        Ok(_) => {}
+                        Err(e) => {
+                            error!(error = %e, "Heartbeat sweep failed");
+                        }
+                    }
+                }
+            }
+        }
+    })
 }

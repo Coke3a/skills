@@ -1,79 +1,71 @@
 use std::sync::Arc;
 
 use axum::{
-    Json, Router,
-    extract::{Path, State},
+    extract::State,
     http::StatusCode,
     response::IntoResponse,
-    routing::{get, post},
+    Json,
 };
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::handlers::errors::ApiError;
-use crate::usecases::errors::UsecaseError;
-use crate::domain::repositories::project::ProjectRepository;
-use crate::usecases::project::ProjectUseCase;
-use crate::dto::{CreateProjectRequest, ProjectResponse};
+use crate::domain::repositories::{EndpointRepository, SubscriptionRepository};
+use crate::handlers::routers::ApiError;
+use crate::handlers::app::AppState;
+use crate::handlers::extractors::AuthenticatedUser;
+use crate::infra::db::repositories::{EndpointPostgres, SubscriptionPostgres};
+use crate::usecases::{CreateEndpointInput, CreateEndpointUseCase};
 
-#[derive(Clone)]
-pub struct AuthUser {
-    pub user_id: Uuid,
+// Request/Response DTOs defined in handler file
+#[derive(Debug, Deserialize)]
+pub struct CreateEndpointRequest {
+    pub name: String,
+    pub provider_label: Option<String>,
 }
 
-pub fn routes<R>(usecase: Arc<ProjectUseCase<R>>) -> Router
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    Router::new()
-        .route("/projects", post(create_project::<R>))
-        .route("/projects/:id", get(get_project::<R>))
-        .with_state(usecase)
+#[derive(Debug, Serialize)]
+pub struct CreateEndpointResponse {
+    pub id: Uuid,
+    pub name: String,
+    pub webhook_url: String,
+    pub provider_label: Option<String>,
+    pub created_at: DateTime<Utc>,
 }
 
-pub async fn create_project<R>(
-    State(usecase): State<Arc<ProjectUseCase<R>>>,
-    AuthUser { user_id }: AuthUser,
-    Json(payload): Json<CreateProjectRequest>,
-) -> impl IntoResponse
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    let input = crate::usecases::project::CreateProjectInput {
-        actor_id: user_id,
-        owner_id: user_id,
-        name: payload.name,
+// Handler: async function (not method on struct)
+pub async fn create_endpoint(
+    State(state): State<AppState>,        // Extract app state
+    auth: AuthenticatedUser,               // Extract authenticated user from JWT
+    Json(body): Json<CreateEndpointRequest>, // Parse request body
+) -> Result<impl IntoResponse, ApiError> {
+    // Create repo implementations from state.db_pool
+    let endpoint_repo: Arc<dyn EndpointRepository> =
+        Arc::new(EndpointPostgres::new(Arc::clone(&state.db_pool)));
+    let subscription_repo: Arc<dyn SubscriptionRepository> =
+        Arc::new(SubscriptionPostgres::new(Arc::clone(&state.db_pool)));
+
+    // Instantiate usecase with dependencies
+    let usecase = CreateEndpointUseCase::new(endpoint_repo, subscription_repo);
+
+    // Map request DTO to usecase input
+    let input = CreateEndpointInput {
+        user_id: auth.user_id,
+        name: body.name,
+        provider_label: body.provider_label,
     };
 
-    match usecase.create(input).await {
-        Ok(result) => (StatusCode::CREATED, Json(ProjectResponse::from(result.project))).into_response(),
-        Err(err) => map_error(err),
-    }
-}
+    // Call usecase. UsecaseError converts to ApiError via From impl.
+    let output = usecase.execute(input).await?;
 
-pub async fn get_project<R>(
-    State(usecase): State<Arc<ProjectUseCase<R>>>,
-    AuthUser { user_id }: AuthUser,
-    Path(id): Path<String>,
-) -> impl IntoResponse
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    let project_id = match Uuid::parse_str(&id) {
-        Ok(id) => crate::domain::ProjectId::new(id),
-        Err(_) => {
-            let err = UsecaseError::Validation("invalid project id".to_string());
-            return map_error(err);
-        }
+    // Map usecase output to response DTO
+    let response = CreateEndpointResponse {
+        id: output.id,
+        name: output.name,
+        webhook_url: output.webhook_url,
+        provider_label: output.provider_label,
+        created_at: output.created_at,
     };
 
-    match usecase.get(user_id, project_id).await {
-        Ok(result) => (StatusCode::OK, Json(ProjectResponse::from(result.project))).into_response(),
-        Err(err) => map_error(err),
-    }
-}
-
-fn map_error(err: UsecaseError) -> axum::response::Response {
-    let status = err.status_code();
-    let body = ApiError::from_usecase(&err);
-    (status, Json(body)).into_response()
+    Ok((StatusCode::CREATED, Json(response)))
 }

@@ -1,87 +1,97 @@
 use std::sync::Arc;
 
-use chrono::Utc;
-use tracing::instrument;
+use chrono::{DateTime, Utc};
+use tracing::{error, info, warn};
 use uuid::Uuid;
 
-use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
-use crate::domain::errors::DomainError;
-use crate::usecases::errors::UsecaseError;
-use crate::domain::repositories::project::ProjectRepository;
+use crate::domain::entities::Endpoint;
+use crate::domain::repositories::{EndpointRepository, SubscriptionRepository};
+use crate::domain::value_objects::{EndpointName, SubscriptionTier, WebhookUrl};
+use crate::usecases::UsecaseError;
 
-#[derive(Debug)]
-pub struct CreateProjectInput {
-    pub actor_id: Uuid,
-    pub owner_id: Uuid,
+// Explicit input struct
+pub struct CreateEndpointInput {
+    pub user_id: Uuid,
     pub name: String,
+    pub provider_label: Option<String>,
 }
 
-#[derive(Debug)]
-pub struct CreateProjectOutput {
-    pub project: Project,
+// Explicit output struct
+pub struct CreateEndpointOutput {
+    pub id: Uuid,
+    pub name: String,
+    pub webhook_url: String,
+    pub provider_label: Option<String>,
+    pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug)]
-pub struct GetProjectOutput {
-    pub project: Project,
+// Usecase struct holds Arc<dyn Trait> dependencies (not generics)
+pub struct CreateEndpointUseCase {
+    endpoint_repo: Arc<dyn EndpointRepository>,
+    subscription_repo: Arc<dyn SubscriptionRepository>,
 }
 
-pub struct ProjectUseCase<R>
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    repo: Arc<R>,
-}
-
-impl<R> ProjectUseCase<R>
-where
-    R: ProjectRepository + Send + Sync + 'static,
-{
-    pub fn new(repo: Arc<R>) -> Self {
-        Self { repo }
+impl CreateEndpointUseCase {
+    pub fn new(
+        endpoint_repo: Arc<dyn EndpointRepository>,
+        subscription_repo: Arc<dyn SubscriptionRepository>,
+    ) -> Self {
+        Self { endpoint_repo, subscription_repo }
     }
 
-    #[instrument(skip(self), fields(actor_id = %input.actor_id, owner_id = %input.owner_id))]
-    pub async fn create(&self, input: CreateProjectInput) -> Result<CreateProjectOutput, UsecaseError> {
-        // Guard: only owners can create projects for themselves (example rule).
-        if input.actor_id != input.owner_id {
-            return Err(UsecaseError::Forbidden);
-        }
+    pub async fn execute(&self, input: CreateEndpointInput) -> Result<CreateEndpointOutput, UsecaseError> {
+        let user_id = input.user_id;
 
-        let name = ProjectName::new(input.name)
-            .map_err(|err| UsecaseError::Validation(err.to_string()))?;
+        // Validate input via domain value objects. DomainError auto-converts via From impl.
+        let name = EndpointName::new(input.name).map_err(|e| {
+            warn!(user_id = %user_id, error = %e, "create_endpoint: validation failed");
+            e
+        })?;
 
-        let now = Utc::now();
-        let project = Project {
-            id: ProjectId::new(Uuid::new_v4()),
-            owner_id: input.owner_id,
-            name,
-            status: ProjectStatus::Active,
-            created_at: now,
-            updated_at: now,
+        // Fetch related data. RepoError auto-converts via From impl.
+        let subscription = self.subscription_repo
+            .find_by_user(&user_id)
+            .await
+            .map_err(|e| {
+                error!(user_id = %user_id, error = %e, "create_endpoint: failed to fetch subscription");
+                e
+            })?;
+
+        let (max_endpoints, tier) = match &subscription {
+            Some(sub) => (sub.max_endpoints() as i64, sub.tier()),
+            None => (1, SubscriptionTier::Free),
         };
 
-        let inserted = self.repo.insert(project).await.map_err(UsecaseError::Infra)?;
+        // Create domain entity
+        let webhook_url = WebhookUrl::new(format!("https://hooks.example.dev/in/wh_{}", nanoid::nanoid!(21)))?;
+        let endpoint = Endpoint::new(user_id, name, webhook_url, input.provider_label);
 
-        Ok(CreateProjectOutput { project: inserted })
-    }
+        // Atomic create with tier limit check
+        let created = self.endpoint_repo
+            .create_if_under_limit(&endpoint, &user_id, max_endpoints)
+            .await
+            .map_err(|e| {
+                error!(user_id = %user_id, endpoint_id = %endpoint.id(), error = %e,
+                    "create_endpoint: failed to create endpoint");
+                e
+            })?;
 
-    #[instrument(skip(self), fields(actor_id = %actor_id, project_id = %project_id.as_uuid()))]
-    pub async fn get(&self, actor_id: Uuid, project_id: ProjectId) -> Result<GetProjectOutput, UsecaseError> {
-        // Guard: authorize first (placeholder).
-        if actor_id.is_nil() {
-            return Err(UsecaseError::Unauthorized);
+        if !created {
+            warn!(user_id = %user_id, tier = %tier, max_endpoints = max_endpoints,
+                "create_endpoint: tier limit reached");
+            return Err(UsecaseError::TierLimitExceeded(
+                format!("Tier limit of {} endpoints reached", max_endpoints),
+            ));
         }
 
-        let project = self.repo.get_by_id(project_id).await.map_err(UsecaseError::Infra)?;
-        let project = project.ok_or(UsecaseError::NotFound)?;
+        info!(user_id = %user_id, endpoint_id = %endpoint.id(), "create_endpoint: success");
 
-        Ok(GetProjectOutput { project })
-    }
-}
-
-impl From<DomainError> for UsecaseError {
-    fn from(err: DomainError) -> Self {
-        UsecaseError::Validation(err.to_string())
+        Ok(CreateEndpointOutput {
+            id: *endpoint.id().as_uuid(),
+            name: endpoint.name().as_str().to_string(),
+            webhook_url: endpoint.webhook_url().as_str().to_string(),
+            provider_label: endpoint.provider_label().map(|s| s.to_string()),
+            created_at: *endpoint.created_at(),
+        })
     }
 }

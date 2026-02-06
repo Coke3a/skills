@@ -1,47 +1,68 @@
 # Evaluations
 
 ## Eval 1: Scaffold feature
-**Input:** "Create a new Project feature with list and create endpoints."
+**Input:** "Create a new Endpoint feature with create and list endpoints."
 
 **Expected:**
-- Files placed in `src/usecases`, `src/handlers`, `src/domain`, `src/infra`.
-- Handler uses usecase input/output structs; no business logic in handler.
-- Repository trait in `src/domain`; ORM impl in `src/infra`.
-- Usecase owns error enum and maps repo errors to user-facing variants.
+- Entity in `src/domain/entities/` with private fields, `new()`, `from_existing()`, getters.
+- ID newtype in `src/domain/value_objects/ids/`.
+- Repository trait in `src/domain/repositories/`.
+- Usecase struct with `Arc<dyn Repo>` deps, explicit input/output structs.
+- Postgres impl in `src/infra/db/repositories/` with `Row`/`NewRow`, `into_entity()`/`from_entity()`, centralized error mapping.
+- Handler creates repos from `AppState.db_pool`, instantiates usecase, returns `Result<impl IntoResponse, ApiError>`.
 
 **Pass/Fail checklist:**
-- [ ] Route only parses request + calls usecase
-- [ ] Usecase has explicit input/output structs
-- [ ] Repo trait returns Option for not-found
-- [ ] ORM implementation exists and is wired
+- [ ] Entity has private fields with getters (no `pub` fields)
+- [ ] Entity has `new()` and `from_existing()` constructors
+- [ ] Repo holds `Arc<PgPool>` (not bare PgPool)
+- [ ] Repo uses `map_diesel_error()` and `map_pool_error()` helpers
+- [ ] Row conversion uses `into_entity()` method (not `TryFrom`)
+- [ ] NewRow uses `from_entity(&entity)` with borrowed fields
+- [ ] Usecase uses `Arc<dyn Trait>` (not generics)
+- [ ] Handler creates repos inline from state, not passed in
 
 ## Eval 2: Refactor handler into clean layers
 **Input:** "Refactor this messy axum handler into clean architecture layers."
 
 **Expected:**
-- New usecase struct extracted.
-- Repo trait defined for data access.
-- Route reduced to thin mapping.
-- Errors mapped through usecase variants.
+- New usecase struct extracted with `Arc<dyn Repo>` deps.
+- Repo trait defined in domain.
+- Handler reduced to: create repos -> instantiate usecase -> parse input -> call usecase -> map response.
+- Errors mapped through `From` impls (DomainError/RepoError -> UsecaseError -> ApiError).
 
 **Pass/Fail checklist:**
-- [ ] Usecase introduced with Arc deps
-- [ ] Repo trait extracted
-- [ ] Route no longer contains business logic
-- [ ] Error mapping is centralized in usecase
+- [ ] Usecase introduced with `Arc<dyn Repo>` deps
+- [ ] Repo trait extracted to domain layer
+- [ ] Handler no longer contains business logic
+- [ ] Error mapping uses `From` impls and `?` operator
 
 ## Eval 3: Error handling for unique constraint
-**Input:** "DB unique violation on project name."
+**Input:** "DB unique violation on endpoint name."
 
 **Expected:**
-- Repo returns rich error with op context.
-- Usecase maps to `UsecaseError::Conflict`.
-- Route returns HTTP 409 with a stable error code.
+- `map_diesel_error()` returns `RepoError::UniqueViolation`.
+- `From<RepoError>` maps to `UsecaseError::Conflict`.
+- `ApiError::IntoResponse` returns HTTP 409 with `CONFLICT` error code.
 
 **Pass/Fail checklist:**
-- [ ] Repo error contains operation context
-- [ ] Usecase maps to Conflict
-- [ ] Route returns 409 with clear code/message
+- [ ] Repo error uses centralized `map_diesel_error()` helper
+- [ ] `From<RepoError>` maps `UniqueViolation` to `Conflict`
+- [ ] Response is 409 with JSON `{"error": "CONFLICT", "message": "..."}`
+
+## Eval 4: Add a background task
+**Input:** "Add a sweeper that cleans up expired events."
+
+**Expected:**
+- Usecase in `src/usecases/background/` with `Arc<dyn Repo>` dep and sweep method.
+- Handler spawner in `src/handlers/{task}/mod.rs` with `spawn()` returning `JoinHandle<()>`.
+- Config params added to `BackgroundTasks` with defaults.
+- Wired in `spawn_background_tasks()` in `app.rs`.
+
+**Pass/Fail checklist:**
+- [ ] Usecase has `Arc<dyn Repo>` dep (not generics)
+- [ ] Spawner uses `tokio::select!` with `cancel.cancelled()`
+- [ ] Config params have defaults in `BackgroundTasks::default()`
+- [ ] JoinHandle added to the returned Vec in `spawn_background_tasks()`
 
 ## Scoring rubric
 - **Pass:** All checklist items are satisfied.

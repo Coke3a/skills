@@ -1,124 +1,183 @@
+// Example: Combined repository trait and implementation
+// Based on actual endpoint_repository.rs + endpoint_postgres.rs
+
+// ============================================
+// Domain trait: src/domain/repositories/endpoint_repository.rs
+// ============================================
+use crate::domain::entities::Endpoint;
+use crate::domain::repositories::RepoError;
+use crate::domain::value_objects::EndpointId;
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
-use diesel::{OptionalExtension, QueryDsl, SelectableHelper};
-use diesel::prelude::*;
-use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use diesel_async::pooled_connection::bb8::Pool;
-use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use uuid::Uuid;
 
-use crate::domain::repositories::RepoError;
-use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
-use crate::infra::db::postgres::schema::projects;
-
 #[async_trait]
-pub trait ProjectRepository: Send + Sync {
-    async fn get_by_id(&self, id: ProjectId) -> Result<Option<Project>, RepoError>;
-    async fn insert(&self, project: Project) -> Result<Project, RepoError>;
+pub trait EndpointRepository: Send + Sync {
+    async fn create(&self, endpoint: &Endpoint) -> Result<(), RepoError>;
+    async fn find_by_id(&self, id: &EndpointId) -> Result<Option<Endpoint>, RepoError>;
+    async fn find_by_user(&self, user_id: &Uuid) -> Result<Vec<Endpoint>, RepoError>;
+    async fn update(&self, endpoint: &Endpoint) -> Result<(), RepoError>;
+    async fn create_if_under_limit(
+        &self, endpoint: &Endpoint, user_id: &Uuid, max_endpoints: i64,
+    ) -> Result<bool, RepoError>;
 }
 
-pub type PgPool = Pool<AsyncDieselConnectionManager<AsyncPgConnection>>;
+// ============================================
+// Infra impl: src/infra/db/repositories/endpoint_postgres.rs
+// ============================================
+use std::sync::Arc;
+use chrono::{DateTime, Utc};
+use diesel::prelude::*;
+use diesel_async::{AsyncConnection, RunQueryDsl};
+use diesel_async::scoped_futures::ScopedFutureExt;
 
-pub struct ProjectPostgres {
-    pool: PgPool,
+use crate::domain::value_objects::{EndpointName, WebhookUrl};
+use crate::infra::db::postgres_connection::PgPool;
+use crate::infra::db::schema::endpoints;
+use super::error_mapping::{map_diesel_error, map_pool_error};
+
+// Read row struct with into_entity() method
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = endpoints)]
+struct EndpointRow {
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    webhook_url: String,
+    provider_label: Option<String>,
+    created_at: DateTime<Utc>,
+    updated_at: DateTime<Utc>,
+    last_event_at: Option<DateTime<Utc>>,
+    total_events: i32,
 }
 
-impl ProjectPostgres {
-    pub fn new(pool: PgPool) -> Self {
+impl EndpointRow {
+    fn into_entity(self) -> Endpoint {
+        Endpoint::from_existing(
+            EndpointId::from_uuid(self.id),
+            self.user_id,
+            EndpointName::from_trusted(self.name),  // from_trusted: skip validation for DB data
+            WebhookUrl::from_trusted(self.webhook_url),
+            self.provider_label,
+            self.created_at,
+            self.updated_at,
+            self.last_event_at,
+            self.total_events,
+            None,
+        )
+    }
+}
+
+// Insert row struct with borrowed fields and from_entity()
+#[derive(Insertable)]
+#[diesel(table_name = endpoints)]
+struct NewEndpointRow<'a> {
+    id: &'a Uuid,
+    user_id: &'a Uuid,
+    name: &'a str,
+    webhook_url: &'a str,
+    provider_label: Option<&'a str>,
+    created_at: DateTime<Utc>,
+    updated_at: DateTime<Utc>,
+}
+
+impl<'a> NewEndpointRow<'a> {
+    fn from_entity(entity: &'a Endpoint) -> Self {
+        Self {
+            id: entity.id().as_uuid(),
+            user_id: entity.user_id(),
+            name: entity.name().as_str(),
+            webhook_url: entity.webhook_url().as_str(),
+            provider_label: entity.provider_label(),
+            created_at: *entity.created_at(),
+            updated_at: *entity.updated_at(),
+        }
+    }
+}
+
+// Repository struct holds Arc<PgPool>
+pub struct EndpointPostgres {
+    pool: Arc<PgPool>,
+}
+
+impl EndpointPostgres {
+    pub fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 }
 
-#[derive(Debug, Queryable, Selectable)]
-#[diesel(table_name = projects)]
-struct ProjectRow {
-    id: Uuid,
-    owner_id: Uuid,
-    name: String,
-    status: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Insertable)]
-#[diesel(table_name = projects)]
-struct NewProjectRow {
-    id: Uuid,
-    owner_id: Uuid,
-    name: String,
-    status: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
-}
-
-impl TryFrom<ProjectRow> for Project {
-    type Error = crate::domain::errors::DomainError;
-
-    fn try_from(row: ProjectRow) -> Result<Self, Self::Error> {
-        Ok(Project {
-            id: ProjectId::new(row.id),
-            owner_id: row.owner_id,
-            name: ProjectName::new(row.name)?,
-            status: ProjectStatus::from_str(&row.status)?,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        })
-    }
-}
-
 #[async_trait]
-impl ProjectRepository for ProjectPostgres {
-    async fn get_by_id(&self, id: ProjectId) -> Result<Option<Project>, RepoError> {
-        let mut conn = self.pool.get().await.map_err(|err| RepoError::Db {
-            op: "projects.get_conn",
-            source: err.into(),
-        })?;
+impl EndpointRepository for EndpointPostgres {
+    async fn create(&self, endpoint: &Endpoint) -> Result<(), RepoError> {
+        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        let new_row = NewEndpointRow::from_entity(endpoint);
+        diesel::insert_into(endpoints::table)
+            .values(&new_row)
+            .execute(&mut conn)
+            .await
+            .map_err(|e| map_diesel_error("endpoint.create", e))?;
+        Ok(())
+    }
 
-        let row = projects::table
+    async fn find_by_id(&self, id: &EndpointId) -> Result<Option<Endpoint>, RepoError> {
+        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        let result = endpoints::table
             .find(id.as_uuid())
-            .select(ProjectRow::as_select())
-            .get_result::<ProjectRow>(&mut conn)
+            .first::<EndpointRow>(&mut conn)
             .await
             .optional()
-            .map_err(|err| RepoError::Db {
-                op: "projects.get_by_id",
-                source: err.into(),
-            })?;
-
-        row.map(Project::try_from)
-            .transpose()
-            .map_err(|err| RepoError::Db {
-                op: "projects.map_domain",
-                source: err.into(),
-            })
+            .map_err(|e| map_diesel_error("endpoint.find_by_id", e))?;
+        Ok(result.map(|row| row.into_entity()))
     }
 
-    async fn insert(&self, project: Project) -> Result<Project, RepoError> {
-        let mut conn = self.pool.get().await.map_err(|err| RepoError::Db {
-            op: "projects.get_conn",
-            source: err.into(),
-        })?;
-
-        let row = diesel::insert_into(projects::table)
-            .values(NewProjectRow {
-                id: project.id.as_uuid(),
-                owner_id: project.owner_id,
-                name: project.name.as_str().to_string(),
-                status: project.status.as_str().to_string(),
-                created_at: project.created_at,
-                updated_at: project.updated_at,
-            })
-            .returning(ProjectRow::as_select())
-            .get_result::<ProjectRow>(&mut conn)
+    async fn find_by_user(&self, user_id: &Uuid) -> Result<Vec<Endpoint>, RepoError> {
+        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        let results = endpoints::table
+            .filter(endpoints::user_id.eq(user_id))
+            .order(endpoints::created_at.desc())
+            .load::<EndpointRow>(&mut conn)
             .await
-            .map_err(|err| RepoError::Db {
-                op: "projects.insert",
-                source: err.into(),
-            })?;
+            .map_err(|e| map_diesel_error("endpoint.find_by_user", e))?;
+        Ok(results.into_iter().map(|row| row.into_entity()).collect())
+    }
 
-        Project::try_from(row).map_err(|err| RepoError::Db {
-            op: "projects.map_domain",
-            source: err.into(),
+    async fn update(&self, endpoint: &Endpoint) -> Result<(), RepoError> {
+        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        let rows_affected = diesel::update(endpoints::table.find(endpoint.id().as_uuid()))
+            .set((
+                endpoints::name.eq(endpoint.name().as_str()),
+                endpoints::updated_at.eq(endpoint.updated_at()),
+            ))
+            .execute(&mut conn)
+            .await
+            .map_err(|e| map_diesel_error("endpoint.update", e))?;
+        if rows_affected == 0 {
+            return Err(RepoError::NotFound(format!("Endpoint {} not found", endpoint.id())));
+        }
+        Ok(())
+    }
+
+    async fn create_if_under_limit(
+        &self, endpoint: &Endpoint, user_id: &Uuid, max_endpoints: i64,
+    ) -> Result<bool, RepoError> {
+        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        conn.transaction::<_, diesel::result::Error, _>(|conn| {
+            async move {
+                let count = endpoints::table
+                    .filter(endpoints::user_id.eq(user_id))
+                    .count()
+                    .get_result::<i64>(conn)
+                    .await?;
+                if count >= max_endpoints { return Ok(false); }
+                let new_row = NewEndpointRow::from_entity(endpoint);
+                diesel::insert_into(endpoints::table)
+                    .values(&new_row)
+                    .execute(conn)
+                    .await?;
+                Ok(true)
+            }
+            .scope_boxed()
         })
+        .await
+        .map_err(|e| map_diesel_error("endpoint.create_if_under_limit", e))
     }
 }

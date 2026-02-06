@@ -1,29 +1,33 @@
+// Request/Response DTOs are defined in handler files, not in a separate dto module.
+// They use serde Deserialize/Serialize and contain only primitive types.
+
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::{Project, ProjectStatus};
-
+// Request DTO: deserializes from JSON body
 #[derive(Debug, Deserialize)]
-pub struct CreateProjectRequest {
+pub struct CreateEndpointRequest {
     pub name: String,
+    pub provider_label: Option<String>,
 }
 
+// Response DTO: serializes to JSON. Uses primitive types, not domain types.
 #[derive(Debug, Serialize)]
-pub struct ProjectResponse {
+pub struct CreateEndpointResponse {
     pub id: Uuid,
     pub name: String,
-    pub status: String,
+    pub webhook_url: String,
+    pub provider_label: Option<String>,
+    pub created_at: DateTime<Utc>,
 }
 
-impl From<Project> for ProjectResponse {
-    fn from(project: Project) -> Self {
-        Self {
-            id: project.id.as_uuid(),
-            name: project.name.as_str().to_string(),
-            status: match project.status {
-                ProjectStatus::Active => "active".to_string(),
-                ProjectStatus::Archived => "archived".to_string(),
-            },
-        }
-    }
-}
+// Response is constructed from usecase output (not from domain entity directly):
+//
+// let response = CreateEndpointResponse {
+//     id: output.id,
+//     name: output.name,
+//     webhook_url: output.webhook_url,
+//     provider_label: output.provider_label,
+//     created_at: output.created_at,
+// };

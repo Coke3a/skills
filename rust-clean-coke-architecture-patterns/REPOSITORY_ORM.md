@@ -1,360 +1,193 @@
 # Repository + ORM
 
-## Default ORM stack
-- Diesel + diesel_async (async-safe) with a pooled `AsyncPgConnection`.
-- Keep ORM details in `src/infra/db/repositories/*`; repositories expose async trait methods.
-- Define `PgPool` in `infra::db::postgres` so handlers and repos share a single pool type.
+## ORM stack
+- Diesel 2.3 + diesel-async with deadpool connection pooling.
+- `PgPool` type alias in `infra::db::postgres_connection` wraps `deadpool::Pool<AsyncPgConnection>`.
+- Pool max size: 10 connections.
+- Repositories hold `Arc<PgPool>`.
 
 ## Repository port pattern
-- Define the trait in `src/domain/repositories/*` (port/interface).
-- Implement the trait in `src/infra/db/repositories/*` using Diesel queries (method repository).
-- Not-found is represented as `Option<T>` (default).
+- Define the trait in `src/domain/repositories/{entity}_repository.rs` using `async_trait`.
+- Implement the trait in `src/infra/db/repositories/{entity}_postgres.rs`.
+- Not-found is `Option<T>` for queries, `RepoError::NotFound` for updates/deletes that expect existing rows.
+- All methods return `Result<T, RepoError>`.
 
-## Full working example (generic domain)
+## Row conversion pattern
+Repositories use two internal structs:
 
-### Domain (entities + value objects)
+1. **Read row** (`EntityRow`): `#[derive(Queryable, Selectable)]` with `into_entity()` method.
+2. **Insert row** (`NewEntityRow`): `#[derive(Insertable)]` with `from_entity(&entity)` associated function using borrowed fields.
+
 ```rust
-use chrono::{DateTime, Utc};
-use uuid::Uuid;
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum DomainError {
-    #[error("invalid {field}: {reason}")]
-    InvalidField { field: &'static str, reason: &'static str },
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = endpoints)]
+struct EndpointRow {
+    id: Uuid,
+    user_id: Uuid,
+    name: String,
+    // ...
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct ProjectId(Uuid);
-
-impl ProjectId {
-    pub fn new(id: Uuid) -> Self {
-        Self(id)
-    }
-
-    pub fn as_uuid(&self) -> Uuid {
-        self.0
+impl EndpointRow {
+    fn into_entity(self) -> Endpoint {
+        Endpoint::from_existing(
+            EndpointId::from_uuid(self.id),
+            self.user_id,
+            EndpointName::from_trusted(self.name),  // from_trusted skips validation
+            // ...
+        )
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ProjectName(String);
+#[derive(Insertable)]
+#[diesel(table_name = endpoints)]
+struct NewEndpointRow<'a> {
+    id: &'a Uuid,
+    user_id: &'a Uuid,
+    name: &'a str,
+    // ...
+}
 
-impl ProjectName {
-    pub fn new(raw: impl Into<String>) -> Result<Self, DomainError> {
-        let value = raw.into().trim().to_string();
-        if value.is_empty() {
-            return Err(DomainError::InvalidField {
-                field: "name",
-                reason: "empty",
-            });
+impl<'a> NewEndpointRow<'a> {
+    fn from_entity(entity: &'a Endpoint) -> Self {
+        Self {
+            id: entity.id().as_uuid(),
+            user_id: entity.user_id(),
+            name: entity.name().as_str(),
+            // ...
         }
-        if value.len() > 120 {
-            return Err(DomainError::InvalidField {
-                field: "name",
-                reason: "too long",
-            });
-        }
-        Ok(Self(value))
-    }
-
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ProjectStatus {
-    Active,
-    Archived,
-}
-
-impl ProjectStatus {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            ProjectStatus::Active => "active",
-            ProjectStatus::Archived => "archived",
-        }
-    }
-
-    pub fn from_str(raw: &str) -> Result<Self, DomainError> {
-        match raw {
-            "active" => Ok(ProjectStatus::Active),
-            "archived" => Ok(ProjectStatus::Archived),
-            _ => Err(DomainError::InvalidField {
-                field: "status",
-                reason: "unknown",
-            }),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Project {
-    pub id: ProjectId,
-    pub owner_id: Uuid,
-    pub name: ProjectName,
-    pub status: ProjectStatus,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-}
-
-impl Project {
-    pub fn rename(self, name: ProjectName, now: DateTime<Utc>) -> Self {
-        Self { name, updated_at: now, ..self }
     }
 }
 ```
 
-### Repository errors (domain)
+## Repository struct pattern
 ```rust
-use thiserror::Error;
-
-#[derive(Debug, Error)]
-pub enum RepoError {
-    #[error("db op failed: {op}")]
-    Db {
-        op: &'static str,
-        #[source]
-        source: anyhow::Error,
-    },
-}
-```
-
-### Repository trait (port)
-```rust
-use async_trait::async_trait;
-use chrono::{DateTime, Utc};
-use uuid::Uuid;
-use crate::domain::{Project, ProjectId, ProjectName, ProjectStatus};
-use crate::domain::repositories::RepoError;
-
-#[derive(Debug, Clone)]
-pub struct ProjectFilters {
-    pub owner_id: Option<Uuid>,
-    pub status: Option<ProjectStatus>,
+pub struct EndpointPostgres {
+    pool: Arc<PgPool>,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Page {
-    pub limit: i64,
-    pub offset: i64,
-}
-
-#[async_trait]
-pub trait ProjectRepository: Send + Sync {
-    async fn get_by_id(&self, id: ProjectId) -> Result<Option<Project>, RepoError>;
-    async fn insert(&self, project: Project) -> Result<Project, RepoError>;
-    async fn update_name(
-        &self,
-        id: ProjectId,
-        name: ProjectName,
-        now: DateTime<Utc>,
-    ) -> Result<Project, RepoError>;
-    async fn list(
-        &self,
-        filters: ProjectFilters,
-        page: Page,
-    ) -> Result<Vec<Project>, RepoError>;
-}
-```
-
-### Infra implementation (Diesel + diesel_async)
-```rust
-use async_trait::async_trait;
-use chrono::{DateTime, Utc};
-use diesel::{OptionalExtension, QueryDsl, SelectableHelper};
-use diesel::prelude::*;
-use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use diesel_async::pooled_connection::bb8::PooledConnection;
-use diesel_async::pooled_connection::AsyncDieselConnectionManager;
-use uuid::Uuid;
-
-use crate::domain::{
-    Project,
-    ProjectId,
-    ProjectName,
-    ProjectStatus,
-    ProjectFilters,
-    Page,
-    ProjectRepository,
-    DomainError,
-};
-use crate::domain::repositories::RepoError;
-use crate::infra::db::postgres::{PgPool, schema::projects};
-
-pub struct ProjectPostgres {
-    pool: PgPool,
-}
-
-impl ProjectPostgres {
-    pub fn new(pool: PgPool) -> Self {
+impl EndpointPostgres {
+    pub fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
-
-    async fn conn(&self) -> Result<PooledConnection<'_, AsyncDieselConnectionManager<AsyncPgConnection>>, RepoError> {
-        self.pool.get().await.map_err(|err| RepoError::Db {
-            op: "projects.get_conn",
-            source: err.into(),
-        })
-    }
 }
+```
 
-#[derive(Debug, Queryable, Selectable)]
-#[diesel(table_name = projects)]
-struct ProjectRow {
-    id: Uuid,
-    owner_id: Uuid,
-    name: String,
-    status: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
+## Error mapping pattern
+All repositories use shared helpers from `error_mapping.rs`:
+```rust
+use super::error_mapping::{map_diesel_error, map_pool_error};
+
+// Getting a connection:
+let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+
+// Running a query:
+.await
+.map_err(|e| map_diesel_error("endpoint.find_by_id", e))?;
+```
+
+Operation names follow the pattern `entity.operation` (e.g., `"endpoint.create"`, `"endpoint.find_by_id"`).
+
+## Common query patterns
+
+### Find by ID (returns Option)
+```rust
+let result = endpoints::table
+    .find(id.as_uuid())
+    .first::<EndpointRow>(&mut conn)
+    .await
+    .optional()
+    .map_err(|e| map_diesel_error("endpoint.find_by_id", e))?;
+
+Ok(result.map(|row| row.into_entity()))
+```
+
+### Insert
+```rust
+let new_row = NewEndpointRow::from_entity(endpoint);
+
+diesel::insert_into(endpoints::table)
+    .values(&new_row)
+    .execute(&mut conn)
+    .await
+    .map_err(|e| map_diesel_error("endpoint.create", e))?;
+```
+
+### Update with not-found check
+```rust
+let rows_affected = diesel::update(endpoints::table.find(endpoint.id().as_uuid()))
+    .set(( /* fields */ ))
+    .execute(&mut conn)
+    .await
+    .map_err(|e| map_diesel_error("endpoint.update", e))?;
+
+if rows_affected == 0 {
+    return Err(RepoError::NotFound(format!("Endpoint {} not found", endpoint.id())));
 }
+```
 
-#[derive(Debug, Insertable)]
-#[diesel(table_name = projects)]
-struct NewProjectRow {
-    id: Uuid,
-    owner_id: Uuid,
-    name: String,
-    status: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
-}
+### Optimistic locking (WHERE guards)
+```rust
+// update_if_active: only update if status is still active
+let rows_affected = diesel::update(
+    sessions::table
+        .find(session.id().as_uuid())
+        .filter(sessions::status.eq_any(["connected", "reconnecting"]))
+    )
+    .set(( /* fields */ ))
+    .execute(&mut conn)
+    .await
+    .map_err(|e| map_diesel_error("session.update_if_active", e))?;
 
-impl TryFrom<ProjectRow> for Project {
-    type Error = DomainError;
-
-    fn try_from(row: ProjectRow) -> Result<Self, Self::Error> {
-        Ok(Project {
-            id: ProjectId::new(row.id),
-            owner_id: row.owner_id,
-            name: ProjectName::new(row.name)?,
-            status: ProjectStatus::from_str(&row.status)?,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        })
-    }
-}
-
-impl From<Project> for NewProjectRow {
-    fn from(project: Project) -> Self {
-        Self {
-            id: project.id.as_uuid(),
-            owner_id: project.owner_id,
-            name: project.name.as_str().to_string(),
-            status: project.status.as_str().to_string(),
-            created_at: project.created_at,
-            updated_at: project.updated_at,
-        }
-    }
-}
-
-#[async_trait]
-impl ProjectRepository for ProjectPostgres {
-    async fn get_by_id(&self, id: ProjectId) -> Result<Option<Project>, RepoError> {
-        let mut conn = self.conn().await?;
-        let row = projects::table
-            .find(id.as_uuid())
-            .select(ProjectRow::as_select())
-            .get_result::<ProjectRow>(&mut conn)
-            .await
-            .optional()
-            .map_err(|err| RepoError::Db { op: "projects.get_by_id", source: err.into() })?;
-
-        row.map(Project::try_from).transpose().map_err(|err| RepoError::Db {
-            op: "projects.map_domain",
-            source: err.into(),
-        })
-    }
-
-    async fn insert(&self, project: Project) -> Result<Project, RepoError> {
-        let mut conn = self.conn().await?;
-        let new_row: NewProjectRow = project.into();
-
-        let row = diesel::insert_into(projects::table)
-            .values(&new_row)
-            .returning(ProjectRow::as_select())
-            .get_result::<ProjectRow>(&mut conn)
-            .await
-            .map_err(|err| RepoError::Db { op: "projects.insert", source: err.into() })?;
-
-        Project::try_from(row).map_err(|err| RepoError::Db {
-            op: "projects.map_domain",
-            source: err.into(),
-        })
-    }
-
-    async fn update_name(
-        &self,
-        id: ProjectId,
-        name: ProjectName,
-        now: DateTime<Utc>,
-    ) -> Result<Project, RepoError> {
-        let mut conn = self.conn().await?;
-
-        let row = diesel::update(projects::table.filter(projects::id.eq(id.as_uuid())))
-            .set((projects::name.eq(name.as_str()), projects::updated_at.eq(now)))
-            .returning(ProjectRow::as_select())
-            .get_result::<ProjectRow>(&mut conn)
-            .await
-            .map_err(|err| RepoError::Db { op: "projects.update_name", source: err.into() })?;
-
-        Project::try_from(row).map_err(|err| RepoError::Db {
-            op: "projects.map_domain",
-            source: err.into(),
-        })
-    }
-
-    async fn list(
-        &self,
-        filters: ProjectFilters,
-        page: Page,
-    ) -> Result<Vec<Project>, RepoError> {
-        let mut conn = self.conn().await?;
-
-        let mut query = projects::table.into_boxed();
-        if let Some(owner_id) = filters.owner_id {
-            query = query.filter(projects::owner_id.eq(owner_id));
-        }
-        if let Some(status) = filters.status {
-            query = query.filter(projects::status.eq(status.as_str()));
-        }
-
-        let rows = query
-            .order(projects::created_at.desc())
-            .limit(page.limit)
-            .offset(page.offset)
-            .select(ProjectRow::as_select())
-            .load::<ProjectRow>(&mut conn)
-            .await
-            .map_err(|err| RepoError::Db { op: "projects.list", source: err.into() })?;
-
-        rows.into_iter()
-            .map(Project::try_from)
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|err| RepoError::Db {
-                op: "projects.map_domain",
-                source: err.into(),
-            })
-    }
-}
+Ok(rows_affected > 0)  // Returns bool indicating if update succeeded
 ```
 
 ### Transaction pattern
 ```rust
-use diesel_async::AsyncConnection;
+use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
 
-let result = conn
-    .transaction(|conn| async move {
-        // Multiple queries in a single transaction.
-        // Return the final domain object or a RepoError.
-        Ok::<_, RepoError>(some_value)
-    })
-    .await;
+conn.transaction::<_, diesel::result::Error, _>(|conn| {
+    async move {
+        let count = endpoints::table
+            .filter(endpoints::user_id.eq(user_id))
+            .count()
+            .get_result::<i64>(conn)
+            .await?;
+
+        if count >= max_endpoints {
+            return Ok(false);
+        }
+
+        diesel::insert_into(endpoints::table)
+            .values(&new_row)
+            .execute(conn)
+            .await?;
+
+        Ok(true)
+    }
+    .scope_boxed()
+})
+.await
+.map_err(|e| map_diesel_error("endpoint.create_if_under_limit", e))
 ```
 
-## Error handling inside repositories
-- Map ORM errors into `RepoError` with operation context.
-- Do not decide HTTP codes at this layer.
-- Keep constraints and ids in error context for usecase mapping.
+### UPSERT pattern (ON CONFLICT)
+```rust
+diesel::insert_into(rate_limits::table)
+    .values(&new_row)
+    .on_conflict((rate_limits::endpoint_id, rate_limits::hour_bucket))
+    .do_update()
+    .set(rate_limits::event_count.eq(rate_limits::event_count + 1))
+    .returning(RateLimitRow::as_returning())
+    .get_result(&mut conn)
+    .await
+    .map_err(|e| map_diesel_error("rate_limit.increment_or_create", e))?;
+```
+
+## Creating repos in handlers
+Repositories are instantiated in handlers from `AppState`:
+```rust
+let endpoint_repo: Arc<dyn EndpointRepository> =
+    Arc::new(EndpointPostgres::new(Arc::clone(&state.db_pool)));
+let usecase = CreateEndpointUseCase::new(endpoint_repo, subscription_repo);
+```
