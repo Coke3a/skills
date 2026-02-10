@@ -76,7 +76,13 @@ pub enum UsecaseError {
     TierLimitExceeded(String),
 
     #[error("Rate limited: {message}")]
-    RateLimited { message: String, limit: u32, remaining: u32, reset_at: DateTime<Utc>, retry_after: i64 },
+    RateLimited {
+        message: String,
+        limit: Option<u32>,        // None = unlimited (free tier)
+        remaining: Option<u32>,    // None = unlimited
+        reset_at: DateTime<Utc>,
+        retry_after: i64,
+    },
 
     #[error("Gone: {0}")]
     Gone(String),
@@ -109,7 +115,13 @@ impl From<DomainError> for UsecaseError {
             DomainError::NotFound(msg) => UsecaseError::NotFound(msg),
             DomainError::Conflict(msg) => UsecaseError::Conflict(msg),
             DomainError::TierLimitExceeded(msg) => UsecaseError::TierLimitExceeded(msg),
-            DomainError::RateLimitExceeded(msg) => UsecaseError::RateLimited { message: msg, ... },
+            DomainError::RateLimitExceeded(msg) => UsecaseError::RateLimited {
+                message: msg,
+                limit: None,           // Domain doesn't know rate limit details
+                remaining: None,
+                reset_at: Utc::now(),
+                retry_after: 0,
+            },
             other => UsecaseError::Validation(other.to_string()),
         }
     }
@@ -149,20 +161,71 @@ pub(crate) fn map_pool_error(err: impl std::error::Error + Send + Sync + 'static
 }
 ```
 
-## HTTP status mapping
+## HTTP status mapping (ApiError IntoResponse)
 
-| UsecaseError variant    | HTTP status | Error code      |
-| ----------------------- | ----------- | --------------- |
-| NotFound                | 404         | NOT_FOUND       |
-| Validation              | 400         | VALIDATION_ERROR|
-| Conflict                | 409         | CONFLICT        |
-| TierLimitExceeded       | 409         | LIMIT_REACHED   |
-| RateLimited             | 429         | RATE_LIMITED     |
-| Gone                    | 410         | GONE            |
-| Infra                   | 500         | INTERNAL_ERROR  |
+### RateLimited — Special handling with headers
+```rust
+UsecaseError::RateLimited { message, limit, remaining, reset_at, retry_after } => {
+    let body = json!({
+        "error": "RATE_LIMITED",
+        "message": message,
+        "retry_after": retry_after,
+        "upgrade_url": "/pricing",
+    });
 
-## Rate limit response
-`RateLimited` responses include custom headers: `x-ratelimit-limit`, `x-ratelimit-remaining`, `x-ratelimit-reset`, `retry-after`.
+    let mut headers = HeaderMap::new();
+    // Option fields: None renders as "unlimited"
+    headers.insert("x-ratelimit-limit",
+        HeaderValue::from_str(&limit.map_or("unlimited".to_string(), |l| l.to_string())).unwrap());
+    headers.insert("x-ratelimit-remaining",
+        HeaderValue::from_str(&remaining.map_or("unlimited".to_string(), |r| r.to_string())).unwrap());
+    headers.insert("x-ratelimit-reset",
+        HeaderValue::from_str(&reset_at.timestamp().to_string()).unwrap());
+    headers.insert("retry-after",
+        HeaderValue::from_str(&retry_after.to_string()).unwrap());
+
+    (StatusCode::TOO_MANY_REQUESTS, headers, Json(body)).into_response()
+}
+```
+
+### TierLimitExceeded — 409 with upgrade_url
+```rust
+UsecaseError::TierLimitExceeded(msg) => {
+    // Returns 409 CONFLICT with LIMIT_REACHED error code and upgrade_url
+    let body = json!({
+        "error": "LIMIT_REACHED",
+        "message": msg,
+        "upgrade_url": "/pricing",
+    });
+    (StatusCode::CONFLICT, Json(body)).into_response()
+}
+```
+
+### Standard variants
+
+| UsecaseError variant    | HTTP status | Error code       | Extra fields |
+| ----------------------- | ----------- | ---------------- | ------------ |
+| NotFound                | 404         | NOT_FOUND        | |
+| Validation              | 400         | VALIDATION_ERROR | |
+| Conflict                | 409         | CONFLICT         | |
+| TierLimitExceeded       | 409         | LIMIT_REACHED    | `upgrade_url: "/pricing"` |
+| RateLimited             | 429         | RATE_LIMITED     | `retry_after`, `upgrade_url: "/pricing"` + headers |
+| Gone                    | 410         | GONE             | |
+| Infra                   | 500         | INTERNAL_ERROR   | (generic message, full error logged server-side) |
+
+### Response body format
+All error responses follow this JSON structure:
+```json
+{
+    "error": "ERROR_CODE",
+    "message": "Human-readable description"
+}
+```
+
+With optional extra fields like `upgrade_url` and `retry_after` for specific error types.
+
+### Infra error redaction
+`UsecaseError::Infra` logs the full error chain at `error!` level server-side but returns a generic "An internal error occurred" message to the client.
 
 ## Redaction guidance
 - Never log tokens, secrets, raw credentials, or full request bodies.

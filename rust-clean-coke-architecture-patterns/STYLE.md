@@ -4,7 +4,7 @@
 - Modules and files: snake_case (e.g., `endpoint_postgres.rs`, `create_endpoint.rs`).
 - Types: CamelCase (e.g., `CreateEndpointUseCase`, `EndpointRepository`).
 - Usecase structs: one per operation, named `{Action}{Entity}UseCase` (e.g., `CreateEndpointUseCase`).
-- Background usecase structs: `{Name}UseCase` (e.g., `HeartbeatSweeperUseCase`, `DeliveryTimeoutUseCase`).
+- Background usecase structs: `{Name}UseCase` (e.g., `DeliveryTimeoutUseCase`, `RateLimitCleanupUseCase`).
 - Usecase I/O: `{Action}{Entity}Input`, `{Action}{Entity}Output`.
 - Request/Response DTOs: `{Action}{Entity}Request`, `{Action}{Entity}Response` (defined in handler file).
 - ID newtypes: `{Entity}Id(Uuid)` (e.g., `EndpointId`, `SessionId`).
@@ -38,12 +38,55 @@
 
 ## Handler style
 - Handlers are async functions (not methods on structs).
-- Extract `State(state): State<AppState>` and `auth: AuthenticatedUser`.
+- Extract `State(state): State<AppState>` and auth extractor as needed.
 - Create repo implementations from `state.db_pool` inline.
 - Instantiate usecase with repo dependencies.
 - Map request DTO to usecase input.
 - Call usecase, return `Result<impl IntoResponse, ApiError>`.
 - Request/Response DTOs defined in handler file with `#[derive(Deserialize)]` / `#[derive(Serialize)]`.
+
+### Auth extractor usage by route group
+- **`/api/v1/*` routes**: Use `auth: AuthenticatedUser` — Supabase JWT via `Authorization: Bearer <token>`.
+- **`/playground/*` routes**: Use `playground_user: PlaygroundUser` — Anonymous token via `X-Playground-Token` header.
+- **`/in/*` routes**: No auth extractor (public webhook ingress).
+- **`/ws/v1/*` routes**: Auth handled within WebSocket handler after upgrade.
+- **`/health-check`, `/ready-check`**: No auth extractor.
+
+## Router organization style
+Each domain gets its own directory under `handlers/routers/{domain}/` with:
+- `mod.rs` — Declares sub-modules and exports `pub fn router() -> Router<AppState>`.
+- One file per handler action (e.g., `create.rs`, `list.rs`, `get.rs`, `update.rs`, `delete.rs`).
+
+```rust
+// handlers/routers/endpoints/mod.rs
+mod create;
+mod list;
+mod get;
+mod update;
+mod delete;
+mod restore;
+
+use axum::routing::{get as get_route, post};
+use axum::Router;
+use crate::handlers::app::AppState;
+
+pub fn router() -> Router<AppState> {
+    Router::new()
+        .route("/", get_route(list::list_endpoints).post(create::create_endpoint))
+        .route("/{endpoint_id}", get_route(get::get_endpoint)
+            .patch(update::update_endpoint)
+            .delete(delete::delete_endpoint))
+        .route("/{endpoint_id}/restore", post(restore::restore_endpoint))
+}
+```
+
+Routers are nested in `app.rs` via helper functions:
+```rust
+.nest("/api/v1", http_api_routes())     // Authenticated API
+.nest("/ws/v1", ws_routes())            // WebSocket
+.nest("/in", http_ingest_routes())      // Webhook ingress
+.nest("/playground", playground_routes()) // Anonymous playground
+```
 
 ## Background task handler style
 - Single `spawn()` function that returns `JoinHandle<()>`.

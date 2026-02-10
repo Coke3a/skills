@@ -10,6 +10,7 @@
 - Usecase struct with `Arc<dyn Repo>` deps, explicit input/output structs.
 - Postgres impl in `src/infra/db/repositories/` with `Row`/`NewRow`, `into_entity()`/`from_entity()`, centralized error mapping.
 - Handler creates repos from `AppState.db_pool`, instantiates usecase, returns `Result<impl IntoResponse, ApiError>`.
+- Router module with `pub fn router() -> Router<AppState>` containing routes.
 
 **Pass/Fail checklist:**
 - [ ] Entity has private fields with getters (no `pub` fields)
@@ -20,6 +21,7 @@
 - [ ] NewRow uses `from_entity(&entity)` with borrowed fields
 - [ ] Usecase uses `Arc<dyn Trait>` (not generics)
 - [ ] Handler creates repos inline from state, not passed in
+- [ ] Router has `pub fn router() -> Router<AppState>` pattern
 
 ## Eval 2: Refactor handler into clean layers
 **Input:** "Refactor this messy axum handler into clean architecture layers."
@@ -55,14 +57,51 @@
 **Expected:**
 - Usecase in `src/usecases/background/` with `Arc<dyn Repo>` dep and sweep method.
 - Handler spawner in `src/handlers/{task}/mod.rs` with `spawn()` returning `JoinHandle<()>`.
-- Config params added to `BackgroundTasks` with defaults.
+- Config params added to `BackgroundTasks` struct with defaults in `Default` impl.
+- Env var loading in `config_loader.rs` using `env_or()`.
 - Wired in `spawn_background_tasks()` in `app.rs`.
+- Re-exported from `src/handlers/mod.rs` and `src/usecases/mod.rs`.
 
 **Pass/Fail checklist:**
 - [ ] Usecase has `Arc<dyn Repo>` dep (not generics)
 - [ ] Spawner uses `tokio::select!` with `cancel.cancelled()`
 - [ ] Config params have defaults in `BackgroundTasks::default()`
+- [ ] Config loading uses `env_or()` helper
 - [ ] JoinHandle added to the returned Vec in `spawn_background_tasks()`
+- [ ] Module declared in `src/handlers/mod.rs`
+- [ ] Imported in `app.rs` via `use super::{task_name};`
+
+## Eval 5: Add a new router domain
+**Input:** "Add a notifications feature with list and create endpoints under /api/v1/notifications."
+
+**Expected:**
+- Router module at `src/handlers/routers/notifications/mod.rs` with `pub fn router() -> Router<AppState>`.
+- Handler files: `list.rs`, `create.rs` under the router module.
+- Router nested in `http_api_routes()` in `app.rs`.
+- Usecases in `src/usecases/notifications/` with input/output structs.
+- Module declared in `src/handlers/routers/mod.rs`.
+
+**Pass/Fail checklist:**
+- [ ] Router follows `pub fn router() -> Router<AppState>` pattern
+- [ ] One handler file per action
+- [ ] Nested in `http_api_routes()` (not directly in `start()`)
+- [ ] Usecases have explicit input/output structs
+- [ ] Auth extractor used for authenticated routes (AuthenticatedUser)
+- [ ] Module declared in routers `mod.rs`
+
+## Eval 6: Rate limit error response
+**Input:** "Return a 429 rate limit error with Option<u32> limit/remaining fields."
+
+**Expected:**
+- `UsecaseError::RateLimited` with `limit: Option<u32>`, `remaining: Option<u32>`.
+- ApiError response includes `x-ratelimit-limit` header with `map_or("unlimited", ...)`.
+- Response body includes `upgrade_url: "/pricing"`.
+
+**Pass/Fail checklist:**
+- [ ] `limit` and `remaining` are `Option<u32>` (not bare `u32`)
+- [ ] Headers use `map_or("unlimited".to_string(), |l| l.to_string())`
+- [ ] Response body includes `upgrade_url: "/pricing"`
+- [ ] HTTP status is 429
 
 ## Scoring rubric
 - **Pass:** All checklist items are satisfied.

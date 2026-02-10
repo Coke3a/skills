@@ -41,7 +41,7 @@
 - [ ] Define request/response DTOs in handler file.
 - [ ] Create repos from `AppState.db_pool`, instantiate usecase.
 - [ ] Map request DTO to input, call usecase, return `Result<impl IntoResponse, ApiError>`.
-- [ ] Add route in `src/handlers/app.rs`.
+- [ ] Add route in the appropriate router's `pub fn router()` or create a new router (see "Add a new router domain" workflow).
 
 7) Add tests
 - [ ] Domain unit tests for value objects and entity state transitions.
@@ -54,27 +54,61 @@
 - [ ] DTOs are separate from domain entities.
 - [ ] Entity fields are private with getters.
 
+## Add a new router domain
+
+When adding an entirely new route group (e.g., adding `/api/v1/notifications`):
+
+1) Create the router module
+- [ ] Create `src/handlers/routers/{domain}/mod.rs`.
+- [ ] Declare handler sub-modules (e.g., `mod create; mod list;`).
+- [ ] Export `pub fn router() -> Router<AppState>` with all routes.
+
+2) Create handler files
+- [ ] One file per action in `src/handlers/routers/{domain}/{action}.rs`.
+- [ ] Each handler: extract auth + state, create repos, instantiate usecase, call execute, return response.
+- [ ] Define Request/Response DTOs in each handler file.
+
+3) Wire into app.rs
+- [ ] Add `pub mod {domain};` to `src/handlers/routers/mod.rs`.
+- [ ] Add the nest call in the appropriate route group function in `app.rs`:
+  - For authenticated API: add `.nest("/path", super::routers::{domain}::router())` in `http_api_routes()`.
+  - For public: add nesting in the appropriate helper or directly in the `start()` router builder.
+
+4) Create the corresponding usecases
+- [ ] Add `src/usecases/{domain}/mod.rs` with re-exports.
+- [ ] Add individual usecase files under `src/usecases/{domain}/`.
+- [ ] Re-export from `src/usecases/mod.rs`.
+
 ## Add a background task
 
 1) Create the usecase
 - [ ] Add `src/usecases/background/{task_name}.rs`.
 - [ ] Struct holds `Arc<dyn Repo>` dependency.
 - [ ] Implement sweep/cleanup method with `Duration` and limit params.
+- [ ] Re-export from `src/usecases/background/mod.rs`.
+- [ ] Re-export from `src/usecases/mod.rs`.
 
 2) Create the handler spawner
 - [ ] Add `src/handlers/{task_name}/mod.rs`.
 - [ ] Single `spawn()` function returning `JoinHandle<()>`.
 - [ ] Takes `Arc<UseCase>`, `CancellationToken`, and config params.
-- [ ] Uses `tokio::time::interval` + `tokio::select!`.
+- [ ] Uses `tokio::time::interval` + `tokio::select!` with `cancel.cancelled()`.
+- [ ] Logs on start and on shutdown.
 
 3) Wire in app.rs
-- [ ] Add config params to `BackgroundTasks` struct and `Default` impl.
-- [ ] Add env var loading in `config_loader.rs`.
+- [ ] Add config params to `BackgroundTasks` struct in `config_model.rs` with doc comments.
+- [ ] Add default values in `BackgroundTasks::default()`.
+- [ ] Add env var loading in `config_loader.rs` using `env_or()`.
+- [ ] Add `pub mod {task_name};` to `src/handlers/mod.rs`.
+- [ ] Add `use super::{task_name};` in `app.rs`.
 - [ ] Create repo and usecase in `spawn_background_tasks()`.
 - [ ] Add spawn call to the returned `Vec<JoinHandle<()>>`.
 
-4) Re-export
-- [ ] Add to `src/handlers/mod.rs` and `src/usecases/mod.rs`.
+4) Current background tasks (4 total)
+- `delivery_timeout` — marks stuck deliveries as Timeout
+- `rate_limit` — cleans up old rate limit records
+- `playground_cleanup` — cleans up expired playground sessions
+- `event_expiry` — deletes events past retention period
 
 ## Refactor existing code into clean layers
 
