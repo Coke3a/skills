@@ -2,23 +2,23 @@
 
 ## Purpose
 
-These evals verify the skill triggers for focus on clean architecture layers/repo pattern and avoids out-of-scope requests.
+These evals verify the skill triggers for build and harden automation workflows and avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 
-- "Create a new Rust backend feature following clean architecture."
-- "Refactor this handler/usecase/domain code into proper layers."
-- "Add a Diesel repository implementation for this entity."
-- "Define repository trait and usecase structure."
-- "Check whether this module follows handler -> usecase -> domain."
+- "Set up Rust GitHub Actions CI."
+- "Create Docker image build workflow."
+- "Add staging and production deploy workflows."
+- "Add smoke tests and rollback instructions."
+- "Harden GitHub Actions permissions and secrets."
 
 ## Negative Trigger Prompts
 
-- "Set up GitHub Actions CI."
-- "Write TDD tests for this bug."
-- "Review this PR."
-- "Benchmark this hot path."
-- "Deploy this app."
+- "Create a domain entity."
+- "Write TDD tests."
+- "Review Rust ownership issues."
+- "Optimize async worker throughput."
+- "Refactor usecase errors."
 
 ## Expected Behavior
 
@@ -41,6 +41,6 @@ These evals verify the skill triggers for focus on clean architecture layers/rep
 
 ## Example Evaluation
 
-- **Input prompt**: "Create a new Rust backend feature following clean architecture."
-- **Expected skill usage**: `rust-clean-coke-architecture-patterns` is selected.
+- **Input prompt**: "Set up Rust GitHub Actions CI."
+- **Expected skill usage**: `rust-ci-cd` is selected.
 - **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and verification guidance.

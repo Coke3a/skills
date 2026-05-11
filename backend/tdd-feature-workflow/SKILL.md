@@ -1,6 +1,6 @@
 ---
 name: tdd-feature-workflow
-description: Use when adding or changing behavior with Test-Driven Development. Guides acceptance criteria, red-green-refactor, choosing the smallest useful test level, behavior-focused tests, Rust domain/usecase/repository/API tests, sibling *_test.rs placement, and test summaries. Pair with rust-clean-architecture for layer structure.
+description: Use when adding or changing behavior with Test-Driven Development. Guides acceptance criteria, red-green-refactor, choosing the smallest useful test level, behavior-focused tests, Rust domain/usecase/repository/API tests, sibling *_test.rs placement, and test summaries. Pair with rust-clean-coke-architecture-patterns for layer structure.
 ---
 
 # TDD Feature Workflow
@@ -95,7 +95,7 @@ Do not test the same business rule in every layer unless each test level provide
 
 ## Rust Clean Architecture Mapping
 
-When used with `rust-clean-architecture`, let that companion skill define architecture, file structure, names, error flow, repository trait shape, Diesel implementation shape, and handler -> usecase -> domain boundaries. In this workspace, the companion folder is `backend/rust-clean-coke-architecture-patterns/`.
+When used with `rust-clean-coke-architecture-patterns`, let that companion skill define architecture, file structure, names, error flow, repository trait shape, Diesel implementation shape, and handler -> usecase -> domain boundaries. In this workspace, the companion folder is `backend/rust-clean-coke-architecture-patterns/`.
 
 Use this skill to decide test order, test level, test file placement, and the red/green/refactor loop:
 
@@ -104,11 +104,11 @@ Use this skill to decide test order, test level, test file placement, and the re
 - Repository integration tests protect Diesel/database behavior.
 - Handler/API tests protect HTTP contract.
 
-## Pairing with rust-clean-architecture
+## Pairing with rust-clean-coke-architecture-patterns
 
 When both architecture and TDD are needed:
 
-1. Use rust-clean-architecture to decide files, layers, names, error flow, and repository shape.
+1. Use rust-clean-coke-architecture-patterns to decide files, layers, names, error flow, and repository shape.
 2. Use this skill to decide test order, test level, test file placement, and red/green/refactor loop.
 3. Put domain/usecase tests beside source modules as `*_test.rs` files.
 4. Put repository/API integration tests under `tests/`.
