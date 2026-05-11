@@ -1,24 +1,41 @@
-# Add a new router domain
+# Add a router domain
 
-When adding an entirely new route group (e.g., adding `/api/v1/notifications`):
+Use this workflow when adding a new route group while preserving the handler boundary.
 
-1) Create the router module
-- [ ] Create `src/handlers/routers/{domain}/mod.rs`.
-- [ ] Declare handler sub-modules (e.g., `mod create; mod list;`).
-- [ ] Export `pub fn router() -> Router<AppState>` with all routes.
+## 1. Create the router module
 
-2) Create handler files
-- [ ] One file per action in `src/handlers/routers/{domain}/{action}.rs`.
-- [ ] Each handler: extract auth + state, create repos, instantiate usecase, call execute, return response.
-- [ ] Define Request/Response DTOs in each handler file.
+- [ ] Create `src/handlers/routers/{feature}/mod.rs`
+- [ ] Declare one handler module per action
+- [ ] Export `pub fn router() -> Router<AppState>`
+- [ ] Keep route paths and HTTP method wiring in the router module
 
-3) Wire into app.rs
-- [ ] Add `pub mod {domain};` to `src/handlers/routers/mod.rs`.
-- [ ] Add the nest call in the appropriate route group function in `app.rs`:
-  - For authenticated API: add `.nest("/path", super::routers::{domain}::router())` in `http_api_routes()`.
-  - For public: add nesting in the appropriate helper or directly in the `start()` router builder.
+## 2. Create handler files
 
-4) Create the corresponding usecases
-- [ ] Add `src/usecases/{domain}/mod.rs` with re-exports.
-- [ ] Add individual usecase files under `src/usecases/{domain}/`.
-- [ ] Re-export from `src/usecases/mod.rs`.
+- [ ] Add one file per action under `src/handlers/routers/{feature}/`
+- [ ] Define request DTOs only for actions with request bodies
+- [ ] Define response DTOs in the handler layer
+- [ ] Extract `State<AppState>` and auth/user context if required
+- [ ] Instantiate infra repository implementations from `AppState`
+- [ ] Instantiate the usecase
+- [ ] Map request DTOs to usecase input
+- [ ] Map usecase output to response DTOs
+- [ ] Return `Result<impl IntoResponse, ApiError>`
+
+## 3. Wire the router
+
+- [ ] Add `pub mod {feature};` to `src/handlers/routers/mod.rs`
+- [ ] Nest the feature router in the app route assembly
+- [ ] Keep handler logic out of app startup
+
+## 4. Architecture verification
+
+- [ ] Handler files contain no business rules
+- [ ] Handler DTOs are not reused as domain entities
+- [ ] Handler code does not import Diesel schema or row structs
+- [ ] Usecases own orchestration and error semantics
+
+## 5. Final commands
+
+- [ ] `cargo fmt --all -- --check`
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings`
+- [ ] `cargo test --all-features`

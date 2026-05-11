@@ -1,26 +1,58 @@
 # Refactor existing code into clean layers
 
-1) Identify the entrypoint
-- [ ] Locate the current handler and its inline business logic.
+Use this workflow when a handler, service, or repository mixes HTTP, orchestration, domain rules, and IO details.
 
-2) Extract a usecase
-- [ ] Move orchestration into a usecase struct with `Arc<dyn Repo>` deps.
-- [ ] Define input/output structs and use `From` impls for errors.
+## 1. Identify mixed responsibilities
 
-3) Define repository ports
-- [ ] Identify data access and define traits in domain.
+- [ ] Locate HTTP extraction/response mapping
+- [ ] Locate orchestration and user-facing error decisions
+- [ ] Locate domain invariants and validation
+- [ ] Locate database or external IO code
 
-4) Move IO into infra
-- [ ] Implement repo traits with Diesel queries, `Row`/`NewRow` structs, centralized error mapping.
+## 2. Extract domain code
 
-5) Thin the handler
-- [ ] Reduce to: create repos from state -> instantiate usecase -> parse input -> call usecase -> return response.
+- [ ] Move entities to `src/domain/entities/`
+- [ ] Move value objects to `src/domain/value_objects/`
+- [ ] Move repository traits to `src/domain/repositories/`
+- [ ] Keep domain free of Axum, Diesel, schema, DTOs, and infra imports
 
-6) Add tests
-- [ ] Cover usecase behavior with mock repos.
+## 3. Extract usecase code
 
-## Feedback loop pattern
-- [ ] Run `cargo clippy` and fix warnings.
-- [ ] Run `cargo test` and fix failures.
-- [ ] Re-run tests.
-- [ ] Final review for layering and error mapping.
+- [ ] Add usecase under `src/usecases/{feature}/`
+- [ ] Define input/output structs
+- [ ] Inject repositories as `Arc<dyn RepositoryTrait>`
+- [ ] Move orchestration and user-facing error semantics into the usecase
+- [ ] Use `?` with `From<DomainError>` and `From<RepoError>` conversions
+
+## 4. Extract infra code
+
+- [ ] Move Diesel queries to `src/infra/db/repositories/`
+- [ ] Add private row structs for `Queryable`/`Selectable` and `Insertable`
+- [ ] Convert rows to domain entities through `from_existing()`
+- [ ] Use Diesel query builder only
+- [ ] Use centralized `map_diesel_error()` and `map_pool_error()`
+
+## 5. Thin the handler
+
+- [ ] Keep request/response DTOs in the handler layer
+- [ ] Instantiate repository implementations from `AppState`
+- [ ] Instantiate the usecase
+- [ ] Map request -> input
+- [ ] Call usecase
+- [ ] Map output -> response
+- [ ] Return `Result<impl IntoResponse, ApiError>`
+
+## 6. Architecture verification
+
+- [ ] Handlers contain no business logic
+- [ ] Usecases do not depend on Axum or Diesel
+- [ ] Domain does not depend on handlers, infra, Axum, Diesel, or schema
+- [ ] Infra does not define business semantics
+- [ ] DTOs do not leak into domain
+- [ ] Row structs do not leak outside infra
+
+## 7. Final commands
+
+- [ ] `cargo fmt --all -- --check`
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings`
+- [ ] `cargo test --all-features`

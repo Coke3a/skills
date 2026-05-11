@@ -1,6 +1,8 @@
-// ============================================
+// Template: split these sections into the indicated layer files. Keep the
+// conversion flow DomainError -> UsecaseError -> ApiError and
+// RepoError -> UsecaseError -> ApiError.
+
 // src/domain/error.rs
-// ============================================
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -11,28 +13,17 @@ pub enum DomainError {
         reason: &'static str,
     },
 
-    #[error("Business rule violation: {0}")]
-    BusinessRuleViolation(String),
+    #[error("Invariant violation: {0}")]
+    InvariantViolation(String),
 
-    #[error("Entity not found: {0}")]
+    #[error("Not found: {0}")]
     NotFound(String),
 
     #[error("Conflict: {0}")]
     Conflict(String),
-
-    #[error("Rate limit exceeded: {0}")]
-    RateLimitExceeded(String),
-
-    #[error("Quota exceeded: {0}")]
-    QuotaExceeded(String),
-
-    #[error("Tier limit exceeded: {0}")]
-    TierLimitExceeded(String),
 }
 
-// ============================================
 // src/domain/repositories/error.rs
-// ============================================
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -40,14 +31,6 @@ pub enum RepoError {
     #[error("Database operation '{op}' failed")]
     Db {
         op: &'static str,
-        #[source]
-        source: anyhow::Error,
-    },
-
-    #[error("Database operation '{op}' failed for entity {entity_id}")]
-    DbWithEntity {
-        op: &'static str,
-        entity_id: String,
         #[source]
         source: anyhow::Error,
     },
@@ -65,15 +48,14 @@ pub enum RepoError {
     ConnectionError(String),
 }
 
-// ============================================
 // src/infra/db/repositories/error_mapping.rs
-// ============================================
-use crate::domain::repositories::RepoError;
 use diesel::result::{DatabaseErrorKind, Error as DieselError};
+
+use crate::domain::repositories::RepoError;
 
 pub(crate) fn map_diesel_error(op: &'static str, err: DieselError) -> RepoError {
     match &err {
-        DieselError::NotFound => RepoError::NotFound(format!("{} returned no rows", op)),
+        DieselError::NotFound => RepoError::NotFound(format!("{op} returned no rows")),
         DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, info) => {
             RepoError::UniqueViolation(info.message().to_string())
         }
@@ -91,12 +73,9 @@ pub(crate) fn map_pool_error(err: impl std::error::Error + Send + Sync + 'static
     RepoError::ConnectionError(err.to_string())
 }
 
-// ============================================
 // src/usecases/error.rs
-// ============================================
-use crate::domain::DomainError;
 use crate::domain::repositories::RepoError;
-use chrono::{DateTime, Utc};
+use crate::domain::DomainError;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -110,21 +89,6 @@ pub enum UsecaseError {
     #[error("Conflict: {0}")]
     Conflict(String),
 
-    #[error("Tier limit exceeded: {0}")]
-    TierLimitExceeded(String),
-
-    #[error("Rate limited: {message}")]
-    RateLimited {
-        message: String,
-        limit: u32,
-        remaining: u32,
-        reset_at: DateTime<Utc>,
-        retry_after: i64,
-    },
-
-    #[error("Gone: {0}")]
-    Gone(String),
-
     #[error("Infrastructure error")]
     Infra(#[source] anyhow::Error),
 }
@@ -132,17 +96,11 @@ pub enum UsecaseError {
 impl From<DomainError> for UsecaseError {
     fn from(err: DomainError) -> Self {
         match err {
-            DomainError::NotFound(msg) => UsecaseError::NotFound(msg),
-            DomainError::Conflict(msg) => UsecaseError::Conflict(msg),
-            DomainError::TierLimitExceeded(msg) => UsecaseError::TierLimitExceeded(msg),
-            DomainError::RateLimitExceeded(msg) => UsecaseError::RateLimited {
-                message: msg,
-                limit: 0,
-                remaining: 0,
-                reset_at: Utc::now(),
-                retry_after: 0,
-            },
-            other => UsecaseError::Validation(other.to_string()),
+            DomainError::NotFound(message) => Self::NotFound(message),
+            DomainError::Conflict(message) => Self::Conflict(message),
+            DomainError::InvalidField { .. } | DomainError::InvariantViolation(_) => {
+                Self::Validation(err.to_string())
+            }
         }
     }
 }
@@ -150,21 +108,21 @@ impl From<DomainError> for UsecaseError {
 impl From<RepoError> for UsecaseError {
     fn from(err: RepoError) -> Self {
         match err {
-            RepoError::NotFound(msg) => UsecaseError::NotFound(msg),
-            RepoError::UniqueViolation(msg) => UsecaseError::Conflict(msg),
-            other => UsecaseError::Infra(anyhow::Error::new(other)),
+            RepoError::NotFound(message) => Self::NotFound(message),
+            RepoError::UniqueViolation(message) | RepoError::ForeignKeyViolation(message) => {
+                Self::Conflict(message)
+            }
+            other => Self::Infra(anyhow::Error::new(other)),
         }
     }
 }
 
-// ============================================
 // src/handlers/routers/error_response.rs
-// ============================================
 use axum::{
-    http::{HeaderMap, HeaderValue, StatusCode},
+    http::StatusCode,
     response::{IntoResponse, Json},
 };
-use serde_json::json;
+use serde::Serialize;
 use tracing::error;
 
 use crate::usecases::UsecaseError;
@@ -173,54 +131,39 @@ pub struct ApiError(pub UsecaseError);
 
 impl From<UsecaseError> for ApiError {
     fn from(err: UsecaseError) -> Self {
-        ApiError(err)
+        Self(err)
     }
+}
+
+#[derive(Serialize)]
+struct ErrorBody {
+    error: &'static str,
+    message: String,
 }
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
-        match self.0 {
-            UsecaseError::RateLimited {
-                message, limit, remaining, reset_at, retry_after,
-            } => {
-                let body = json!({
-                    "error": "RATE_LIMITED",
-                    "message": message,
-                    "retry_after": retry_after,
-                    "upgrade_url": "/pricing",
-                });
-                let mut headers = HeaderMap::new();
-                headers.insert("x-ratelimit-limit", HeaderValue::from_str(&limit.to_string()).unwrap());
-                headers.insert("x-ratelimit-remaining", HeaderValue::from_str(&remaining.to_string()).unwrap());
-                headers.insert("x-ratelimit-reset", HeaderValue::from_str(&reset_at.timestamp().to_string()).unwrap());
-                headers.insert("retry-after", HeaderValue::from_str(&retry_after.to_string()).unwrap());
-                (StatusCode::TOO_MANY_REQUESTS, headers, Json(body)).into_response()
+        let (status, code, message) = match self.0 {
+            UsecaseError::NotFound(message) => (StatusCode::NOT_FOUND, "NOT_FOUND", message),
+            UsecaseError::Validation(message) => {
+                (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", message)
             }
-            UsecaseError::Gone(msg) => {
-                let body = json!({ "error": "GONE", "message": msg });
-                (StatusCode::GONE, Json(body)).into_response()
+            UsecaseError::Conflict(message) => (StatusCode::CONFLICT, "CONFLICT", message),
+            UsecaseError::Infra(err) => {
+                error!(error = ?err, "internal usecase error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "INTERNAL_ERROR",
+                    "An internal error occurred".to_string(),
+                )
             }
-            other => {
-                let (status, error_code, message, extra) = match other {
-                    UsecaseError::Validation(msg) => (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", msg, None),
-                    UsecaseError::NotFound(msg) => (StatusCode::NOT_FOUND, "NOT_FOUND", msg, None),
-                    UsecaseError::Conflict(msg) => (StatusCode::CONFLICT, "CONFLICT", msg, None),
-                    UsecaseError::TierLimitExceeded(msg) => (StatusCode::CONFLICT, "LIMIT_REACHED", msg, Some("/pricing")),
-                    UsecaseError::Infra(e) => {
-                        error!("Internal error: {:?}", e);
-                        (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An internal error occurred".to_string(), None)
-                    }
-                    UsecaseError::RateLimited { .. } | UsecaseError::Gone(_) => unreachable!(),
-                };
+        };
 
-                let body = if let Some(upgrade_url) = extra {
-                    json!({ "error": error_code, "message": message, "upgrade_url": upgrade_url })
-                } else {
-                    json!({ "error": error_code, "message": message })
-                };
+        let body = ErrorBody {
+            error: code,
+            message,
+        };
 
-                (status, Json(body)).into_response()
-            }
-        }
+        (status, Json(body)).into_response()
     }
 }

@@ -1,71 +1,68 @@
+// Template: replace CreateExampleEntity*, ExampleRepository, ExamplePostgres,
+// route names, and DTO fields with project-specific names. Handlers stay thin:
+// extract, wire, map request to input, call usecase, map output to response.
+
 use std::sync::Arc;
 
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::repositories::{EndpointRepository, SubscriptionRepository};
-use crate::handlers::routers::ApiError;
+use crate::domain::repositories::ExampleRepository;
 use crate::handlers::app::AppState;
 use crate::handlers::extractors::AuthenticatedUser;
-use crate::infra::db::repositories::{EndpointPostgres, SubscriptionPostgres};
-use crate::usecases::{CreateEndpointInput, CreateEndpointUseCase};
+use crate::handlers::routers::ApiError;
+use crate::infra::db::repositories::ExamplePostgres;
+use crate::usecases::{CreateExampleEntityInput, CreateExampleEntityOutput, CreateExampleEntityUseCase};
 
-// Request/Response DTOs defined in handler file
 #[derive(Debug, Deserialize)]
-pub struct CreateEndpointRequest {
-    pub name: String,
-    pub provider_label: Option<String>,
+pub struct CreateExampleEntityRequest {
+    pub column_text: String,
+    pub column_url: String,
 }
 
 #[derive(Debug, Serialize)]
-pub struct CreateEndpointResponse {
+pub struct CreateExampleEntityResponse {
     pub id: Uuid,
-    pub name: String,
-    pub webhook_url: String,
-    pub provider_label: Option<String>,
+    pub owner_id: Uuid,
+    pub column_text: String,
+    pub column_url: String,
+    pub status: String,
     pub created_at: DateTime<Utc>,
 }
 
-// Handler: async function (not method on struct)
-pub async fn create_endpoint(
-    State(state): State<AppState>,        // Extract app state
-    auth: AuthenticatedUser,               // Extract authenticated user from JWT
-    Json(body): Json<CreateEndpointRequest>, // Parse request body
+impl From<CreateExampleEntityOutput> for CreateExampleEntityResponse {
+    fn from(output: CreateExampleEntityOutput) -> Self {
+        Self {
+            id: output.id,
+            owner_id: output.owner_id,
+            column_text: output.column_text,
+            column_url: output.column_url,
+            status: output.status,
+            created_at: output.created_at,
+        }
+    }
+}
+
+pub async fn create_example_entity(
+    State(state): State<AppState>,
+    auth: AuthenticatedUser,
+    Json(body): Json<CreateExampleEntityRequest>,
 ) -> Result<impl IntoResponse, ApiError> {
-    // Create repo implementations from state.db_pool
-    let endpoint_repo: Arc<dyn EndpointRepository> =
-        Arc::new(EndpointPostgres::new(Arc::clone(&state.db_pool)));
-    let subscription_repo: Arc<dyn SubscriptionRepository> =
-        Arc::new(SubscriptionPostgres::new(Arc::clone(&state.db_pool)));
+    let example_repo: Arc<dyn ExampleRepository> =
+        Arc::new(ExamplePostgres::new(Arc::clone(&state.db_pool)));
 
-    // Instantiate usecase with dependencies
-    let usecase = CreateEndpointUseCase::new(endpoint_repo, subscription_repo);
+    let usecase = CreateExampleEntityUseCase::new(example_repo);
 
-    // Map request DTO to usecase input
-    let input = CreateEndpointInput {
-        user_id: auth.user_id,
-        name: body.name,
-        provider_label: body.provider_label,
+    let input = CreateExampleEntityInput {
+        owner_id: auth.user_id,
+        column_text: body.column_text,
+        column_url: body.column_url,
     };
 
-    // Call usecase. UsecaseError converts to ApiError via From impl.
     let output = usecase.execute(input).await?;
-
-    // Map usecase output to response DTO
-    let response = CreateEndpointResponse {
-        id: output.id,
-        name: output.name,
-        webhook_url: output.webhook_url,
-        provider_label: output.provider_label,
-        created_at: output.created_at,
-    };
+    let response = CreateExampleEntityResponse::from(output);
 
     Ok((StatusCode::CREATED, Json(response)))
 }

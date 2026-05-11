@@ -1,211 +1,193 @@
-# Repository + ORM
+# Repository And Diesel Reference
 
-## ORM stack
-- Diesel 2.2+ with `diesel-async` and `deadpool` connection pooling.
-- `PgPool` type alias wraps `deadpool::Pool<AsyncPgConnection>`.
-- Pool max size configurable (typically 10 connections).
-- Repositories hold `Arc<PgPool>`.
-- Key rule: NO raw SQL -- always use the Diesel query builder.
+Use this reference for repository traits and Diesel repository implementations.
 
 ## Repository port pattern
-- Define trait in `src/domain/repositories/{entity}_repository.rs` using `async_trait`.
-- Implement trait in `src/infra/db/repositories/{entity}_postgres.rs`.
-- Not-found is `Option<T>` for queries, `RepoError::NotFound` for updates/deletes expecting existing rows.
-- All methods return `Result<T, RepoError>`.
 
-## Row conversion pattern
-
-Two internal structs per entity:
-
-**Read row** (`EntityRow`): `#[derive(Queryable, Selectable)]` with `into_entity()` method.
-**Insert row** (`NewEntityRow`): `#[derive(Insertable)]` with `from_entity(&entity)` using borrowed fields.
+- Define traits in `src/domain/repositories/{entity}_repository.rs`.
+- Implement traits in `src/infra/db/repositories/{entity}_postgres.rs`.
+- Use `async_trait` for async trait methods.
+- Return `Result<T, RepoError>`.
+- `find_by_*` methods return `Result<Option<T>, RepoError>`.
+- Updates/deletes that expect an existing row return `RepoError::NotFound` when no row is affected.
 
 ```rust
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = items)]
-struct ItemRow {
-    id: Uuid,
-    user_id: Uuid,
-    name: String,
-}
-
-impl ItemRow {
-    fn into_entity(self) -> Item {
-        Item::from_existing(
-            ItemId::from_uuid(self.id),
-            self.user_id,
-            ItemName::from_trusted(self.name), // from_trusted skips validation
-        )
-    }
-}
-
-#[derive(Insertable)]
-#[diesel(table_name = items)]
-struct NewItemRow<'a> {
-    id: &'a Uuid,
-    user_id: &'a Uuid,
-    name: &'a str,
-}
-
-impl<'a> NewItemRow<'a> {
-    fn from_entity(entity: &'a Item) -> Self {
-        Self {
-            id: entity.id().as_uuid(),
-            user_id: entity.user_id(),
-            name: entity.name().as_str(),
-        }
-    }
+#[async_trait]
+pub trait ExampleRepository: Send + Sync {
+    async fn create(&self, entity: &ExampleEntity) -> Result<(), RepoError>;
+    async fn find_by_id(&self, id: &ExampleEntityId) -> Result<Option<ExampleEntity>, RepoError>;
+    async fn update(&self, entity: &ExampleEntity) -> Result<(), RepoError>;
+    async fn delete(&self, id: &ExampleEntityId) -> Result<(), RepoError>;
 }
 ```
 
-## Repository struct pattern
+## Diesel implementation pattern
+
+- Name the implementation `{Entity}Postgres`.
+- Store `Arc<PgPool>`.
+- Get a connection inside each method.
+- Use Diesel query builder only.
+- Use centralized `map_diesel_error()` and `map_pool_error()`.
+- Keep rows private to infra.
+
 ```rust
-pub struct ItemPostgres {
+pub struct ExamplePostgres {
     pool: Arc<PgPool>,
 }
 
-impl ItemPostgres {
+impl ExamplePostgres {
     pub fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 }
 ```
 
-## Error mapping pattern
-All repositories use shared helpers from `error_mapping.rs`:
-```rust
-use super::error_mapping::{map_diesel_error, map_pool_error};
+## Row conversion pattern
 
-// Getting a connection:
+Use one row struct for reads and one row struct for inserts.
+
+```rust
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = example_entities)]
+struct ExampleEntityRow {
+    id: Uuid,
+    owner_id: Uuid,
+    column_text: String,
+    column_url: String,
+    status: String,
+}
+
+impl ExampleEntityRow {
+    fn into_entity(self) -> ExampleEntity {
+        ExampleEntity::from_existing(
+            ExampleEntityId::from_uuid(self.id),
+            self.owner_id,
+            ExampleEntityName::from_trusted(self.column_text),
+            self.column_url,
+            ExampleEntityStatus::from_trusted(self.status),
+        )
+    }
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = example_entities)]
+struct NewExampleEntityRow<'a> {
+    id: &'a Uuid,
+    owner_id: &'a Uuid,
+    column_text: &'a str,
+    column_url: &'a str,
+    status: &'a str,
+}
+
+impl<'a> NewExampleEntityRow<'a> {
+    fn from_entity(entity: &'a ExampleEntity) -> Self {
+        Self {
+            id: entity.id().as_uuid(),
+            owner_id: entity.owner_id(),
+            column_text: entity.column_text().as_str(),
+            column_url: entity.column_url(),
+            status: entity.status().as_str(),
+        }
+    }
+}
+```
+
+## Error mapping
+
+```rust
 let mut conn = self.pool.get().await.map_err(map_pool_error)?;
 
-// Running a query:
-.await
-.map_err(|e| map_diesel_error("item.find_by_id", e))?;
-```
-
-Operation names follow the pattern `entity.operation` (e.g., `"item.create"`, `"item.find_by_id"`).
-
-## Common query patterns
-
-### Find by ID (returns Option)
-```rust
-let result = items::table
+example_entities::table
     .find(id.as_uuid())
-    .first::<ItemRow>(&mut conn)
+    .first::<ExampleEntityRow>(&mut conn)
     .await
     .optional()
-    .map_err(|e| map_diesel_error("item.find_by_id", e))?;
-
-Ok(result.map(|row| row.into_entity()))
+    .map_err(|err| map_diesel_error("example_entity.find_by_id", err))?;
 ```
 
-### Insert
-```rust
-let new_row = NewItemRow::from_entity(item);
+Operation names should follow `entity.operation`, such as:
 
-diesel::insert_into(items::table)
+- `example_entity.create`
+- `example_entity.find_by_id`
+- `example_entity.update`
+- `example_entity.delete`
+
+## Query patterns
+
+### Create
+
+```rust
+let new_row = NewExampleEntityRow::from_entity(entity);
+
+diesel::insert_into(example_entities::table)
     .values(&new_row)
     .execute(&mut conn)
     .await
-    .map_err(|e| map_diesel_error("item.create", e))?;
+    .map_err(|err| map_diesel_error("example_entity.create", err))?;
 ```
 
-### Update with not-found check
+### Find by ID
+
 ```rust
-let rows_affected = diesel::update(items::table.find(item.id().as_uuid()))
-    .set(( /* fields */ ))
+let row = example_entities::table
+    .find(id.as_uuid())
+    .first::<ExampleEntityRow>(&mut conn)
+    .await
+    .optional()
+    .map_err(|err| map_diesel_error("example_entity.find_by_id", err))?;
+
+Ok(row.map(ExampleEntityRow::into_entity))
+```
+
+### Update
+
+```rust
+let rows_affected = diesel::update(example_entities::table.find(entity.id().as_uuid()))
+    .set((
+        example_entities::column_text.eq(entity.column_text().as_str()),
+        example_entities::column_url.eq(entity.column_url()),
+        example_entities::status.eq(entity.status().as_str()),
+    ))
     .execute(&mut conn)
     .await
-    .map_err(|e| map_diesel_error("item.update", e))?;
+    .map_err(|err| map_diesel_error("example_entity.update", err))?;
 
 if rows_affected == 0 {
-    return Err(RepoError::NotFound(format!("Item {} not found", item.id())));
+    return Err(RepoError::NotFound(format!("example entity {} not found", entity.id())));
 }
 ```
 
 ### Delete
+
 ```rust
-let rows_affected = diesel::delete(items::table.find(id.as_uuid()))
+let rows_affected = diesel::delete(example_entities::table.find(id.as_uuid()))
     .execute(&mut conn)
     .await
-    .map_err(|e| map_diesel_error("item.delete", e))?;
+    .map_err(|err| map_diesel_error("example_entity.delete", err))?;
 
 if rows_affected == 0 {
-    return Err(RepoError::NotFound(format!("Item {} not found", id)));
+    return Err(RepoError::NotFound(format!("example entity {id} not found")));
 }
 ```
 
-### Count
-```rust
-let count = items::table
-    .filter(items::user_id.eq(user_id))
-    .count()
-    .get_result::<i64>(&mut conn)
-    .await
-    .map_err(|e| map_diesel_error("item.count_by_user", e))?;
-```
+## Optional transaction shape
 
-### Transaction
+Use transactions only when one usecase requires multiple writes to commit atomically.
+
 ```rust
-use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
+use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection};
 
 conn.transaction::<_, diesel::result::Error, _>(|conn| {
     async move {
-        let count = items::table
-            .filter(items::user_id.eq(user_id))
-            .count()
-            .get_result::<i64>(conn)
-            .await?;
-
-        if count >= max_items {
-            return Ok(false);
-        }
-
-        diesel::insert_into(items::table)
+        diesel::insert_into(example_entities::table)
             .values(&new_row)
             .execute(conn)
             .await?;
 
-        Ok(true)
+        Ok(())
     }
     .scope_boxed()
 })
 .await
-.map_err(|e| map_diesel_error("item.create_if_under_limit", e))
-```
-
-### Upsert (ON CONFLICT)
-```rust
-diesel::insert_into(counters::table)
-    .values(&new_row)
-    .on_conflict((counters::entity_id, counters::bucket))
-    .do_update()
-    .set(counters::count.eq(counters::count + 1))
-    .returning(CounterRow::as_returning())
-    .get_result(&mut conn)
-    .await
-    .map_err(|e| map_diesel_error("counter.increment_or_create", e))?;
-```
-
-### Optimistic locking (WHERE guards)
-```rust
-let rows_affected = diesel::update(
-    sessions::table
-        .find(session.id().as_uuid())
-        .filter(sessions::status.eq_any(["active", "pending"]))
-    )
-    .set(( /* fields */ ))
-    .execute(&mut conn)
-    .await
-    .map_err(|e| map_diesel_error("session.update_if_active", e))?;
-
-Ok(rows_affected > 0)  // Returns bool indicating if update succeeded
-```
-
-## Creating repos in handlers
-```rust
-let item_repo: Arc<dyn ItemRepository> =
-    Arc::new(ItemPostgres::new(Arc::clone(&state.db_pool)));
-let usecase = CreateItemUseCase::new(item_repo);
+.map_err(|err| map_diesel_error("example_entity.transactional_create", err))?;
 ```

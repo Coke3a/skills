@@ -1,221 +1,193 @@
-//! PostgreSQL implementation of EndpointRepository
+// Template: replace ExampleEntity, ExampleEntityId, ExampleRepository,
+// ExamplePostgres, example_entities, and field names with project-specific names.
+// Keep Diesel rows and schema references inside infra. Do not expose rows to
+// domain, usecases, or handlers.
 
 use std::sync::Arc;
 
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
-use diesel_async::{AsyncConnection, RunQueryDsl};
-use diesel_async::scoped_futures::ScopedFutureExt;
+use diesel_async::RunQueryDsl;
 use uuid::Uuid;
 
-use crate::domain::entities::Endpoint;
-use crate::domain::repositories::{EndpointRepository, RepoError};
-use crate::domain::value_objects::{EndpointId, EndpointName, WebhookUrl};
+use crate::domain::entities::ExampleEntity;
+use crate::domain::repositories::{ExampleRepository, RepoError};
+use crate::domain::value_objects::{ExampleEntityId, ExampleEntityName, ExampleEntityStatus};
 use crate::infra::db::postgres_connection::PgPool;
-use crate::infra::db::schema::endpoints;
+use crate::infra::db::schema::example_entities;
 
 use super::error_mapping::{map_diesel_error, map_pool_error};
 
-/// Diesel row struct for reading from the database
 #[derive(Queryable, Selectable)]
-#[diesel(table_name = endpoints)]
-struct EndpointRow {
+#[diesel(table_name = example_entities)]
+struct ExampleEntityRow {
     id: Uuid,
-    user_id: Uuid,
-    name: String,
-    webhook_url: String,
-    provider_label: Option<String>,
+    owner_id: Uuid,
+    column_text: String,
+    column_url: String,
+    status: String,
     created_at: DateTime<Utc>,
     updated_at: DateTime<Utc>,
-    last_event_at: Option<DateTime<Utc>>,
-    total_events: i32,
+    deleted_at: Option<DateTime<Utc>>,
 }
 
-impl EndpointRow {
-    /// Convert DB row to domain entity using from_existing + from_trusted
-    fn into_entity(self) -> Endpoint {
-        Endpoint::from_existing(
-            EndpointId::from_uuid(self.id),
-            self.user_id,
-            EndpointName::from_trusted(self.name),
-            WebhookUrl::from_trusted(self.webhook_url),
-            self.provider_label,
+impl ExampleEntityRow {
+    fn into_entity(self) -> ExampleEntity {
+        ExampleEntity::from_existing(
+            ExampleEntityId::from_uuid(self.id),
+            self.owner_id,
+            ExampleEntityName::from_trusted(self.column_text),
+            self.column_url,
+            ExampleEntityStatus::from_trusted(self.status),
             self.created_at,
             self.updated_at,
-            self.last_event_at,
-            self.total_events,
-            None,
+            self.deleted_at,
         )
     }
 }
 
-/// Diesel insertable struct with borrowed fields (lifetime 'a)
 #[derive(Insertable)]
-#[diesel(table_name = endpoints)]
-struct NewEndpointRow<'a> {
+#[diesel(table_name = example_entities)]
+struct NewExampleEntityRow<'a> {
     id: &'a Uuid,
-    user_id: &'a Uuid,
-    name: &'a str,
-    webhook_url: &'a str,
-    provider_label: Option<&'a str>,
+    owner_id: &'a Uuid,
+    column_text: &'a str,
+    column_url: &'a str,
+    status: &'a str,
     created_at: DateTime<Utc>,
     updated_at: DateTime<Utc>,
-    last_event_at: Option<DateTime<Utc>>,
-    total_events: i32,
+    deleted_at: Option<DateTime<Utc>>,
 }
 
-impl<'a> NewEndpointRow<'a> {
-    fn from_entity(entity: &'a Endpoint) -> Self {
+impl<'a> NewExampleEntityRow<'a> {
+    fn from_entity(entity: &'a ExampleEntity) -> Self {
         Self {
             id: entity.id().as_uuid(),
-            user_id: entity.user_id(),
-            name: entity.name().as_str(),
-            webhook_url: entity.webhook_url().as_str(),
-            provider_label: entity.provider_label(),
-            created_at: *entity.created_at(),
-            updated_at: *entity.updated_at(),
-            last_event_at: entity.last_event_at().copied(),
-            total_events: entity.total_events(),
+            owner_id: entity.owner_id(),
+            column_text: entity.column_text().as_str(),
+            column_url: entity.column_url(),
+            status: entity.status().as_str(),
+            created_at: entity.created_at(),
+            updated_at: entity.updated_at(),
+            deleted_at: entity.deleted_at(),
         }
     }
 }
 
-/// Repository struct holds Arc<PgPool>
-pub struct EndpointPostgres {
+pub struct ExamplePostgres {
     pool: Arc<PgPool>,
 }
 
-impl EndpointPostgres {
+impl ExamplePostgres {
     pub fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl EndpointRepository for EndpointPostgres {
-    async fn create(&self, endpoint: &Endpoint) -> Result<(), RepoError> {
+impl ExampleRepository for ExamplePostgres {
+    async fn create(&self, entity: &ExampleEntity) -> Result<(), RepoError> {
         let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        let new_row = NewExampleEntityRow::from_entity(entity);
 
-        let new_row = NewEndpointRow::from_entity(endpoint);
-
-        diesel::insert_into(endpoints::table)
+        diesel::insert_into(example_entities::table)
             .values(&new_row)
             .execute(&mut conn)
             .await
-            .map_err(|e| map_diesel_error("endpoint.create", e))?;
+            .map_err(|err| map_diesel_error("example_entity.create", err))?;
 
         Ok(())
     }
 
-    async fn find_by_id(&self, id: &EndpointId) -> Result<Option<Endpoint>, RepoError> {
+    async fn find_by_id(&self, id: &ExampleEntityId) -> Result<Option<ExampleEntity>, RepoError> {
         let mut conn = self.pool.get().await.map_err(map_pool_error)?;
 
-        let result = endpoints::table
+        let row = example_entities::table
             .find(id.as_uuid())
-            .first::<EndpointRow>(&mut conn)
+            .first::<ExampleEntityRow>(&mut conn)
             .await
             .optional()
-            .map_err(|e| map_diesel_error("endpoint.find_by_id", e))?;
+            .map_err(|err| map_diesel_error("example_entity.find_by_id", err))?;
 
-        Ok(result.map(|row| row.into_entity()))
+        Ok(row.map(ExampleEntityRow::into_entity))
     }
 
-    async fn find_by_user(&self, user_id: &Uuid) -> Result<Vec<Endpoint>, RepoError> {
+    async fn find_by_owner(&self, owner_id: &Uuid) -> Result<Vec<ExampleEntity>, RepoError> {
         let mut conn = self.pool.get().await.map_err(map_pool_error)?;
 
-        let results = endpoints::table
-            .filter(endpoints::user_id.eq(user_id))
-            .order(endpoints::created_at.desc())
-            .load::<EndpointRow>(&mut conn)
+        let rows = example_entities::table
+            .filter(example_entities::owner_id.eq(owner_id))
+            .filter(example_entities::deleted_at.is_null())
+            .order(example_entities::created_at.desc())
+            .load::<ExampleEntityRow>(&mut conn)
             .await
-            .map_err(|e| map_diesel_error("endpoint.find_by_user", e))?;
+            .map_err(|err| map_diesel_error("example_entity.find_by_owner", err))?;
 
-        Ok(results.into_iter().map(|row| row.into_entity()).collect())
+        Ok(rows.into_iter().map(ExampleEntityRow::into_entity).collect())
     }
 
-    async fn update(&self, endpoint: &Endpoint) -> Result<(), RepoError> {
+    async fn update(&self, entity: &ExampleEntity) -> Result<(), RepoError> {
         let mut conn = self.pool.get().await.map_err(map_pool_error)?;
 
-        let rows_affected = diesel::update(endpoints::table.find(endpoint.id().as_uuid()))
+        let rows_affected = diesel::update(example_entities::table.find(entity.id().as_uuid()))
             .set((
-                endpoints::name.eq(endpoint.name().as_str()),
-                endpoints::webhook_url.eq(endpoint.webhook_url().as_str()),
-                endpoints::provider_label.eq(endpoint.provider_label()),
-                endpoints::updated_at.eq(endpoint.updated_at()),
-                endpoints::last_event_at.eq(endpoint.last_event_at().copied()),
-                endpoints::total_events.eq(endpoint.total_events()),
+                example_entities::column_text.eq(entity.column_text().as_str()),
+                example_entities::column_url.eq(entity.column_url()),
+                example_entities::status.eq(entity.status().as_str()),
+                example_entities::updated_at.eq(entity.updated_at()),
+                example_entities::deleted_at.eq(entity.deleted_at()),
             ))
             .execute(&mut conn)
             .await
-            .map_err(|e| map_diesel_error("endpoint.update", e))?;
+            .map_err(|err| map_diesel_error("example_entity.update", err))?;
 
         if rows_affected == 0 {
-            return Err(RepoError::NotFound(format!("Endpoint {} not found", endpoint.id())));
+            return Err(RepoError::NotFound(format!(
+                "example entity {} not found",
+                entity.id()
+            )));
         }
 
         Ok(())
     }
 
-    async fn delete(&self, id: &EndpointId) -> Result<(), RepoError> {
+    async fn delete(&self, id: &ExampleEntityId) -> Result<(), RepoError> {
         let mut conn = self.pool.get().await.map_err(map_pool_error)?;
+        let now = Utc::now();
 
-        let rows_affected = diesel::delete(endpoints::table.find(id.as_uuid()))
+        let rows_affected = diesel::update(example_entities::table.find(id.as_uuid()))
+            .set((
+                example_entities::status.eq(ExampleEntityStatus::Inactive.as_str()),
+                example_entities::updated_at.eq(now),
+                example_entities::deleted_at.eq(now),
+            ))
             .execute(&mut conn)
             .await
-            .map_err(|e| map_diesel_error("endpoint.delete", e))?;
+            .map_err(|err| map_diesel_error("example_entity.delete", err))?;
 
         if rows_affected == 0 {
-            return Err(RepoError::NotFound(format!("Endpoint {} not found", id)));
+            return Err(RepoError::NotFound(format!("example entity {id} not found")));
         }
 
         Ok(())
     }
-
-    async fn count_by_user(&self, user_id: &Uuid) -> Result<i64, RepoError> {
-        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
-
-        let count = endpoints::table
-            .filter(endpoints::user_id.eq(user_id))
-            .count()
-            .get_result::<i64>(&mut conn)
-            .await
-            .map_err(|e| map_diesel_error("endpoint.count_by_user", e))?;
-
-        Ok(count)
-    }
-
-    async fn create_if_under_limit(
-        &self,
-        endpoint: &Endpoint,
-        user_id: &Uuid,
-        max_endpoints: i64,
-    ) -> Result<bool, RepoError> {
-        let mut conn = self.pool.get().await.map_err(map_pool_error)?;
-
-        conn.transaction::<_, diesel::result::Error, _>(|conn| {
-            async move {
-                let count = endpoints::table
-                    .filter(endpoints::user_id.eq(user_id))
-                    .count()
-                    .get_result::<i64>(conn)
-                    .await?;
-
-                if count >= max_endpoints {
-                    return Ok(false);
-                }
-
-                let new_row = NewEndpointRow::from_entity(endpoint);
-                diesel::insert_into(endpoints::table)
-                    .values(&new_row)
-                    .execute(conn)
-                    .await?;
-
-                Ok(true)
-            }
-            .scope_boxed()
-        })
-        .await
-        .map_err(|e| map_diesel_error("endpoint.create_if_under_limit", e))
-    }
 }
+
+// Optional generic transaction shape. Keep only when one usecase requires
+// multiple writes to commit atomically; otherwise prefer direct query builder calls.
+//
+// use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection};
+//
+// conn.transaction::<_, diesel::result::Error, _>(|conn| {
+//     async move {
+//         diesel::insert_into(example_entities::table)
+//             .values(&new_row)
+//             .execute(conn)
+//             .await?;
+//         Ok(())
+//     }
+//     .scope_boxed()
+// })
+// .await
+// .map_err(|err| map_diesel_error("example_entity.transactional_create", err))?;

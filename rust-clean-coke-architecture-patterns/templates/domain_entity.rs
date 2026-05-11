@@ -1,110 +1,131 @@
-use crate::domain::DomainError;
-use crate::domain::value_objects::{EndpointId, EndpointName, WebhookUrl};
+// Template: replace ExampleEntity, ExampleEntityId, ExampleEntityName,
+// ExampleEntityStatus, and field names with project-specific names.
+// Keep this file in the domain layer. Do not import Axum, Diesel, schema,
+// handler DTOs, or infra types here.
+
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Entity with private fields, new()/from_existing() constructors, and getters.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Endpoint {
-    id: EndpointId,
-    user_id: Uuid,
-    name: EndpointName,
-    webhook_url: WebhookUrl,
-    provider_label: Option<String>,
+use crate::domain::value_objects::{ExampleEntityId, ExampleEntityName, ExampleEntityStatus};
+use crate::domain::DomainError;
+
+#[derive(Debug, Clone)]
+pub struct ExampleEntity {
+    id: ExampleEntityId,
+    owner_id: Uuid,
+    column_text: ExampleEntityName,
+    column_url: String,
+    status: ExampleEntityStatus,
     created_at: DateTime<Utc>,
     updated_at: DateTime<Utc>,
-    last_event_at: Option<DateTime<Utc>>,
-    total_events: i32,
     deleted_at: Option<DateTime<Utc>>,
 }
 
-impl Endpoint {
-    /// Create a new Endpoint with validated fields (generates ID, sets timestamps)
-    pub fn new(
-        user_id: Uuid,
-        name: EndpointName,
-        webhook_url: WebhookUrl,
-        provider_label: Option<String>,
-    ) -> Self {
+impl ExampleEntity {
+    pub fn new(owner_id: Uuid, column_text: ExampleEntityName, column_url: String) -> Self {
         let now = Utc::now();
+
         Self {
-            id: EndpointId::new(),
-            user_id,
-            name,
-            webhook_url,
-            provider_label,
+            id: ExampleEntityId::new(),
+            owner_id,
+            column_text,
+            column_url,
+            status: ExampleEntityStatus::Active,
             created_at: now,
             updated_at: now,
-            last_event_at: None,
-            total_events: 0,
             deleted_at: None,
         }
     }
 
-    /// Reconstruct from existing data (e.g., from database). All fields provided, no validation.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments, reason = "database reconstruction needs all fields")]
     pub fn from_existing(
-        id: EndpointId,
-        user_id: Uuid,
-        name: EndpointName,
-        webhook_url: WebhookUrl,
-        provider_label: Option<String>,
+        id: ExampleEntityId,
+        owner_id: Uuid,
+        column_text: ExampleEntityName,
+        column_url: String,
+        status: ExampleEntityStatus,
         created_at: DateTime<Utc>,
         updated_at: DateTime<Utc>,
-        last_event_at: Option<DateTime<Utc>>,
-        total_events: i32,
         deleted_at: Option<DateTime<Utc>>,
     ) -> Self {
         Self {
-            id, user_id, name, webhook_url, provider_label,
-            created_at, updated_at, last_event_at, total_events, deleted_at,
+            id,
+            owner_id,
+            column_text,
+            column_url,
+            status,
+            created_at,
+            updated_at,
+            deleted_at,
         }
     }
 
-    // Getters (return references)
-    pub fn id(&self) -> &EndpointId { &self.id }
-    pub fn user_id(&self) -> &Uuid { &self.user_id }
-    pub fn name(&self) -> &EndpointName { &self.name }
-    pub fn webhook_url(&self) -> &WebhookUrl { &self.webhook_url }
-    pub fn provider_label(&self) -> Option<&str> { self.provider_label.as_deref() }
-    pub fn created_at(&self) -> &DateTime<Utc> { &self.created_at }
-    pub fn updated_at(&self) -> &DateTime<Utc> { &self.updated_at }
-    pub fn last_event_at(&self) -> Option<&DateTime<Utc>> { self.last_event_at.as_ref() }
-    pub fn total_events(&self) -> i32 { self.total_events }
-    pub fn deleted_at(&self) -> Option<&DateTime<Utc>> { self.deleted_at.as_ref() }
-    pub fn is_deleted(&self) -> bool { self.deleted_at.is_some() }
+    pub fn id(&self) -> &ExampleEntityId {
+        &self.id
+    }
 
-    // State transition methods (take &mut self, return Result)
-    pub fn rename(&mut self, new_name: EndpointName) -> Result<(), DomainError> {
-        if self.is_deleted() {
-            return Err(DomainError::BusinessRuleViolation(
-                "Cannot rename a deleted endpoint".to_string(),
-            ));
-        }
-        self.name = new_name;
+    pub fn owner_id(&self) -> &Uuid {
+        &self.owner_id
+    }
+
+    pub fn column_text(&self) -> &ExampleEntityName {
+        &self.column_text
+    }
+
+    pub fn column_url(&self) -> &str {
+        &self.column_url
+    }
+
+    pub fn status(&self) -> ExampleEntityStatus {
+        self.status
+    }
+
+    pub fn created_at(&self) -> DateTime<Utc> {
+        self.created_at
+    }
+
+    pub fn updated_at(&self) -> DateTime<Utc> {
+        self.updated_at
+    }
+
+    pub fn deleted_at(&self) -> Option<DateTime<Utc>> {
+        self.deleted_at
+    }
+
+    pub fn is_deleted(&self) -> bool {
+        self.deleted_at.is_some()
+    }
+
+    pub fn rename(&mut self, column_text: ExampleEntityName) -> Result<(), DomainError> {
+        self.ensure_not_deleted()?;
+        self.column_text = column_text;
+        self.updated_at = Utc::now();
+        Ok(())
+    }
+
+    pub fn change_status(&mut self, status: ExampleEntityStatus) -> Result<(), DomainError> {
+        self.ensure_not_deleted()?;
+        self.status = status;
         self.updated_at = Utc::now();
         Ok(())
     }
 
     pub fn soft_delete(&mut self) -> Result<(), DomainError> {
-        if self.is_deleted() {
-            return Err(DomainError::BusinessRuleViolation(
-                "Endpoint is already deleted".to_string(),
-            ));
-        }
-        self.deleted_at = Some(Utc::now());
-        self.updated_at = Utc::now();
+        self.ensure_not_deleted()?;
+        let now = Utc::now();
+        self.status = ExampleEntityStatus::Inactive;
+        self.updated_at = now;
+        self.deleted_at = Some(now);
         Ok(())
     }
 
-    pub fn record_event(&mut self) {
-        self.last_event_at = Some(Utc::now());
-        self.total_events += 1;
-        self.updated_at = Utc::now();
-    }
+    fn ensure_not_deleted(&self) -> Result<(), DomainError> {
+        if self.is_deleted() {
+            return Err(DomainError::InvariantViolation(
+                "example entity is deleted".to_string(),
+            ));
+        }
 
-    pub fn is_owned_by(&self, user_id: &Uuid) -> bool {
-        &self.user_id == user_id
+        Ok(())
     }
 }

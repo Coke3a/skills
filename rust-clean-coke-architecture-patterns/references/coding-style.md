@@ -1,98 +1,69 @@
-# Coding Style
+# Coding Style Reference
 
-## Naming conventions
+This reference covers only naming and style conventions needed for the Clean Architecture pattern.
 
-| Item | Convention | Example |
-|------|-----------|---------|
-| Modules/files | snake_case | `item_postgres.rs`, `create_item.rs` |
-| Types | CamelCase | `CreateItemUseCase`, `ItemRepository` |
-| Usecase structs | `{Action}{Entity}UseCase` | `CreateItemUseCase` |
-| Background usecases | `{Name}UseCase` | `CleanupUseCase` |
-| Usecase I/O | `{Action}{Entity}Input/Output` | `CreateItemInput` |
-| Request/Response DTOs | `{Action}{Entity}Request/Response` | `CreateItemRequest` |
-| ID newtypes | `{Entity}Id(Uuid)` | `ItemId`, `OrderId` |
-| Repository traits | `{Entity}Repository` | `ItemRepository` |
-| Repository impls | `{Entity}Postgres` | `ItemPostgres` |
-| Row structs | `{Entity}Row` / `New{Entity}Row` | `ItemRow`, `NewItemRow` |
-| Value objects | `{Entity}{Field}` | `ItemName`, `WebhookUrl` |
+## Naming
+
+| Item | Pattern | Example |
+|---|---|---|
+| Module/file | snake_case | `create_example_entity.rs` |
+| Entity | PascalCase | `ExampleEntity` |
+| ID newtype | `{Entity}Id` | `ExampleEntityId` |
+| Validated value object | `{Entity}{Field}` | `ExampleEntityName` |
+| Repository trait | `{Entity}Repository` | `ExampleRepository` |
+| Repository impl | `{Entity}Postgres` | `ExamplePostgres` |
+| Usecase | `{Action}{Entity}UseCase` | `CreateExampleEntityUseCase` |
+| Input/output | `{Action}{Entity}Input/Output` | `CreateExampleEntityInput` / `CreateExampleEntityOutput` |
+| Request/response DTO | `{Action}{Entity}Request/Response` | `CreateExampleEntityRequest` / `CreateExampleEntityResponse` |
+| Row structs | `{Entity}Row` / `New{Entity}Row` | `ExampleEntityRow` / `NewExampleEntityRow` |
+| Route handler | snake_case action | `create_example_entity` |
+| Table | snake_case plural | `example_entities` |
+| Generic columns | snake_case | `owner_id`, `column_text`, `column_url`, `status` |
 
 ## Entity style
-- Private fields (no `pub`).
-- `new()` creates fresh entities (generates IDs, sets timestamps, enforces invariants).
-- `from_existing()` reconstructs from database (takes all fields, no validation).
-- Getters return references: `&self -> &T` or `&self -> Option<&T>`.
-- State transitions take `&mut self` and return `Result<(), DomainError>`.
+
+- Use private fields.
+- Use `new()` for fresh entity creation.
+- Use `from_existing()` for database reconstruction.
+- Use getters instead of public fields.
+- Add state transition methods only when the entity owns a real invariant.
+- Return `Result<(), DomainError>` from fallible transitions.
+- Keep entities free of Axum, Diesel, schema, DTOs, and infra types.
 
 ## Value object style
-- `new()` validates input, returns `Result<Self, DomainError>`.
-- `from_trusted()` skips validation (for DB reconstruction only).
-- `as_str()` returns `&str` for string-based value objects.
-- ID newtypes: `new()` generates UUID, `from_uuid()` wraps existing, `as_uuid()` returns `&Uuid`.
+
+- Use ID newtypes for domain IDs.
+- Use validated value objects for user-provided fields that have invariants.
+- Use `new()` for validation.
+- Use `from_trusted()` only for database reconstruction or internally trusted values.
+- Return `DomainError` for validation failures.
 
 ## Usecase style
-- Take `Arc<dyn Repo>` trait object dependencies (not generics).
-- `new()` constructor stores dependencies.
-- `execute()` or domain-specific method name (e.g., `sweep()`).
-- Use explicit input/output structs for HTTP-facing usecases.
-- Start with guard clauses for validation and existence checks.
-- Prefer flat control flow and early returns over deep nesting.
-- Use `?` operator with `From` impls for error conversion.
-- Log: `info` for success, `warn` for business violations, `error` for failures.
+
+- Inject repositories as `Arc<dyn RepositoryTrait>`.
+- Define explicit input and output structs.
+- Validate input by constructing domain value objects.
+- Keep orchestration and user-facing error decisions in the usecase.
+- Prefer guard clauses and `?` over nested control flow.
+- Do not import Axum, Diesel, schema modules, row structs, or handler DTOs.
 
 ## Handler style
-- Handlers are async functions (not methods on structs).
-- Extract `State(state): State<AppState>` and auth extractor as needed.
-- Create repo implementations from `state.db_pool` inline.
-- Instantiate usecase with repo dependencies.
-- Map request DTO to usecase input, call usecase, return `Result<impl IntoResponse, ApiError>`.
-- Request/Response DTOs defined in handler file with `#[derive(Deserialize)]` / `#[derive(Serialize)]`.
 
-## Router organization style
-One directory per domain under `handlers/routers/{domain}/`:
-- `mod.rs` -- declares sub-modules, exports `pub fn router() -> Router<AppState>`.
-- One file per handler action: `create.rs`, `list.rs`, `get.rs`, `update.rs`, `delete.rs`.
+- Keep handlers as async functions.
+- Extract state, auth/user context, path/query params, and JSON bodies.
+- Define request and response DTOs in the handler layer.
+- Instantiate repository implementations from `AppState`.
+- Instantiate usecases in the handler.
+- Map request DTOs to usecase input.
+- Map usecase output to response DTOs.
+- Return `Result<impl IntoResponse, ApiError>`.
+- Do not put business logic in handlers.
 
-## Background task handler style
-- Single `spawn()` function returning `JoinHandle<()>`.
-- Takes `Arc<UseCase>`, `CancellationToken`, and config params.
-- Uses `tokio::time::interval` + `tokio::select!` with `cancel.cancelled()`.
-- Logs on start, on meaningful work, and on shutdown.
+## Infra repository style
 
-## Early return pattern
-
-WHY it matters: deeply nested code is harder to read, harder to test, and invites bugs. Guard clauses at the top of a function reject invalid states immediately, keeping the happy path flat and left-aligned.
-
-```rust
-// GOOD: guard clauses, flat flow
-pub async fn execute(&self, input: Input) -> Result<Output, UsecaseError> {
-    if input.name.is_empty() {
-        return Err(UsecaseError::Validation("name required".into()));
-    }
-    let entity = self.repo.find_by_id(input.id).await?
-        .ok_or_else(|| UsecaseError::NotFound("entity not found".into()))?;
-    // ... happy path continues flat
-    Ok(output)
-}
-
-// BAD: deep nesting
-pub async fn execute(&self, input: Input) -> Result<Output, UsecaseError> {
-    if !input.name.is_empty() {
-        if let Some(entity) = self.repo.find_by_id(input.id).await? {
-            // ... indented further and further
-        }
-    }
-}
-```
-
-## Import ordering
-1. `std` / `core` / `alloc`
-2. External crates (from `Cargo.toml`)
-3. Workspace crates
-4. `super::` / `crate::`
-
-## Comment guidance
-- Comment on the "why", not the "what" or "how".
-- Use `///` rustdoc for public structs/enums and methods.
-- Use `//!` for module-level docs.
-- If a function needs long comments, refactor into smaller named functions.
-- Turn TODOs into tracked issues; reference the issue in code.
+- Name implementations `{Entity}Postgres`.
+- Hold `Arc<PgPool>`.
+- Define private `{Entity}Row` and `New{Entity}Row` structs.
+- Use Diesel query builder only.
+- Use centralized error mapping helpers.
+- Return domain entities, not row structs.

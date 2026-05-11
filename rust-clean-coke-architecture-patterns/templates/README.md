@@ -1,20 +1,26 @@
 # Templates
 
-These templates reflect the actual patterns used in the codebase. Copy the file into your project and replace the placeholder names (Endpoint/Item) with your domain terms. Keep the handler->usecase->repository structure intact.
+These files are generic Rust Clean Architecture templates. Copy the relevant template into a Rust backend project and replace every `Example*`, `example_*`, and placeholder field name with project-specific names.
 
-Key patterns to maintain:
-- Entities have private fields with `new()` / `from_existing()` constructors
-- Usecases use `Arc<dyn Repo>` (trait objects, not generics)
-- Repository impls hold `Arc<PgPool>` and use centralized error mapping
-- Row structs use `into_entity()` method and `from_entity()` associated function
-- Value objects provide `from_trusted()` for DB reconstruction
+The templates demonstrate architecture boundaries only. They intentionally avoid product-specific behavior, TDD workflow, CI/CD setup, broad testing strategy, and performance tuning.
 
-Templates:
-- `domain_entity.rs` -> `src/domain/entities/*`
-- `value_object.rs` -> `src/domain/value_objects/validated/*` and `ids/*`
-- `repo_trait.rs` -> `src/domain/repositories/*`
-- `repo_diesel_impl.rs` -> `src/infra/db/repositories/*`
-- `usecase.rs` -> `src/usecases/{feature}/*`
-- `handler_axum.rs` -> `src/handlers/routers/{feature}/*`
-- `background_job.rs` -> `src/usecases/background/*` + `src/handlers/{task}/mod.rs`
-- `error_types.rs` -> Error types across all layers
+Key patterns:
+
+- Domain entities use private fields, `new()`, `from_existing()`, getters, and explicit state transitions only when needed.
+- Usecases use `Arc<dyn ExampleRepository>` and contain orchestration without HTTP or Diesel logic.
+- Repository traits live in `domain`; Diesel implementations live in `infra`.
+- Diesel rows stay private to infra and convert through domain constructors.
+- Handler DTOs stay in the handler layer and map to usecase input/output.
+- Errors flow through `DomainError` or `RepoError` into `UsecaseError`, then `ApiError`.
+
+Template targets:
+
+| Template | Target Location |
+|---|---|
+| `domain_entity.rs` | `src/domain/entities/{entity}.rs` |
+| `value_object.rs` | `src/domain/value_objects/ids/`, `validated/`, and `enums/` |
+| `repo_trait.rs` | `src/domain/repositories/{entity}_repository.rs` |
+| `repo_diesel_impl.rs` | `src/infra/db/repositories/{entity}_postgres.rs` |
+| `usecase.rs` | `src/usecases/{feature}/{action}_{entity}.rs` |
+| `handler_axum.rs` | `src/handlers/routers/{feature}/{action}.rs` |
+| `error_types.rs` | Layer error files across `domain`, `usecases`, `handlers`, and `infra` |

@@ -1,53 +1,82 @@
-# Scaffold a new feature
+# Scaffold a feature with Rust Clean Architecture
 
-1) Define domain value objects
-- [ ] Add ID newtype in `src/domain/value_objects/ids/{entity}_id.rs` with `new()`, `from_uuid()`, `as_uuid()`, `Display`.
-- [ ] Add validated strings in `src/domain/value_objects/validated/` with `new()` (validates) and `from_trusted()`.
-- [ ] Add status enums in `src/domain/value_objects/enums/` with `as_str()`, `FromStr`, `transition_to()` if stateful.
-- [ ] Re-export from `src/domain/value_objects/mod.rs`.
+## 1. Define feature shape
 
-2) Define the domain entity
-- [ ] Add entity struct in `src/domain/entities/{entity}.rs` with private fields.
-- [ ] Add `new()` constructor (creates fresh, generates ID).
-- [ ] Add `from_existing()` constructor (all fields, for DB reconstruction).
-- [ ] Add getter methods returning references.
-- [ ] Add state transition methods returning `Result<(), DomainError>`.
-- [ ] Re-export from `src/domain/entities/mod.rs`.
+- [ ] Identify entity name, action name, route name, and table name
+- [ ] Identify which layers are affected
+- [ ] Define the minimal public contract: input, output, repository methods, and route shape
 
-3) Define the repository port
-- [ ] Add trait in `src/domain/repositories/{entity}_repository.rs`.
-- [ ] Use `async_trait`, methods return `Result<T, RepoError>`.
-- [ ] `find_by_*` returns `Option<Entity>`.
-- [ ] Re-export from `src/domain/repositories/mod.rs`.
+## 2. Define domain value objects
 
-4) Implement the usecase
-- [ ] Create `src/usecases/{feature}/{action}_{entity}.rs`.
-- [ ] Struct holds `Arc<dyn Repo>` dependencies.
-- [ ] Define `{Action}{Entity}Input` and `{Action}{Entity}Output` structs.
-- [ ] Implement `execute()` with guard clauses, `?` for error conversion.
-- [ ] Re-export from `src/usecases/mod.rs`.
+- [ ] Add ID newtype in `src/domain/value_objects/ids/{entity}_id.rs`
+- [ ] Add validated fields in `src/domain/value_objects/validated/`
+- [ ] Add enums/state objects in `src/domain/value_objects/enums/` if needed
+- [ ] Re-export from `mod.rs`
 
-5) Implement the infra repository
-- [ ] Add `src/infra/db/repositories/{entity}_postgres.rs`.
-- [ ] Define `{Entity}Row` (Queryable, Selectable) with `into_entity()` method.
-- [ ] Define `New{Entity}Row` (Insertable) with `from_entity()` associated function.
-- [ ] Implement trait using `map_diesel_error()` and `map_pool_error()`.
-- [ ] Re-export from `src/infra/db/repositories/mod.rs`.
+## 3. Define domain entity
 
-6) Wire handler -> usecase
-- [ ] Add handler file under `src/handlers/routers/{feature}/`.
-- [ ] Define request/response DTOs in handler file.
-- [ ] Create repos from `AppState.db_pool`, instantiate usecase.
-- [ ] Map request DTO to input, call usecase, return `Result<impl IntoResponse, ApiError>`.
-- [ ] Add route in the appropriate router's `pub fn router()` or create a new router (see "Add a new router domain" workflow).
+- [ ] Add entity in `src/domain/entities/{entity}.rs`
+- [ ] Use private fields
+- [ ] Add `new()` for fresh entity creation
+- [ ] Add `from_existing()` for database reconstruction
+- [ ] Add getters
+- [ ] Add state transition methods only when needed
+- [ ] Re-export from `mod.rs`
 
-7) Add tests
-- [ ] Domain unit tests for value objects and entity state transitions.
-- [ ] Usecase tests with mock repositories.
+## 4. Define repository port
 
-8) Final review checklist
-- [ ] Handlers contain no business logic.
-- [ ] Usecases own error semantics and use `From` impls.
-- [ ] Repositories only do IO with centralized error mapping.
-- [ ] DTOs are separate from domain entities.
-- [ ] Entity fields are private with getters.
+- [ ] Add trait in `src/domain/repositories/{entity}_repository.rs`
+- [ ] Use async trait methods
+- [ ] Return `Result<T, RepoError>`
+- [ ] `find_by_*` methods should return `Result<Option<T>, RepoError>`
+- [ ] Re-export from `mod.rs`
+
+## 5. Define usecase
+
+- [ ] Add usecase file in `src/usecases/{feature}/{action}_{entity}.rs`
+- [ ] Use `{Action}{Entity}UseCase`
+- [ ] Use `{Action}{Entity}Input` and `{Action}{Entity}Output`
+- [ ] Use `Arc<dyn RepositoryTrait>`
+- [ ] Keep orchestration here
+- [ ] Use guard clauses and `?` error conversion
+- [ ] Re-export from `mod.rs`
+
+## 6. Implement Diesel repository
+
+- [ ] Add `src/infra/db/repositories/{entity}_postgres.rs`
+- [ ] Add `{Entity}Row` for `Queryable`/`Selectable`
+- [ ] Add `New{Entity}Row` for `Insertable`
+- [ ] Convert row -> entity through `from_existing()`
+- [ ] Convert entity -> row through borrowed fields
+- [ ] Use Diesel query builder only
+- [ ] Use centralized `map_diesel_error()` and `map_pool_error()`
+- [ ] Re-export from `mod.rs`
+
+## 7. Wire handler/router
+
+- [ ] Add handler file under `src/handlers/routers/{feature}/`
+- [ ] Define request/response DTOs in the handler layer
+- [ ] Instantiate repository implementations from `AppState`
+- [ ] Instantiate usecase
+- [ ] Map request -> input
+- [ ] Call usecase
+- [ ] Map output -> response
+- [ ] Return `Result<impl IntoResponse, ApiError>`
+- [ ] Add route to router module
+
+## 8. Architecture verification
+
+- [ ] Handlers contain no business logic
+- [ ] Usecases do not depend on Axum or Diesel
+- [ ] Domain does not depend on handlers, infra, Axum, Diesel, or schema
+- [ ] Infra does not define business semantics
+- [ ] Repository traits are in domain
+- [ ] Repository implementations are in infra
+- [ ] DTOs are not reused as domain entities
+- [ ] Row structs are not exposed outside infra
+
+## 9. Final commands
+
+- [ ] `cargo fmt --all -- --check`
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings`
+- [ ] `cargo test --all-features`
