@@ -1,12 +1,12 @@
-# Error handling
+# Error Handling
 
 ## Layered error types
 
 ### DomainError (`src/domain/error.rs`)
-Invariant and validation failures from value objects/entities.
+Invariant and validation failures from value objects/entities. Use `thiserror` to derive.
 
 ```rust
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum DomainError {
     #[error("Invalid field '{field}': {reason}")]
     InvalidField { field: &'static str, reason: &'static str },
@@ -25,9 +25,6 @@ pub enum DomainError {
 
     #[error("Quota exceeded: {0}")]
     QuotaExceeded(String),
-
-    #[error("Tier limit exceeded: {0}")]
-    TierLimitExceeded(String),
 }
 ```
 
@@ -35,7 +32,7 @@ pub enum DomainError {
 Database/IO failures with rich context for observability.
 
 ```rust
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum RepoError {
     #[error("Database operation '{op}' failed")]
     Db { op: &'static str, #[source] source: anyhow::Error },
@@ -58,10 +55,10 @@ pub enum RepoError {
 ```
 
 ### UsecaseError (`src/usecases/error.rs`)
-Orchestration errors that describe user-facing meaning.
+Orchestration errors with user-facing semantics.
 
 ```rust
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum UsecaseError {
     #[error("Not found: {0}")]
     NotFound(String),
@@ -72,17 +69,8 @@ pub enum UsecaseError {
     #[error("Conflict: {0}")]
     Conflict(String),
 
-    #[error("Tier limit exceeded: {0}")]
-    TierLimitExceeded(String),
-
     #[error("Rate limited: {message}")]
-    RateLimited {
-        message: String,
-        limit: Option<u32>,        // None = unlimited (free tier)
-        remaining: Option<u32>,    // None = unlimited
-        reset_at: DateTime<Utc>,
-        retry_after: i64,
-    },
+    RateLimited { message: String, retry_after: i64 },
 
     #[error("Gone: {0}")]
     Gone(String),
@@ -93,7 +81,7 @@ pub enum UsecaseError {
 ```
 
 ### ApiError (`src/handlers/routers/error_response.rs`)
-Thin wrapper that implements `IntoResponse` for Axum.
+Thin wrapper implementing `IntoResponse` for Axum.
 
 ```rust
 pub struct ApiError(pub UsecaseError);
@@ -102,7 +90,7 @@ impl From<UsecaseError> for ApiError {
     fn from(err: UsecaseError) -> Self { ApiError(err) }
 }
 
-impl IntoResponse for ApiError { ... }
+impl IntoResponse for ApiError { /* maps to JSON + status code */ }
 ```
 
 ## Error mapping chain
@@ -114,13 +102,8 @@ impl From<DomainError> for UsecaseError {
         match err {
             DomainError::NotFound(msg) => UsecaseError::NotFound(msg),
             DomainError::Conflict(msg) => UsecaseError::Conflict(msg),
-            DomainError::TierLimitExceeded(msg) => UsecaseError::TierLimitExceeded(msg),
             DomainError::RateLimitExceeded(msg) => UsecaseError::RateLimited {
-                message: msg,
-                limit: None,           // Domain doesn't know rate limit details
-                remaining: None,
-                reset_at: Utc::now(),
-                retry_after: 0,
+                message: msg, retry_after: 0,
             },
             other => UsecaseError::Validation(other.to_string()),
         }
@@ -147,7 +130,8 @@ impl From<RepoError> for UsecaseError {
 
 pub(crate) fn map_diesel_error(op: &'static str, err: DieselError) -> RepoError {
     match &err {
-        DieselError::NotFound => RepoError::NotFound(format!("{} returned no rows", op)),
+        DieselError::NotFound =>
+            RepoError::NotFound(format!("{} returned no rows", op)),
         DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, info) =>
             RepoError::UniqueViolation(info.message().to_string()),
         DieselError::DatabaseError(DatabaseErrorKind::ForeignKeyViolation, info) =>
@@ -161,60 +145,18 @@ pub(crate) fn map_pool_error(err: impl std::error::Error + Send + Sync + 'static
 }
 ```
 
-## HTTP status mapping (ApiError IntoResponse)
+## HTTP status mapping table
 
-### RateLimited — Special handling with headers
-```rust
-UsecaseError::RateLimited { message, limit, remaining, reset_at, retry_after } => {
-    let body = json!({
-        "error": "RATE_LIMITED",
-        "message": message,
-        "retry_after": retry_after,
-        "upgrade_url": "/pricing",
-    });
-
-    let mut headers = HeaderMap::new();
-    // Option fields: None renders as "unlimited"
-    headers.insert("x-ratelimit-limit",
-        HeaderValue::from_str(&limit.map_or("unlimited".to_string(), |l| l.to_string())).unwrap());
-    headers.insert("x-ratelimit-remaining",
-        HeaderValue::from_str(&remaining.map_or("unlimited".to_string(), |r| r.to_string())).unwrap());
-    headers.insert("x-ratelimit-reset",
-        HeaderValue::from_str(&reset_at.timestamp().to_string()).unwrap());
-    headers.insert("retry-after",
-        HeaderValue::from_str(&retry_after.to_string()).unwrap());
-
-    (StatusCode::TOO_MANY_REQUESTS, headers, Json(body)).into_response()
-}
-```
-
-### TierLimitExceeded — 409 with upgrade_url
-```rust
-UsecaseError::TierLimitExceeded(msg) => {
-    // Returns 409 CONFLICT with LIMIT_REACHED error code and upgrade_url
-    let body = json!({
-        "error": "LIMIT_REACHED",
-        "message": msg,
-        "upgrade_url": "/pricing",
-    });
-    (StatusCode::CONFLICT, Json(body)).into_response()
-}
-```
-
-### Standard variants
-
-| UsecaseError variant    | HTTP status | Error code       | Extra fields |
-| ----------------------- | ----------- | ---------------- | ------------ |
-| NotFound                | 404         | NOT_FOUND        | |
-| Validation              | 400         | VALIDATION_ERROR | |
-| Conflict                | 409         | CONFLICT         | |
-| TierLimitExceeded       | 409         | LIMIT_REACHED    | `upgrade_url: "/pricing"` |
-| RateLimited             | 429         | RATE_LIMITED     | `retry_after`, `upgrade_url: "/pricing"` + headers |
-| Gone                    | 410         | GONE             | |
-| Infra                   | 500         | INTERNAL_ERROR   | (generic message, full error logged server-side) |
+| UsecaseError variant | HTTP status | Error code       | Notes |
+|----------------------|-------------|------------------|-------|
+| NotFound             | 404         | NOT_FOUND        | |
+| Validation           | 400         | VALIDATION_ERROR | |
+| Conflict             | 409         | CONFLICT         | |
+| RateLimited          | 429         | RATE_LIMITED     | Include `retry-after` header |
+| Gone                 | 410         | GONE             | |
+| Infra                | 500         | INTERNAL_ERROR   | Generic message to client, full error logged server-side |
 
 ### Response body format
-All error responses follow this JSON structure:
 ```json
 {
     "error": "ERROR_CODE",
@@ -222,13 +164,64 @@ All error responses follow this JSON structure:
 }
 ```
 
-With optional extra fields like `upgrade_url` and `retry_after` for specific error types.
+### RateLimited -- special handling with headers
+```rust
+UsecaseError::RateLimited { message, retry_after } => {
+    let body = json!({ "error": "RATE_LIMITED", "message": message, "retry_after": retry_after });
+    let mut headers = HeaderMap::new();
+    headers.insert("retry-after", HeaderValue::from_str(&retry_after.to_string()).unwrap());
+    (StatusCode::TOO_MANY_REQUESTS, headers, Json(body)).into_response()
+}
+```
 
 ### Infra error redaction
-`UsecaseError::Infra` logs the full error chain at `error!` level server-side but returns a generic "An internal error occurred" message to the client.
+`UsecaseError::Infra` logs the full error chain at `error!` level server-side but returns a generic "An internal error occurred" message to the client. Never expose internal details.
 
-## Redaction guidance
+## Error handling best practices
+
+### Prefer `Result`, avoid panic
+- If a function can fail, return `Result<T, E>`.
+- Use `panic!` only for unrecoverable conditions (tests, assertions, true bugs).
+- Use `todo!`, `unreachable!`, `unimplemented!` instead of bare `panic!` where appropriate.
+
+### Avoid `unwrap`/`expect` in production
+- Use `let Ok(x) = expr else { return Err(...) }` for early returns.
+- Use `if let Ok(x) = expr { ... } else { ... }` when recovery needs computation.
+- Use `unwrap_or`, `unwrap_or_else`, `unwrap_or_default` for fallback values.
+- Reserve `unwrap`/`expect` for tests or provably infallible cases.
+
+### `thiserror` for crate/library errors
+- Derive `Error` with `thiserror` for all domain, repo, and usecase errors.
+- Use `#[from]` for automatic `From` impls in error hierarchies.
+- Use `#[source]` to preserve error chains for debugging.
+
+### Reserve `anyhow` for binaries and infra boundaries
+- Use `anyhow::Error` at the infra boundary (wrapping third-party errors).
+- Do not use `anyhow::Result` as a return type in library/domain code.
+- `anyhow::Result` erases context a caller might need.
+
+### Use `?` to bubble errors
+```rust
+fn handle_request(req: &Request) -> Result<Response, UsecaseError> {
+    let input = validate(req)?;
+    let entity = repo.find_by_id(input.id).await?;
+    let result = usecase.execute(entity)?;
+    Ok(result.into())
+}
+```
+Use `inspect_err` to log before propagating, `map_err` to transform.
+
+### Error redaction guidance
 - Never log tokens, secrets, raw credentials, or full request bodies.
-- Log ids or hashes, not PII values.
+- Log IDs or hashes, not PII values.
 - For user input, log type/length, not content.
-- Internal errors log full error chain at `error!` level but return generic message to client.
+- Internal errors: full chain server-side at `error!`, generic message to client.
+
+### Unit tests should exercise errors
+```rust
+#[test]
+fn rejects_empty_name() {
+    let err = ItemName::new("").unwrap_err();
+    assert_eq!(err.to_string(), "Invalid field 'name': must not be empty");
+}
+```
