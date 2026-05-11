@@ -2,8 +2,8 @@
 
 ## Scope
 
-This reference is for code review level checks.
-It is not a benchmarking or profiling guide.
+This reference is for code review level checks. It is not a benchmarking or profiling
+guide.
 
 The goal is to catch:
 
@@ -24,7 +24,8 @@ Check:
 - no `std::thread::sleep` in async code
 - use `tokio::time::sleep` instead of `std::thread::sleep` in async code
 - no blocking recv/send from sync channels in async tasks
-- no blocking filesystem/network/database operations on async runtime threads unless project-approved
+- no blocking filesystem/network/database operations on async runtime threads unless
+  project-approved
 - use `spawn_blocking` for short-lived blocking work
 - use a dedicated thread/worker for long-lived blocking loops
 - bound CPU-heavy `spawn_blocking` work with semaphore or dedicated executor
@@ -39,8 +40,10 @@ Check:
 - lock scope is minimal
 - no nested lock deadlock risk
 - lock order is consistent
-- `std::sync::Mutex` is acceptable only for short, low-contention critical sections with no await
-- `tokio::sync::Mutex` is used only when a lock must be held across await or async resource access requires it
+- `std::sync::Mutex` is acceptable only for short, low-contention critical sections with
+  no await
+- `tokio::sync::Mutex` is used only when a lock must be held across await or async
+  resource access requires it
 - consider task ownership/message passing for async IO resources
 
 ## Channels and Backpressure
@@ -85,7 +88,8 @@ Check:
 - unnecessary `to_string()`/`format!` in loops
 - avoid `collect()` if streaming/iterator is enough
 - pre-allocate `Vec`/`String` capacity when size is known and path is hot
-- avoid cloning large domain entities just to satisfy ownership when borrowing or `Arc` is clearer
+- avoid cloning large domain entities just to satisfy ownership when borrowing or `Arc`
+  is clearer
 - avoid repeated serialization/parsing inside loops
 
 ## Reporting
@@ -100,5 +104,5 @@ Only flag performance issues when there is a plausible cost:
 - in DB/API hot path
 - in a queue/worker path
 
-Do not block on micro-optimizations without evidence.
-Recommend benchmarking/profiling when the performance impact is uncertain or workload-dependent.
+Do not block on micro-optimizations without evidence. Recommend benchmarking/profiling
+when the performance impact is uncertain or workload-dependent.

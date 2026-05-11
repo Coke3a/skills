@@ -7,7 +7,9 @@ description: Use when creating, reviewing, or fixing CI/CD for Rust backend proj
 
 ## Purpose
 
-Create and repair CI/CD pipelines for Rust backend services. Focus on reliable Rust CI, safe deployment automation, repeatable artifacts, environment separation, deployment smoke tests, rollback readiness, and GitHub Actions security.
+Create and repair CI/CD pipelines for Rust backend services. Focus on reliable Rust CI,
+safe deployment automation, repeatable artifacts, environment separation, deployment
+smoke tests, rollback readiness, and GitHub Actions security.
 
 ## When to Use
 
@@ -55,7 +57,8 @@ cargo test --all-features
 cargo build --release
 ```
 
-Inspect `Cargo.toml` before choosing workspace-specific flags. Use existing Makefile, justfile, or script commands when the repository already defines canonical local checks.
+Inspect `Cargo.toml` before choosing workspace-specific flags. Use existing Makefile,
+justfile, or script commands when the repository already defines canonical local checks.
 
 ## Resource Guide
 
@@ -64,16 +67,20 @@ Inspect `Cargo.toml` before choosing workspace-specific flags. Use existing Make
 - Use `workflows/setup-deploy-pipeline.md` for staging and production deployment.
 - Use `workflows/setup-db-migration-pipeline.md` for database migration integration.
 - Use `workflows/fix-ci-failure.md` to diagnose and repair failing CI/CD.
-- Use `workflows/harden-github-actions.md` for permissions, secrets, OIDC, and shell hardening.
+- Use `workflows/harden-github-actions.md` for permissions, secrets, OIDC, and shell
+  hardening.
 - Use `references/` for detailed guidance only when relevant.
 - Use `templates/` as starting points, then adapt to the repository.
 
 ## Companion Skills
 
-- `rust-clean-coke-architecture-patterns` owns architecture, layers, naming, error flow, and repository patterns.
+- `rust-clean-coke-architecture-patterns` owns architecture, layers, naming, error flow,
+  and repository patterns.
 - `tdd-feature-workflow` owns test design and the red/green/refactor workflow.
-- `rust-code-review` owns final code review, quality review, security review, and async/concurrency review.
-- `rust-ci-cd` owns automation that verifies and ships the code produced by those skills.
+- `rust-code-review` owns final code review, quality review, security review, and
+  async/concurrency review.
+- `rust-ci-cd` owns automation that verifies and ships the code produced by those
+  skills.
 
 ## Final Response Format
 

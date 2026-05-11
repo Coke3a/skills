@@ -1,6 +1,8 @@
 # Advanced Rust Patterns Are Out Of Scope
 
-This Rust Clean Architecture skill does not define advanced Rust patterns such as type-state APIs, generic dispatch strategy, pointer taxonomy, or optimization-oriented abstractions.
+This Rust Clean Architecture skill does not define advanced Rust patterns such as type-
+state APIs, generic dispatch strategy, pointer taxonomy, or optimization-oriented
+abstractions.
 
 The architecture default is:
 

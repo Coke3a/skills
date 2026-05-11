@@ -15,7 +15,8 @@
 ## 3. Analyze
 
 - [ ] Identify hot function/path.
-- [ ] Identify whether bottleneck is CPU, allocation, lock, IO, DB, serialization, or async scheduling.
+- [ ] Identify whether bottleneck is CPU, allocation, lock, IO, DB, serialization, or
+      async scheduling.
 - [ ] Confirm bottleneck is in scope.
 
 ## 4. Plan

@@ -1,18 +1,12 @@
 ---
 name: rust-clean-coke-architecture-patterns
-description: >
-  Use when creating or refactoring Rust backend code with Axum, Diesel,
-  and Postgres to follow Clean Architecture layers: handlers to usecases
-  to domain, with infra implementing repository traits. Use for file
-  structure, naming, error flow, repository traits, Diesel repository
-  implementations, and handler/usecase/domain boundaries. Do not use as
-  the primary skill for TDD workflow, CI/CD setup, code review process,
-  performance optimization, or general Rust development.
+description: Use when creating or refactoring Rust backend code with Axum, Diesel, and Postgres to follow Clean Architecture layers: handlers to usecases to domain, with infra implementing repository traits. Use for file structure, naming, error flow, repository traits, Diesel repository implementations, and handler/usecase/domain boundaries. Do not use as the primary skill for TDD workflow, CI/CD setup, code review process, performance optimization, or general Rust development.
 ---
 
 # Rust Clean Architecture
 
-Use this skill to create or refactor Rust backend code around a focused Clean Architecture pattern:
+Use this skill to create or refactor Rust backend code around a focused Clean
+Architecture pattern:
 
 ```text
 handlers -> usecases -> domain
@@ -29,13 +23,15 @@ cargo test --all-features
 
 ## Purpose
 
-Keep Axum handlers, usecases, domain code, and Diesel infrastructure separated by explicit responsibilities and dependency direction.
+Keep Axum handlers, usecases, domain code, and Diesel infrastructure separated by
+explicit responsibilities and dependency direction.
 
 Use this skill for:
 
 - Layer responsibilities and dependency boundaries.
 - Project and file structure for Rust backend features.
-- Naming conventions for entities, value objects, repositories, usecases, DTOs, and rows.
+- Naming conventions for entities, value objects, repositories, usecases, DTOs, and
+  rows.
 - Error types and conversion flow.
 - Repository trait pattern in the domain layer.
 - Diesel repository implementation pattern in the infra layer.
@@ -63,7 +59,8 @@ infra -> domain traits
 
 Rules:
 
-- Handlers may instantiate infra implementations for wiring, but must not contain business logic.
+- Handlers may instantiate infra implementations for wiring, but must not contain
+  business logic.
 - Usecases own orchestration and user-facing error semantics.
 - Domain owns entities, value objects, invariants, and repository traits.
 - Infra implements repository traits and handles IO details.
@@ -145,8 +142,10 @@ RepoError   -> UsecaseError -> ApiError
 - `UsecaseError` owns user-facing semantics.
 - `ApiError` maps usecase errors to HTTP status and error body.
 - Use `thiserror` for error enums.
-- Use `anyhow` only for wrapping infra/internal context if the project already uses that pattern.
-- Never use `unwrap()` or `expect()` outside tests or code explicitly marked as example-only.
+- Use `anyhow` only for wrapping infra/internal context if the project already uses that
+  pattern.
+- Never use `unwrap()` or `expect()` outside tests or code explicitly marked as example-
+  only.
 
 ## Repository Pattern
 
@@ -182,7 +181,8 @@ RepoError   -> UsecaseError -> ApiError
 | `workflows/add-router-domain.md` | Add a new route group while preserving handler boundaries |
 | `workflows/refactor-to-layers.md` | Move mixed handler/business/IO code into clean layers |
 
-`workflows/add-background-task.md` is optional architecture-only guidance. Use it only when a background task must preserve the same dependency direction.
+`workflows/add-background-task.md` is optional architecture-only guidance. Use it only
+when a background task must preserve the same dependency direction.
 
 ## References
 

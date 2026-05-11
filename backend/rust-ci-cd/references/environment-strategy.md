@@ -7,5 +7,6 @@
 - Use branch restrictions for deployment environments when useful.
 - Use `workflow_dispatch` to redeploy selected artifacts.
 - Use separate concurrency groups such as `staging-deploy` and `production-deploy`.
-- Preserve deployment history through job summaries, deployment records, or platform logs.
+- Preserve deployment history through job summaries, deployment records, or platform
+  logs.
 - Keep production deploy gates explicit.

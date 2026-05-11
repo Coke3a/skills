@@ -1,6 +1,7 @@
 # Coding Style Reference
 
-This reference covers only naming and style conventions needed for the Clean Architecture pattern.
+This reference covers only naming and style conventions needed for the Clean
+Architecture pattern.
 
 ## Naming
 

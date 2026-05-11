@@ -1,6 +1,7 @@
 # Linting Workflow Is Out Of Scope
 
-This Rust Clean Architecture skill does not define lint configuration, lint policy, pre-commit hooks, or CI enforcement.
+This Rust Clean Architecture skill does not define lint configuration, lint policy, pre-
+commit hooks, or CI enforcement.
 
 The only lint command owned by this skill is the downstream final verification command:
 

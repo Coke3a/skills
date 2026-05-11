@@ -3,7 +3,8 @@
 ## 1. Choose benchmark
 
 - [ ] Benchmark real hot behavior.
-- [ ] Avoid benchmarking private implementation details if public/intended interface is available.
+- [ ] Avoid benchmarking private implementation details if public/intended interface is
+      available.
 - [ ] Keep workload deterministic.
 - [ ] Document input size and assumptions.
 
@@ -18,4 +19,5 @@
 
 - [ ] cargo bench.
 - [ ] Record baseline.
-- [ ] Do not add noisy pass/fail thresholds unless CI is configured for stable performance testing.
+- [ ] Do not add noisy pass/fail thresholds unless CI is configured for stable
+      performance testing.

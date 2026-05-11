@@ -27,7 +27,8 @@
 - [ ] Repository integration tests go under `tests/repositories/*_test.rs`.
 - [ ] Handler/API tests go under `tests/api/*_test.rs`.
 - [ ] Shared integration helpers go under `tests/common/mod.rs`.
-- [ ] For every source-level `*_test.rs` file, add `#[cfg(test)] mod *_test;` in the parent module.
+- [ ] For every source-level `*_test.rs` file, add `#[cfg(test)] mod *_test;` in the
+      parent module.
 
 ## 4. Red
 

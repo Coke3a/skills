@@ -2,7 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for build and harden automation workflows and avoids out-of-scope requests.
+These evals verify the skill triggers for build and harden automation workflows and
+avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 
@@ -43,4 +44,5 @@ These evals verify the skill triggers for build and harden automation workflows 
 
 - **Input prompt**: "Set up Rust GitHub Actions CI."
 - **Expected skill usage**: `rust-ci-cd` is selected.
-- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and verification guidance.
+- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and
+  verification guidance.

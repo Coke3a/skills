@@ -22,4 +22,5 @@ Rollback:
 - Use platform-native rollback when available.
 - Revert and redeploy only when artifact rollback is unavailable.
 - Document migration rollback caveats when schema changes are not backward-compatible.
-- Include deployed artifact, previous artifact, rollback command, migration status, and smoke test result in the deploy summary.
+- Include deployed artifact, previous artifact, rollback command, migration status, and
+  smoke test result in the deploy summary.

@@ -7,7 +7,8 @@
 - Keep the runtime image small.
 - Do not bake secrets into the image.
 - Tag images with the git SHA.
-- Use `latest` only as a convenience tag for `main`, never as the only deployment identity.
+- Use `latest` only as a convenience tag for `main`, never as the only deployment
+  identity.
 - Prefer immutable image digest or SHA tag for deployment.
 - Use Docker Buildx for build and push workflows.
 - Authenticate to GHCR with `packages: write` only when publishing.

@@ -1,5 +1,5 @@
-# Optimize this Dockerfile based on the actual workspace structure.
-# Do not bake secrets into the image. Provide runtime config through environment variables.
+# Optimize this template for the actual workspace layout before use.
+# Do not bake secrets into the image. Pass runtime config through env vars.
 
 FROM rust:1-bookworm AS builder
 WORKDIR /app

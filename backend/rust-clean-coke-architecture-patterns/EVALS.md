@@ -2,7 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for focus on clean architecture layers/repo pattern and avoids out-of-scope requests.
+These evals verify the skill triggers for focus on clean architecture layers/repo
+pattern and avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 
@@ -43,4 +44,5 @@ These evals verify the skill triggers for focus on clean architecture layers/rep
 
 - **Input prompt**: "Create a new Rust backend feature following clean architecture."
 - **Expected skill usage**: `rust-clean-coke-architecture-patterns` is selected.
-- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and verification guidance.
+- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and
+  verification guidance.

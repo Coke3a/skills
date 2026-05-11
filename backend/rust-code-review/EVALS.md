@@ -2,7 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for produce actionable findings by severity and avoids out-of-scope requests.
+These evals verify the skill triggers for produce actionable findings by severity and
+avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 
@@ -43,4 +44,5 @@ These evals verify the skill triggers for produce actionable findings by severit
 
 - **Input prompt**: "Review this Rust backend change."
 - **Expected skill usage**: `rust-code-review` is selected.
-- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and verification guidance.
+- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and
+  verification guidance.

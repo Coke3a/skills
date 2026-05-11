@@ -8,7 +8,8 @@ Use this reference to check whether tests followed `tdd-feature-workflow`.
 - Prefer one behavior per test.
 - Use the smallest useful test level.
 - Do not create all test levels upfront.
-- Avoid duplicating the same business rule across every layer unless each test adds unique confidence.
+- Avoid duplicating the same business rule across every layer unless each test adds
+  unique confidence.
 
 ## Placement
 
@@ -17,7 +18,8 @@ Use this reference to check whether tests followed `tdd-feature-workflow`.
 - Repository integration tests go under `tests/repositories/*_test.rs`.
 - Handler/API tests go under `tests/api/*_test.rs`.
 - Shared integration helpers go under `tests/common/mod.rs`.
-- Every src-level `*_test.rs` file is wired with `#[cfg(test)] mod *_test;` in the parent module.
+- Every src-level `*_test.rs` file is wired with `#[cfg(test)] mod *_test;` in the
+  parent module.
 
 ## Test Doubles
 
@@ -27,8 +29,10 @@ Use this reference to check whether tests followed `tdd-feature-workflow`.
 
 ## Repository and API Tests
 
-- Add repository integration tests when persistence behavior, Diesel mapping, constraints, transactions, or DB error mapping changed.
-- Add handler/API tests when HTTP contract, request/response mapping, route wiring, auth extraction, or API error mapping changed.
+- Add repository integration tests when persistence behavior, Diesel mapping,
+  constraints, transactions, or DB error mapping changed.
+- Add handler/API tests when HTTP contract, request/response mapping, route wiring, auth
+  extraction, or API error mapping changed.
 - API tests should focus on HTTP contract, not duplicate all business rules.
 
 ## Test Smells

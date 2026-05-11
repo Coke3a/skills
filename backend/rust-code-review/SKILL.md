@@ -7,7 +7,8 @@ description: Use when reviewing Rust backend changes for correctness, Clean Arch
 
 ## Purpose
 
-Review Rust backend changes and produce actionable findings. Check whether implementation follows:
+Review Rust backend changes and produce actionable findings. Check whether
+implementation follows:
 
 - Rust clean architecture rules
 - TDD test quality rules
@@ -21,11 +22,16 @@ Review Rust backend changes and produce actionable findings. Check whether imple
 
 ## When to Use
 
-Use this skill before finishing a feature, after generated code, before opening or merging a PR, when refactoring mixed handler/usecase/domain/infra code, when tests/repositories/handlers changed, when async/background/concurrent code changed, or when the user asks to review, audit, check correctness, or check skill compliance.
+Use this skill before finishing a feature, after generated code, before opening or
+merging a PR, when refactoring mixed handler/usecase/domain/infra code, when
+tests/repositories/handlers changed, when async/background/concurrent code changed, or
+when the user asks to review, audit, check correctness, or check skill compliance.
 
 ## When Not to Use
 
-Do not use this for initial architecture scaffolding, TDD red/green/refactor implementation, CI/CD setup, deployment, formatting-only changes, full benchmarking, profiling, or load testing.
+Do not use this for initial architecture scaffolding, TDD red/green/refactor
+implementation, CI/CD setup, deployment, formatting-only changes, full benchmarking,
+profiling, or load testing.
 
 ## Review Priorities
 
@@ -43,9 +49,12 @@ Do not use this for initial architecture scaffolding, TDD red/green/refactor imp
 
 ## Companion Skills
 
-- `rust-clean-coke-architecture-patterns` owns layer structure, naming, error flow, repository trait patterns, and Diesel implementation patterns.
-- `tdd-feature-workflow` owns TDD workflow, behavior-focused tests, test scope, and test placement.
-- `rust-code-review` checks whether the change followed those skills. Do not duplicate their full implementation workflows.
+- `rust-clean-coke-architecture-patterns` owns layer structure, naming, error flow,
+  repository trait patterns, and Diesel implementation patterns.
+- `tdd-feature-workflow` owns TDD workflow, behavior-focused tests, test scope, and test
+  placement.
+- `rust-code-review` checks whether the change followed those skills. Do not duplicate
+  their full implementation workflows.
 
 ## Workflows
 
@@ -54,13 +63,20 @@ Do not use this for initial architecture scaffolding, TDD red/green/refactor imp
 - Failing implementation review: use `workflows/review-failing-implementation.md`.
 - Applying review fixes: use `workflows/apply-review-fixes.md`.
 
-Load only the references needed for the review scope. Use `references/review-priorities.md` for severity, `references/clean-architecture-review.md` for architecture, `references/tdd-test-review.md` for tests, and `references/performance-concurrency-review.md` for async/concurrency and performance footguns.
+Load only the references needed for the review scope. Use `references/review-
+priorities.md` for severity, `references/clean-architecture-review.md` for architecture,
+`references/tdd-test-review.md` for tests, and `references/performance-concurrency-
+review.md` for async/concurrency and performance footguns.
 
 ## Performance and Concurrency Scope
 
-Catch review-level Rust/Tokio performance and concurrency footguns: blocking work in async code, locks across `.await`, unbounded tasks/channels, ignored task failures, missing cancellation/shutdown behavior, DB pool exhaustion risks, excessive hot-path allocation/cloning, and unsafe concurrent access patterns.
+Catch review-level Rust/Tokio performance and concurrency footguns: blocking work in
+async code, locks across `.await`, unbounded tasks/channels, ignored task failures,
+missing cancellation/shutdown behavior, DB pool exhaustion risks, excessive hot-path
+allocation/cloning, and unsafe concurrent access patterns.
 
-Do not perform benchmarking, profiling, or load testing. If impact is uncertain or workload-dependent, recommend a dedicated benchmark/profiling workflow.
+Do not perform benchmarking, profiling, or load testing. If impact is uncertain or
+workload-dependent, recommend a dedicated benchmark/profiling workflow.
 
 ## Final Verification
 
@@ -72,7 +88,9 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
 
-Do not fabricate command results. If the repository is only a skills repository and has no Cargo project, report that these are downstream verification commands for projects using the skill.
+Do not fabricate command results. If the repository is only a skills repository and has
+no Cargo project, report that these are downstream verification commands for projects
+using the skill.
 
 ## Review Report Format
 

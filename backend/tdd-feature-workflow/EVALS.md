@@ -2,7 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for focus on acceptance criteria and red/green/refactor and avoids out-of-scope requests.
+These evals verify the skill triggers for focus on acceptance criteria and
+red/green/refactor and avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 
@@ -43,4 +44,5 @@ These evals verify the skill triggers for focus on acceptance criteria and red/g
 
 - **Input prompt**: "Implement this feature with TDD."
 - **Expected skill usage**: `tdd-feature-workflow` is selected.
-- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and verification guidance.
+- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and
+  verification guidance.

@@ -22,7 +22,8 @@
 - [ ] Run `cargo build --release`.
 
 3. Handle services
-- [ ] If repository tests require Postgres, Redis, or another service, add service containers only when needed.
+- [ ] If repository tests require Postgres, Redis, or another service, add service
+      containers only when needed.
 - [ ] Use test-specific environment variables.
 - [ ] Do not use production secrets in CI.
 - [ ] Keep service health checks explicit.

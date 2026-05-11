@@ -7,7 +7,8 @@ description: Use when optimizing Rust backend performance with measurement-first
 
 ## Purpose
 
-Use this skill to optimize Rust backend performance without breaking clean architecture. Prefer measured, small, layer-correct changes over speculative rewrites.
+Use this skill to optimize Rust backend performance without breaking clean architecture.
+Prefer measured, small, layer-correct changes over speculative rewrites.
 
 ## When to Use
 
@@ -48,9 +49,11 @@ Use this skill to optimize Rust backend performance without breaking clean archi
 
 ## Companion Skills
 
-- `rust-clean-coke-architecture-patterns` owns layer structure, dependency direction, naming, error flow, repository traits, and Diesel implementation patterns.
+- `rust-clean-coke-architecture-patterns` owns layer structure, dependency direction,
+  naming, error flow, repository traits, and Diesel implementation patterns.
 - `tdd-feature-workflow` owns correctness and regression test workflow.
-- `rust-code-review` owns final code review, security review, async/concurrency review, and architecture review.
+- `rust-code-review` owns final code review, security review, async/concurrency review,
+  and architecture review.
 - `rust-ci-cd` owns CI/CD and deployment automation.
 
 ## Default Optimization Loop
@@ -73,15 +76,18 @@ handlers -> usecases -> domain
 infra -> domain traits
 ```
 
-- Handlers stay thin and only own HTTP parsing, DTO mapping, serialization, and usecase calls.
+- Handlers stay thin and only own HTTP parsing, DTO mapping, serialization, and usecase
+  calls.
 - Usecases own orchestration and user-facing semantics.
-- Domain stays pure and owns entities, value objects, invariants, pure rules, and repository traits.
+- Domain stays pure and owns entities, value objects, invariants, pure rules, and
+  repository traits.
 - Infra owns DB queries, Diesel rows, pool access, IO, and DB-specific optimization.
 - Repository traits remain the boundary.
 - DTOs must not leak into domain.
 - Diesel row structs must not leak into domain or handlers.
 - Do not bypass layers for performance without explicit approval.
-- If an optimization needs an architecture change, propose it first and wait for approval.
+- If an optimization needs an architecture change, propose it first and wait for
+  approval.
 
 ## Workflows
 

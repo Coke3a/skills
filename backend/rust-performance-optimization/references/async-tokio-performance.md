@@ -19,7 +19,8 @@ Guidance:
 
 - Use `tokio::time::sleep` in async code.
 - Use `spawn_blocking` for short-lived blocking operations that finish on their own.
-- For many CPU-bound tasks, use a semaphore, bounded worker pool, Rayon, or a dedicated executor.
+- For many CPU-bound tasks, use a semaphore, bounded worker pool, Rayon, or a dedicated
+  executor.
 - For long-lived blocking loops, prefer a dedicated thread or worker architecture.
 - Define cancellation/shutdown behavior for long-running tasks.
 - Track or intentionally detach `JoinHandle`.

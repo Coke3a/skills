@@ -2,7 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for measure-first optimization preserving architecture and avoids out-of-scope requests.
+These evals verify the skill triggers for measure-first optimization preserving
+architecture and avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 
@@ -43,4 +44,5 @@ These evals verify the skill triggers for measure-first optimization preserving 
 
 - **Input prompt**: "Optimize this slow Rust endpoint."
 - **Expected skill usage**: `rust-performance-optimization` is selected.
-- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and verification guidance.
+- **Expected output qualities**: Clear scope, concrete steps, boundary/safety rules, and
+  verification guidance.

@@ -44,18 +44,21 @@
 - [ ] Public APIs and DTOs are intentional.
 
 6. Review performance and concurrency
-- [ ] No blocking operation inside async handlers/tasks unless isolated with spawn_blocking or project-approved strategy.
+- [ ] No blocking operation inside async handlers/tasks unless isolated with
+      spawn_blocking or project-approved strategy.
 - [ ] CPU-heavy work is bounded and not run directly on async runtime worker threads.
 - [ ] No blocking lock guard or borrow is held across .await.
 - [ ] Lock scope is short and contention risk is acceptable.
 - [ ] Shared mutable state uses Mutex/RwLock/channel/actor pattern intentionally.
 - [ ] Channels/queues are bounded or have explicit backpressure strategy.
-- [ ] Spawned tasks have error handling, cancellation, and shutdown strategy when needed.
+- [ ] Spawned tasks have error handling, cancellation, and shutdown strategy when
+      needed.
 - [ ] JoinHandle is not ignored when task failure matters.
 - [ ] External IO has timeout/retry/backoff where appropriate.
 - [ ] DB pool usage cannot be exhausted by unbounded concurrency.
 - [ ] Hot paths avoid unnecessary clone(), to_string(), collect(), or allocation.
-- [ ] Performance concerns are reported as footguns, not speculative micro-optimizations.
+- [ ] Performance concerns are reported as footguns, not speculative micro-
+      optimizations.
 
 7. Review security/data safety
 - [ ] No secrets/PII logged.
@@ -67,10 +70,8 @@
 - [ ] Concurrent/background paths preserve tenant/user boundaries.
 
 8. Verify
-- [ ] Run or request:
-      cargo fmt --all -- --check
-      cargo clippy --all-targets --all-features -- -D warnings
-      cargo test --all-features
+- [ ] Run or request: cargo fmt --all -- --check cargo clippy --all-targets --all-
+      features -- -D warnings cargo test --all-features
 - [ ] Do not fabricate command results.
 - [ ] Report any command not run.
 

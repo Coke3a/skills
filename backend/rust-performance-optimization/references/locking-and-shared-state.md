@@ -15,7 +15,8 @@ Guidance:
 
 - Use `std::sync::Mutex` only for short, low-contention critical sections with no await.
 - Do not hold `std::sync::MutexGuard` across `.await`.
-- Use `tokio::sync::Mutex` only when a lock must be held across await or async resource access requires it.
+- Use `tokio::sync::Mutex` only when a lock must be held across await or async resource
+  access requires it.
 - Prefer task ownership and message passing for shared resources that do async IO.
 - Consider sharding locks only when contention is real and measured.
 - Keep critical sections short.

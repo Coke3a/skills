@@ -1,6 +1,8 @@
 # Clean Architecture Test Mapping
 
-Use this with the companion Rust clean architecture skill. The architecture skill owns layer structure, naming, error flow, repository trait shape, and Diesel implementation patterns.
+Use this with the companion Rust clean architecture skill. The architecture skill owns
+layer structure, naming, error flow, repository trait shape, and Diesel implementation
+patterns.
 
 ## Domain
 
@@ -13,7 +15,8 @@ Generic names:
 
 ## Usecases
 
-Test orchestration, repository trait behavior, error semantics, permissions, and ownership.
+Test orchestration, repository trait behavior, error semantics, permissions, and
+ownership.
 
 Generic names:
 - `ExampleRepository`
@@ -24,7 +27,8 @@ Generic names:
 
 ## Infra Repositories
 
-Test Diesel mapping, database constraints, transactions, and query behavior with integration tests.
+Test Diesel mapping, database constraints, transactions, and query behavior with
+integration tests.
 
 Generic names:
 - `ExamplePostgres`
@@ -32,4 +36,6 @@ Generic names:
 
 ## Handlers/API
 
-Test request DTO mapping, response DTO shape, status codes, `ApiError` mapping, route wiring, and auth extraction. Do not move business logic into handlers to make API tests pass.
+Test request DTO mapping, response DTO shape, status codes, `ApiError` mapping, route
+wiring, and auth extraction. Do not move business logic into handlers to make API tests
+pass.

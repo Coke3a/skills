@@ -12,8 +12,10 @@ cargo build --release
 Workspace variants:
 
 - Use `cargo fmt --all -- --check` for workspace formatting.
-- Prefer `cargo clippy --workspace --all-targets --all-features -- -D warnings` only when the repository is a workspace and uses that pattern.
-- Prefer `cargo test --workspace --all-features` only when appropriate for the workspace.
+- Prefer `cargo clippy --workspace --all-targets --all-features -- -D warnings` only
+  when the repository is a workspace and uses that pattern.
+- Prefer `cargo test --workspace --all-features` only when appropriate for the
+  workspace.
 - Do not invent workspace flags for a single-crate project.
 
 Integration test support:

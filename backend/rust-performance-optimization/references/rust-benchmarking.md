@@ -1,6 +1,7 @@
 # Rust Benchmarking
 
-- Use Criterion for pure functions, domain logic, parsing, serialization, and implementation comparisons.
+- Use Criterion for pure functions, domain logic, parsing, serialization, and
+  implementation comparisons.
 - Use `cargo bench` or the narrowest practical benchmark command.
 - Place Criterion benchmarks under `benches/`.
 - Add `[[bench]]` with `harness = false` when using Criterion.

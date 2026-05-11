@@ -7,16 +7,19 @@ Before changing code, define:
 - How it is measured.
 - What target matters.
 - What workload represents the real use case.
-- Whether the issue is latency, throughput, memory, CPU, DB time, queue lag, or runtime starvation.
+- Whether the issue is latency, throughput, memory, CPU, DB time, queue lag, or runtime
+  starvation.
 - Whether this path is actually hot.
 - How improvement will be verified.
 
 ## Benchmark vs Profile
 
 - Use benchmarks when the target is known and repeatable.
-- Use profiling when it is unclear where time, allocation, locking, IO, or DB cost is spent.
+- Use profiling when it is unclear where time, allocation, locking, IO, or DB cost is
+  spent.
 - Use production metrics when synthetic workloads cannot reproduce the issue.
-- Synthetic benchmarks are useful for controlled comparisons but can miss real data shape, contention, cache behavior, and IO variance.
+- Synthetic benchmarks are useful for controlled comparisons but can miss real data
+  shape, contention, cache behavior, and IO variance.
 
 ## Before / After
 

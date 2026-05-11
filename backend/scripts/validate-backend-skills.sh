@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
-python3 "$(dirname "$0")/validate-backend-skills.py" "$@"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+python3 "${SCRIPT_DIR}/validate-backend-skills.py" "$@"
