@@ -2,7 +2,8 @@
 
 ## Rule
 
-Follow the existing project convention. Do not introduce a second convention because the template prefers one.
+Follow the existing project convention. Do not introduce a second convention because the template
+prefers one.
 
 ## Supported Component/Hook Patterns
 
@@ -60,8 +61,10 @@ apps/
         login.spec.ts
 ```
 
-Shared test utilities should follow the project convention, commonly `test-utils`, `tests/utils`, or `apps/web/tests/utils`.
+Shared test utilities should follow the project convention, commonly `test-utils`, `tests/utils`, or
+`apps/web/tests/utils`.
 
 ## Mock Placement
 
-Use `tests/mocks` or `src/mocks` depending on existing convention. Keep mock data contract-shaped and close to the tests that need it unless it is reused broadly.
+Use `tests/mocks` or `src/mocks` depending on existing convention. Keep mock data contract-shaped
+and close to the tests that need it unless it is reused broadly.

@@ -1,7 +1,7 @@
 # Architecture Reference
 
-Use this reference for layer responsibilities, dependency direction, file layout, and
-architecture checks.
+Use this reference for layer responsibilities, dependency direction, file layout, and architecture
+checks.
 
 ## Dependency direction
 
@@ -34,8 +34,8 @@ Rules:
 - Map usecase outputs to response DTOs.
 - Return `Result<impl IntoResponse, ApiError>`.
 
-Handlers do not validate domain invariants, decide business semantics, run Diesel
-queries, or expose row structs.
+Handlers do not validate domain invariants, decide business semantics, run Diesel queries, or expose
+row structs.
 
 ### Usecases
 
@@ -45,11 +45,9 @@ queries, or expose row structs.
 - Load and persist through domain repository traits.
 - Coordinate entities and value objects.
 - Convert `DomainError` and `RepoError` into `UsecaseError` through `?`.
-- Own user-facing semantics such as not found, validation, conflict, and internal
-  failure.
+- Own user-facing semantics such as not found, validation, conflict, and internal failure.
 
-Usecases do not import Axum, Diesel, schema modules, row structs, or request/response
-DTOs.
+Usecases do not import Axum, Diesel, schema modules, row structs, or request/response DTOs.
 
 ### Domain
 

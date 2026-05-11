@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "format:md": "prettier \"{skills,text}/**/*.{md,markdown}\" --write",
+    "format:md:check": "prettier \"{skills,text}/**/*.{md,markdown}\" --check"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.3"
+  }
+}

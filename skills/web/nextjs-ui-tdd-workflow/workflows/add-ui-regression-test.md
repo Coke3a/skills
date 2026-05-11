@@ -11,6 +11,8 @@ Use this workflow when fixing a user-visible UI bug.
 7. Fix the behavior with the smallest code change.
 8. Run the same test until green.
 9. Check whether related tests should run.
-10. Avoid broad duplication: do not add E2E coverage if a component/integration test proves the regression.
+10. Avoid broad duplication: do not add E2E coverage if a component/integration test proves the
+    regression.
 
-Prefer a regression test that protects the observed user outcome, not the implementation detail that caused the bug.
+Prefer a regression test that protects the observed user outcome, not the implementation detail that
+caused the bug.

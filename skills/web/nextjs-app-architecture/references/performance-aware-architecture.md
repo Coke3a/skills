@@ -1,6 +1,7 @@
 # Performance-Aware Architecture
 
 Sources synthesized:
+
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/react-best-practices/SKILL.md
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md
 
@@ -18,7 +19,8 @@ Sources synthesized:
 
 - Avoid unnecessary `"use client"`.
 - Avoid broad barrel imports when they pull large modules into the bundle.
-- Import directly from package subpaths when the package supports it and the project convention allows it.
+- Import directly from package subpaths when the package supports it and the project convention
+  allows it.
 - Dynamically import heavy client-only widgets such as charts, editors, maps, and media tools.
 - Defer non-critical third-party scripts and analytics.
 

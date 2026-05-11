@@ -4,8 +4,7 @@
 
 - [ ] Identify entity name, action name, route name, and table name
 - [ ] Identify which layers are affected
-- [ ] Define the minimal public contract: input, output, repository methods, and route
-      shape
+- [ ] Define the minimal public contract: input, output, repository methods, and route shape
 
 ## 2. Define domain value objects
 

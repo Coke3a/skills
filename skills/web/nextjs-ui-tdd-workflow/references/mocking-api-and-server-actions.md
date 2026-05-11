@@ -1,9 +1,11 @@
 # Mocking API and Server Actions
 
 Sources:
+
 - Official: https://nextjs.org/docs/app/guides/testing
 - Official: https://nextjs.org/docs/app/guides/testing/jest
-- Community inspiration only: https://agent-skills.md/skills/pluginagentmarketplace/custom-plugin-react/react-testing-library
+- Community inspiration only:
+  https://agent-skills.md/skills/pluginagentmarketplace/custom-plugin-react/react-testing-library
 
 ## Component Tests
 
@@ -18,11 +20,13 @@ Do not mock:
 
 - React internals.
 - The component under test.
-- A child component solely to make assertions easier, unless the child is an expensive unrelated boundary and the behavior under test is still user-visible.
+- A child component solely to make assertions easier, unless the child is an expensive unrelated
+  boundary and the behavior under test is still user-visible.
 
 ## API Mocks
 
-Prefer MSW or the project-approved network mock strategy when available. Keep responses realistic and shaped like the API contract.
+Prefer MSW or the project-approved network mock strategy when available. Keep responses realistic
+and shaped like the API contract.
 
 Cover only states relevant to the behavior under test:
 
@@ -42,4 +46,5 @@ Test isolated Server Action result mapping when practical:
 - Validation failure maps to field/global error.
 - Domain/API failure maps to user-visible error.
 
-Use Playwright when the important behavior depends on browser submission, cookies, redirects, cache revalidation, auth state, or the full server flow.
+Use Playwright when the important behavior depends on browser submission, cookies, redirects, cache
+revalidation, auth state, or the full server flow.

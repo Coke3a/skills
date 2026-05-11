@@ -1,17 +1,21 @@
 ---
 name: nextjs-app-architecture
-description: Use when creating or refactoring Next.js App Router application structure, pages, layouts, Server/Client Component boundaries, data fetching placement, Server Actions, component composition, feature folders, API client boundaries, UI state patterns, and optional Cache Components/PPR guidance. Pair with nextjs-ui-tdd-workflow for tests.
+description:
+  Use when creating or refactoring Next.js App Router application structure, pages, layouts,
+  Server/Client Component boundaries, data fetching placement, Server Actions, component
+  composition, feature folders, API client boundaries, UI state patterns, and optional Cache
+  Components/PPR guidance. Pair with nextjs-ui-tdd-workflow for tests.
 ---
 
 # Next.js App Architecture
 
 ## Purpose
 
-Build maintainable, scalable Next.js apps with App Router, React composition, clear
-Server/Client Component boundaries, explicit UI states, and performance-aware structure.
+Build maintainable, scalable Next.js apps with App Router, React composition, clear Server/Client
+Component boundaries, explicit UI states, and performance-aware structure.
 
-Use this skill as architecture guidance. Load the relevant workflow first, then load only
-the reference files needed for the task.
+Use this skill as architecture guidance. Load the relevant workflow first, then load only the
+reference files needed for the task.
 
 ## When to Use
 
@@ -44,12 +48,14 @@ the reference files needed for the task.
 ## Core Rules
 
 - Prefer Server Components by default.
-- Use Client Components only for interactivity, browser APIs, state, effects, refs, or event handlers.
+- Use Client Components only for interactivity, browser APIs, state, effects, refs, or event
+  handlers.
 - Keep data fetching close to the server boundary.
 - Avoid async waterfalls; start independent async work early and parallelize it.
 - Use Suspense intentionally for streaming and independent loading regions.
 - Keep pages and layouts thin, compositional, and route-focused.
-- Keep business logic out of UI components when it belongs in an API, domain, service, or usecase layer.
+- Keep business logic out of UI components when it belongs in an API, domain, service, or usecase
+  layer.
 - Keep API client calls behind a clear boundary.
 - Model loading, error, empty, success, auth, pending, and optimistic states explicitly.
 - Avoid component APIs with many boolean props; prefer composition and explicit variants.
@@ -115,7 +121,8 @@ features/<feature-name>/
 ## App Router Structure
 
 - Use `app/<route>/page.tsx` for the route entry.
-- Add `layout.tsx`, `loading.tsx`, `error.tsx`, and `not-found.tsx` only where they own useful behavior.
+- Add `layout.tsx`, `loading.tsx`, `error.tsx`, and `not-found.tsx` only where they own useful
+  behavior.
 - Use route groups to organize without changing URLs.
 - Use nested layouts for persistent route UI, not one-off wrappers.
 - Colocate route-specific components near the route or feature.
@@ -125,16 +132,16 @@ See `references/app-router-structure.md`.
 
 ## Server / Client Boundary
 
-| Need | Prefer |
-|---|---|
-| Static render / data from server | Server Component |
-| DB/server-only access | Server Component or Server Action |
-| Form mutation | Server Action + client form shell when needed |
-| Browser API | Client Component |
-| `useState`/`useEffect`/event handlers | Client Component |
-| Heavy interactive widget | Client Component, dynamically imported if appropriate |
-| User-specific dynamic data | Server Component with dynamic boundary or client fetch depending on UX |
-| Shared UI with no interactivity | Server Component-compatible component |
+| Need                                  | Prefer                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| Static render / data from server      | Server Component                                                       |
+| DB/server-only access                 | Server Component or Server Action                                      |
+| Form mutation                         | Server Action + client form shell when needed                          |
+| Browser API                           | Client Component                                                       |
+| `useState`/`useEffect`/event handlers | Client Component                                                       |
+| Heavy interactive widget              | Client Component, dynamically imported if appropriate                  |
+| User-specific dynamic data            | Server Component with dynamic boundary or client fetch depending on UX |
+| Shared UI with no interactivity       | Server Component-compatible component                                  |
 
 - Do not add `"use client"` at a high-level route unless needed.
 - Keep client islands small.
@@ -221,8 +228,7 @@ See `references/performance-aware-architecture.md`.
 
 ## Optional Cache Components
 
-Only apply Cache Components guidance if `cacheComponents: true` is detected in
-`next.config.*`.
+Only apply Cache Components guidance if `cacheComponents: true` is detected in `next.config.*`.
 
 - Keep user-specific data dynamic.
 - Use `'use cache'` only for cacheable data that is the same across users.
@@ -247,8 +253,8 @@ See `references/cache-components-optional.md` and `workflows/apply-cache-compone
 
 ## Final Verification
 
-When changing a downstream Next.js project, inspect `package.json` first and run or
-request project-appropriate scripts, for example:
+When changing a downstream Next.js project, inspect `package.json` first and run or request
+project-appropriate scripts, for example:
 
 ```sh
 npm run lint

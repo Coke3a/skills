@@ -1,31 +1,41 @@
 # Before / After Performance Report
 
 Goal:
+
 - ...
 
 Metric:
+
 - ...
 
 Baseline:
+
 - ...
 
 After:
+
 - ...
 
 Change:
+
 - ...
 
 Benchmark/profile command:
+
 - ...
 
 Correctness commands:
+
 - ...
 
 Architecture boundaries preserved:
+
 - ...
 
 Tradeoffs:
+
 - ...
 
 Remaining risks:
+
 - ...

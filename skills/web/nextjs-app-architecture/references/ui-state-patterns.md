@@ -37,7 +37,8 @@ Every data-driven screen should explicitly account for:
 
 ## Permission/Auth
 
-- Distinguish unauthenticated, unauthorized, missing resource, and unexpected error when the product needs different UX.
+- Distinguish unauthenticated, unauthorized, missing resource, and unexpected error when the product
+  needs different UX.
 
 ## Optimistic/Pending
 

@@ -1,14 +1,17 @@
 # App Router Structure
 
 Sources synthesized:
+
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/react-best-practices/SKILL.md
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md
 
 ## Route Files
 
 - `page.tsx` is the route entry and should stay thin: fetch or compose, then delegate feature UI.
-- `layout.tsx` owns persistent route chrome, shared providers at that route depth, and stable metadata.
-- `loading.tsx` provides an immediate fallback for the route segment; keep it layout-compatible with final content.
+- `layout.tsx` owns persistent route chrome, shared providers at that route depth, and stable
+  metadata.
+- `loading.tsx` provides an immediate fallback for the route segment; keep it layout-compatible with
+  final content.
 - `error.tsx` catches recoverable errors for a segment and must be a Client Component.
 - `not-found.tsx` handles missing route/entity states and should be user-facing.
 - `route.ts` is for route handlers, not page UI.
@@ -25,7 +28,8 @@ Sources synthesized:
 
 - Prefer static `metadata` when values do not depend on request data.
 - Use `generateMetadata` only when route params or fetched data are needed.
-- Avoid duplicate data fetching between `generateMetadata` and the page when the project has a dedupe/cache convention.
+- Avoid duplicate data fetching between `generateMetadata` and the page when the project has a
+  dedupe/cache convention.
 
 ## Architecture Checks
 

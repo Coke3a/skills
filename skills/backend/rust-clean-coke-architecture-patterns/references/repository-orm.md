@@ -9,8 +9,7 @@ Use this reference for repository traits and Diesel repository implementations.
 - Use `async_trait` for async trait methods.
 - Return `Result<T, RepoError>`.
 - `find_by_*` methods return `Result<Option<T>, RepoError>`.
-- Updates/deletes that expect an existing row return `RepoError::NotFound` when no row
-  is affected.
+- Updates/deletes that expect an existing row return `RepoError::NotFound` when no row is affected.
 
 ```rust
 #[async_trait]

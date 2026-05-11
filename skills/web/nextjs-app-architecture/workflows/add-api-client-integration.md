@@ -8,7 +8,8 @@ Use this workflow when a Next.js feature consumes a backend or external API.
    - If yes, use `app-api-contract-workflow`.
    - This skill only owns consuming an existing contract from the app side.
 2. Find the existing API boundary.
-   - Look for `packages/api-client`, `src/lib/api`, `src/shared/api`, feature `services`, or generated clients.
+   - Look for `packages/api-client`, `src/lib/api`, `src/shared/api`, feature `services`, or
+     generated clients.
    - Follow the project convention instead of creating a competing client.
 3. Place integration code.
    - Use shared/lib/package clients for cross-feature API calls.

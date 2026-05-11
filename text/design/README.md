@@ -2,7 +2,8 @@
 
 This README explains how to use the design-focused skills in this project.
 
-The goal is to separate **design thinking**, **implementation architecture**, **behavior testing**, and **final UX review** so the agent does not mix responsibilities.
+The goal is to separate **design thinking**, **implementation architecture**, **behavior testing**,
+and **final UX review** so the agent does not mix responsibilities.
 
 ## Design Skills
 
@@ -10,7 +11,8 @@ The goal is to separate **design thinking**, **implementation architecture**, **
 
 **Role:** design system generator / style intelligence
 
-Use this skill when you need to define or improve the overall design direction before implementation.
+Use this skill when you need to define or improve the overall design direction before
+implementation.
 
 Good use cases:
 
@@ -86,7 +88,8 @@ Do not use this skill for:
 
 **Role:** creative polish / distinctive frontend
 
-Use this skill when the UI already has a basic direction but needs to become more polished, memorable, and production-grade.
+Use this skill when the UI already has a basic direction but needs to become more polished,
+memorable, and production-grade.
 
 Good use cases:
 
@@ -99,7 +102,8 @@ Good use cases:
 - Make the UI feel less generic
 - Create a distinctive aesthetic for a feature or product
 
-Use this skill when the question is not “what is the component architecture?” but “how should this feel visually?”
+Use this skill when the question is not “what is the component architecture?” but “how should this
+feel visually?”
 
 Example prompt:
 
@@ -159,7 +163,8 @@ Do not use this skill for:
 
 **Role:** final UX/accessibility/design review
 
-Use this skill after UI implementation to review whether the page follows web interface best practices.
+Use this skill after UI implementation to review whether the page follows web interface best
+practices.
 
 Good use cases:
 
@@ -287,13 +292,13 @@ Use the skills in this order.
 
 ## Skill Responsibilities
 
-| Skill | Main Responsibility | Use When |
-|---|---|---|
-| `ui-ux-pro-max-skill` | Design system generator / style intelligence | You need design direction, tokens, style, palette, typography, layout pattern |
-| `frontend-design` | Creative polish / distinctive frontend | You want the UI to look premium, memorable, and less generic |
-| `web-design-guidelines` | Final UX/accessibility/design review | You already implemented UI and need review findings |
-| `nextjs-app-architecture` | Next.js structure and implementation architecture | You need App Router, Server/Client boundaries, component structure |
-| `nextjs-ui-tdd-workflow` | UI behavior testing | You need tests for forms, loading, error, navigation, critical journeys |
+| Skill                     | Main Responsibility                               | Use When                                                                      |
+| ------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ui-ux-pro-max-skill`     | Design system generator / style intelligence      | You need design direction, tokens, style, palette, typography, layout pattern |
+| `frontend-design`         | Creative polish / distinctive frontend            | You want the UI to look premium, memorable, and less generic                  |
+| `web-design-guidelines`   | Final UX/accessibility/design review              | You already implemented UI and need review findings                           |
+| `nextjs-app-architecture` | Next.js structure and implementation architecture | You need App Router, Server/Client boundaries, component structure            |
+| `nextjs-ui-tdd-workflow`  | UI behavior testing                               | You need tests for forms, loading, error, navigation, critical journeys       |
 
 ---
 
@@ -519,6 +524,7 @@ Do not mix responsibilities:
 ## Source References
 
 - UI UX Pro Max Skill: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
-- Anthropic Frontend Design Skill: https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md
-- Vercel Web Design Guidelines Skill: https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md
-
+- Anthropic Frontend Design Skill:
+  https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md
+- Vercel Web Design Guidelines Skill:
+  https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md

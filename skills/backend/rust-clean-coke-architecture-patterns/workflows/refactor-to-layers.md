@@ -1,7 +1,7 @@
 # Refactor existing code into clean layers
 
-Use this workflow when a handler, service, or repository mixes HTTP, orchestration,
-domain rules, and IO details.
+Use this workflow when a handler, service, or repository mixes HTTP, orchestration, domain rules,
+and IO details.
 
 ## 1. Identify mixed responsibilities
 

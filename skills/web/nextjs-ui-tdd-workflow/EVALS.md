@@ -2,7 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for Next.js UI TDD work, chooses the smallest useful UI test level, and stays out of architecture, backend, mobile, CI, and deployment ownership.
+These evals verify the skill triggers for Next.js UI TDD work, chooses the smallest useful UI test
+level, and stays out of architecture, backend, mobile, CI, and deployment ownership.
 
 ## Positive Trigger Prompts
 
@@ -22,7 +23,8 @@ These evals verify the skill triggers for Next.js UI TDD work, chooses the small
 
 ## Expected Behavior
 
-- Trigger for Next.js UI behavior changes, UI regression tests, form behavior, client component tests, Server Action user-visible behavior, and critical Playwright journeys.
+- Trigger for Next.js UI behavior changes, UI regression tests, form behavior, client component
+  tests, Server Action user-visible behavior, and critical Playwright journeys.
 - Start from UI acceptance criteria.
 - Choose the smallest useful test level.
 - Use Testing Library for user-centric component behavior.
@@ -56,4 +58,6 @@ These evals verify the skill triggers for Next.js UI TDD work, chooses the small
 
 - **Input prompt**: "Add a Playwright test for the login journey."
 - **Expected skill usage**: `nextjs-ui-tdd-workflow` is selected.
-- **Expected output qualities**: The agent defines the critical journey, checks existing E2E placement and scripts, uses role/label/text locators, isolates session/data, uses web-first assertions, and explains why E2E is appropriate.
+- **Expected output qualities**: The agent defines the critical journey, checks existing E2E
+  placement and scripts, uses role/label/text locators, isolates session/data, uses web-first
+  assertions, and explains why E2E is appropriate.

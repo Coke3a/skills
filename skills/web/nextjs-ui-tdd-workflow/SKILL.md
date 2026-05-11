@@ -1,13 +1,19 @@
 ---
 name: nextjs-ui-tdd-workflow
-description: Use when adding or changing Next.js UI behavior with TDD. Guides UI acceptance criteria, smallest useful test level, Testing Library component tests, hook/unit tests, form tests, Server Action tests, Playwright E2E critical journeys, regression tests, test placement, and behavior-focused test summaries. Pair with nextjs-app-architecture for structure.
+description:
+  Use when adding or changing Next.js UI behavior with TDD. Guides UI acceptance criteria, smallest
+  useful test level, Testing Library component tests, hook/unit tests, form tests, Server Action
+  tests, Playwright E2E critical journeys, regression tests, test placement, and behavior-focused
+  test summaries. Pair with nextjs-app-architecture for structure.
 ---
 
 # Next.js UI TDD Workflow
 
 ## Purpose
 
-Guide UI feature implementation through user behavior tests, one behavior at a time. Use this skill to turn UI acceptance criteria into the smallest useful test, run a red/green/refactor loop, and summarize what user-visible behavior is protected.
+Guide UI feature implementation through user behavior tests, one behavior at a time. Use this skill
+to turn UI acceptance criteria into the smallest useful test, run a red/green/refactor loop, and
+summarize what user-visible behavior is protected.
 
 ## When to Use
 
@@ -75,19 +81,19 @@ Guide UI feature implementation through user behavior tests, one behavior at a t
 
 ## Test Scope Selection
 
-| Behavior type | Preferred test level | Preferred location |
-| --- | --- | --- |
-| Pure function | Unit test | `src/**/__tests__/*.test.ts` or colocated `*.test.ts` |
-| Custom hook | Hook/unit test | `src/**/__tests__/*.test.ts` or colocated `*.test.ts` |
-| Client component interaction | Testing Library component test | `src/**/__tests__/*.test.tsx` or colocated `*.test.tsx` |
-| Form validation | Component/integration test | feature/component test |
-| Server Action result mapping | Unit/integration test if isolated, E2E if full server behavior needed | depends on setup |
-| Route/page with async Server Component | Playwright E2E | `tests/e2e/*.spec.ts` |
-| Navigation flow | Playwright E2E or integration test | `tests/e2e/*.spec.ts` |
-| Auth flow | Playwright E2E critical journey | `tests/e2e/*.spec.ts` |
-| Loading/error/empty UI state | Component or integration test | feature/component test |
-| Bug fix | Smallest regression test that would have caught the bug | depends on behavior |
-| Visual appearance | Visual test only if project has tooling | project-specific |
+| Behavior type                          | Preferred test level                                                  | Preferred location                                      |
+| -------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
+| Pure function                          | Unit test                                                             | `src/**/__tests__/*.test.ts` or colocated `*.test.ts`   |
+| Custom hook                            | Hook/unit test                                                        | `src/**/__tests__/*.test.ts` or colocated `*.test.ts`   |
+| Client component interaction           | Testing Library component test                                        | `src/**/__tests__/*.test.tsx` or colocated `*.test.tsx` |
+| Form validation                        | Component/integration test                                            | feature/component test                                  |
+| Server Action result mapping           | Unit/integration test if isolated, E2E if full server behavior needed | depends on setup                                        |
+| Route/page with async Server Component | Playwright E2E                                                        | `tests/e2e/*.spec.ts`                                   |
+| Navigation flow                        | Playwright E2E or integration test                                    | `tests/e2e/*.spec.ts`                                   |
+| Auth flow                              | Playwright E2E critical journey                                       | `tests/e2e/*.spec.ts`                                   |
+| Loading/error/empty UI state           | Component or integration test                                         | feature/component test                                  |
+| Bug fix                                | Smallest regression test that would have caught the bug               | depends on behavior                                     |
+| Visual appearance                      | Visual test only if project has tooling                               | project-specific                                        |
 
 See `references/nextjs-test-scope.md` for more test-level detail.
 
@@ -231,7 +237,8 @@ Summarize:
 
 ## Companion Skills
 
-- `nextjs-app-architecture` owns Next.js structure, App Router, Server/Client boundaries, data fetching, Server Actions, and component architecture.
+- `nextjs-app-architecture` owns Next.js structure, App Router, Server/Client boundaries, data
+  fetching, Server Actions, and component architecture.
 - `app-api-contract-workflow` owns API contracts shared with backend/mobile.
 - `app-design-system` owns design tokens and design language.
 - `app-code-review` owns final UI code review.

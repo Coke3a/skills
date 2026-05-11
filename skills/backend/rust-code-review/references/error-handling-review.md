@@ -12,8 +12,8 @@ Check:
 - `UsecaseError` owns user-facing semantics.
 - `ApiError` owns HTTP mapping.
 - Conversion direction is clear.
-- Not found cases map intentionally, commonly `Ok(None)` from `find_by_*` repositories
-  and a usecase-level not-found error when user-facing.
+- Not found cases map intentionally, commonly `Ok(None)` from `find_by_*` repositories and a
+  usecase-level not-found error when user-facing.
 - Conflict cases preserve enough detail to return the right user-facing response.
 - Validation errors are created in domain/usecase, not infra.
 - Infra/internal errors do not leak directly into domain or handlers.

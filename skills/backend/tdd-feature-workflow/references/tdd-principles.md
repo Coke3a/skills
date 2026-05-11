@@ -1,7 +1,6 @@
 # TDD Principles
 
-- Use red/green/refactor: failing test, smallest passing implementation, cleanup while
-  green.
+- Use red/green/refactor: failing test, smallest passing implementation, cleanup while green.
 - Keep a short test list before coding; pick one item at a time.
 - Work in small batches so each behavior drives one design decision.
 - Write one behavior-focused test at a time.
@@ -11,6 +10,5 @@
 - Confirm failing tests fail for the expected reason before implementing.
 - Do not create every test level upfront.
 
-TDD does not replace integration, security, performance, exploratory, or usability
-testing. Add those only when they provide distinct confidence for the behavior being
-changed.
+TDD does not replace integration, security, performance, exploratory, or usability testing. Add
+those only when they provide distinct confidence for the behavior being changed.

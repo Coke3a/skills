@@ -2,8 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for focus on clean architecture layers/repo
-pattern and avoids out-of-scope requests.
+These evals verify the skill triggers for focus on clean architecture layers/repo pattern and avoids
+out-of-scope requests.
 
 ## Positive Trigger Prompts
 

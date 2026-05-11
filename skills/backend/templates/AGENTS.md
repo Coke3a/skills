@@ -8,23 +8,20 @@ Rust backend project using Clean Architecture.
 
 Use these skills when relevant:
 
-- **rust-clean-coke-architecture-patterns**: Use for layer structure, naming, error
-  flow, repository traits, Diesel repository implementations, and handler/usecase/domain
-  boundaries.
+- **rust-clean-coke-architecture-patterns**: Use for layer structure, naming, error flow, repository
+  traits, Diesel repository implementations, and handler/usecase/domain boundaries.
 
-- **tdd-feature-workflow**: Use for new behavior, bug fixes, acceptance criteria, test
-  scope selection, red/green/refactor, and Rust test file placement.
+- **tdd-feature-workflow**: Use for new behavior, bug fixes, acceptance criteria, test scope
+  selection, red/green/refactor, and Rust test file placement.
 
-- **rust-code-review**: Use before finishing a feature or PR to review correctness,
-  architecture, tests, Rust quality, error handling, async/concurrency, security, and
-  verification readiness.
+- **rust-code-review**: Use before finishing a feature or PR to review correctness, architecture,
+  tests, Rust quality, error handling, async/concurrency, security, and verification readiness.
 
-- **rust-ci-cd**: Use for GitHub Actions, Rust CI checks, Docker/image builds,
-  deployment workflows, migrations, smoke tests, rollback, permissions, secrets, and
-  OIDC.
+- **rust-ci-cd**: Use for GitHub Actions, Rust CI checks, Docker/image builds, deployment workflows,
+  migrations, smoke tests, rollback, permissions, secrets, and OIDC.
 
-- **rust-performance-optimization**: Use only when there is a performance goal, hot
-  path, benchmark/profile need, suspected bottleneck, or performance regression.
+- **rust-performance-optimization**: Use only when there is a performance goal, hot path,
+  benchmark/profile need, suspected bottleneck, or performance regression.
 
 ## Required Commands Before Finishing Code Changes
 
@@ -49,8 +46,7 @@ cargo test --all-features
 
 ## Feature Workflow
 
-1. Use tdd-feature-workflow to define acceptance criteria and the smallest useful first
-   test.
+1. Use tdd-feature-workflow to define acceptance criteria and the smallest useful first test.
 2. Use rust-clean-coke-architecture-patterns to place code in the correct layers.
 3. Implement one behavior at a time.
 4. Run tests.

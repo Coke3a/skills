@@ -1,16 +1,20 @@
 # UI TDD Principles
 
 Sources:
+
 - Official: https://nextjs.org/docs/app/guides/testing
 - Official: https://testing-library.com/docs/guiding-principles/
 - Official: https://playwright.dev/docs/best-practices
-- Community inspiration only: https://agent-skills.md/skills/itechmeat/llm-code/react-testing-library
-- Community inspiration only: https://agent-skills.md/skills/pluginagentmarketplace/custom-plugin-react/react-testing-library
+- Community inspiration only:
+  https://agent-skills.md/skills/itechmeat/llm-code/react-testing-library
+- Community inspiration only:
+  https://agent-skills.md/skills/pluginagentmarketplace/custom-plugin-react/react-testing-library
 - Community inspiration only: https://skillsauth.com/skills/absolutelyskilled/playwright-testing
 
 ## Principle
 
-UI TDD starts from a user-visible behavior, not a component tree. The stronger the resemblance between the test and real use, the more confidence the test provides.
+UI TDD starts from a user-visible behavior, not a component tree. The stronger the resemblance
+between the test and real use, the more confidence the test provides.
 
 ## Workflow
 
@@ -27,7 +31,8 @@ UI TDD starts from a user-visible behavior, not a component tree. The stronger t
 
 - Name what the user can see or do.
 - Include relevant states: loading, empty, error, validation, pending, success.
-- Avoid implementation details such as state variable names, component internals, CSS classes, or hook names.
+- Avoid implementation details such as state variable names, component internals, CSS classes, or
+  hook names.
 - Keep one behavior per criterion when possible.
 
 ## Behavior Test Shape

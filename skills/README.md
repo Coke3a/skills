@@ -1,7 +1,7 @@
 # Agent Skills
 
-This folder contains real agent skills. Each skill lives in its own folder and
-has a `SKILL.md` file.
+This folder contains real agent skills. Each skill lives in its own folder and has a `SKILL.md`
+file.
 
 ## Backend
 

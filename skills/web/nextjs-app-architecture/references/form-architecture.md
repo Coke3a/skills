@@ -2,7 +2,8 @@
 
 ## Placement
 
-- Keep the visual form shell in a Client Component when it needs pending state, client validation, local state, or interactive controls.
+- Keep the visual form shell in a Client Component when it needs pending state, client validation,
+  local state, or interactive controls.
 - Keep mutation logic in Server Actions when the mutation can run on the server.
 - Share validation schemas between the form and action where practical.
 

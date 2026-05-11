@@ -1,19 +1,22 @@
 # Cache Components Optional
 
 Source synthesized:
+
 - https://skills.sh/vercel/next.js/cache-components
 
 ## Detection
 
 Apply this guidance only when `cacheComponents: true` is present in `next.config.*`.
 
-If the flag is absent, do not add `'use cache'`, `cacheTag()`, `cacheLife()`, or Cache Components-specific structure.
+If the flag is absent, do not add `'use cache'`, `cacheTag()`, `cacheLife()`, or Cache
+Components-specific structure.
 
 ## Decision Model
 
 - Static content: no directive needed.
 - Shared cacheable data: same output across users for the same arguments; may use `'use cache'`.
-- Dynamic user-specific data: depends on `cookies()`, `headers()`, auth, request context, or private user data; keep dynamic and stream with Suspense when useful.
+- Dynamic user-specific data: depends on `cookies()`, `headers()`, auth, request context, or private
+  user data; keep dynamic and stream with Suspense when useful.
 
 ## Rules
 

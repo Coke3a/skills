@@ -1,7 +1,6 @@
 # Clean Architecture Review
 
-Use this reference to check whether changes followed `rust-clean-coke-architecture-
-patterns`.
+Use this reference to check whether changes followed `rust-clean-coke-architecture- patterns`.
 
 ## Dependency Direction
 
@@ -13,8 +12,8 @@ patterns`.
 
 ## Layer Ownership
 
-- Handlers map request DTOs to usecase input, call usecases, map output to response
-  DTOs, and map errors to API responses.
+- Handlers map request DTOs to usecase input, call usecases, map output to response DTOs, and map
+  errors to API responses.
 - Usecases own orchestration and user-facing error semantics.
 - Domain owns invariants and business rules.
 - Infra owns persistence details and external IO adapters.
@@ -34,8 +33,7 @@ patterns`.
 - Repository traits live in `src/domain/repositories/`.
 - Repository implementations live in `src/infra/db/repositories/`.
 - `find_by_*` methods return `Result<Option<T>, RepoError>`.
-- Diesel query builder is used unless the architecture skill explicitly allows an
-  exception.
+- Diesel query builder is used unless the architecture skill explicitly allows an exception.
 - Row to domain reconstruction uses `from_existing()`.
 - Domain to row conversion borrows fields where practical.
 - Row and NewRow structs stay private to infra.

@@ -2,7 +2,9 @@
 
 This README explains how to use the official Expo Skills for React Native + Expo projects.
 
-The goal is to use Expo’s official AI agent skills directly whenever possible instead of recreating or merging them into a custom skill. Expo maintains these skills specifically for building, deploying, and debugging Expo and React Native apps.
+The goal is to use Expo’s official AI agent skills directly whenever possible instead of recreating
+or merging them into a custom skill. Expo maintains these skills specifically for building,
+deploying, and debugging Expo and React Native apps.
 
 ## Principle
 
@@ -24,14 +26,22 @@ Do not rewrite Expo-specific guidance unless there is a clear project-specific r
 
 - Expo Skills documentation: https://docs.expo.dev/skills/
 - Expo Skills GitHub repository: https://github.com/expo/skills
-- Expo building-native-ui skill: https://github.com/expo/skills/blob/main/plugins/expo/skills/building-native-ui/SKILL.md
-- Expo native-data-fetching skill: https://github.com/expo/skills/blob/main/plugins/expo/skills/native-data-fetching/SKILL.md
-- Expo expo-cicd-workflows skill: https://github.com/expo/skills/blob/main/plugins/expo/skills/expo-cicd-workflows/SKILL.md
-- Expo expo-deployment skill: https://github.com/expo/skills/blob/main/plugins/expo/skills/expo-deployment/SKILL.md
-- Expo dev-client skill: https://github.com/expo/skills/tree/main/plugins/expo/skills/expo-dev-client
-- Expo upgrading-expo skill: https://github.com/expo/skills/tree/main/plugins/expo/skills/upgrading-expo
-- Expo tailwind setup skill: https://github.com/expo/skills/tree/main/plugins/expo/skills/expo-tailwind-setup
-- Expo EAS update insights skill: https://github.com/expo/skills/tree/main/plugins/expo/skills/eas-update-insights
+- Expo building-native-ui skill:
+  https://github.com/expo/skills/blob/main/plugins/expo/skills/building-native-ui/SKILL.md
+- Expo native-data-fetching skill:
+  https://github.com/expo/skills/blob/main/plugins/expo/skills/native-data-fetching/SKILL.md
+- Expo expo-cicd-workflows skill:
+  https://github.com/expo/skills/blob/main/plugins/expo/skills/expo-cicd-workflows/SKILL.md
+- Expo expo-deployment skill:
+  https://github.com/expo/skills/blob/main/plugins/expo/skills/expo-deployment/SKILL.md
+- Expo dev-client skill:
+  https://github.com/expo/skills/tree/main/plugins/expo/skills/expo-dev-client
+- Expo upgrading-expo skill:
+  https://github.com/expo/skills/tree/main/plugins/expo/skills/upgrading-expo
+- Expo tailwind setup skill:
+  https://github.com/expo/skills/tree/main/plugins/expo/skills/expo-tailwind-setup
+- Expo EAS update insights skill:
+  https://github.com/expo/skills/tree/main/plugins/expo/skills/eas-update-insights
 
 ---
 
@@ -72,27 +82,28 @@ pnpm dlx skills add expo/skills
 yarn dlx skills add expo/skills
 ```
 
-After installation, ask the agent Expo-specific questions and let it auto-discover the correct skill.
+After installation, ask the agent Expo-specific questions and let it auto-discover the correct
+skill.
 
 ---
 
 ## Official Expo Skills and Responsibilities
 
-| Official Expo Skill | Main Responsibility | Use When |
-|---|---|---|
-| `building-native-ui` | Build native UI with Expo Router, styling, components, navigation, animations, patterns, and native tabs | Creating screens, navigation, UI components, native-feeling interactions |
-| `native-data-fetching` | API calls, fetch, React Query, SWR, caching, offline support, token/auth handling, Expo Router loaders | Implementing or debugging network requests or API integration |
-| `expo-cicd-workflows` | EAS workflow YAML files and CI/CD automation for Expo/EAS | Creating `.eas/workflows/*.yml`, EAS build pipelines, automation |
-| `expo-deployment` | Deploy Expo apps to iOS App Store, Android Play Store, web hosting, and API routes | Building production apps, submitting to stores, release setup |
-| `expo-dev-client` | Build and distribute Expo development clients locally or via TestFlight | Using custom native modules or development builds |
-| `expo-tailwind-setup` | Set up Tailwind CSS v4 / NativeWind in Expo | Adding Tailwind-style universal styling to Expo |
-| `upgrading-expo` | Upgrade Expo SDK and fix dependency issues | Moving to a newer Expo SDK |
-| `eas-update-insights` | Check health of published EAS Updates | Monitoring OTA update health, crash rates, install/launch counts |
-| `expo-api-routes` | Create API routes in Expo Router with EAS Hosting | Building API routes inside Expo Router |
-| `expo-module` | Create native Expo modules and native views | Building Swift/Kotlin/TypeScript native modules |
-| `use-dom` | Run web code in a WebView on native and as-is on web | Reusing web components inside Expo native apps |
-| `expo-ui-swift-ui` | Use SwiftUI views/modifiers through Expo UI | iOS-native UI integration |
-| `expo-ui-jetpack-compose` | Use Jetpack Compose views/modifiers through Expo UI | Android-native UI integration |
+| Official Expo Skill       | Main Responsibility                                                                                      | Use When                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `building-native-ui`      | Build native UI with Expo Router, styling, components, navigation, animations, patterns, and native tabs | Creating screens, navigation, UI components, native-feeling interactions |
+| `native-data-fetching`    | API calls, fetch, React Query, SWR, caching, offline support, token/auth handling, Expo Router loaders   | Implementing or debugging network requests or API integration            |
+| `expo-cicd-workflows`     | EAS workflow YAML files and CI/CD automation for Expo/EAS                                                | Creating `.eas/workflows/*.yml`, EAS build pipelines, automation         |
+| `expo-deployment`         | Deploy Expo apps to iOS App Store, Android Play Store, web hosting, and API routes                       | Building production apps, submitting to stores, release setup            |
+| `expo-dev-client`         | Build and distribute Expo development clients locally or via TestFlight                                  | Using custom native modules or development builds                        |
+| `expo-tailwind-setup`     | Set up Tailwind CSS v4 / NativeWind in Expo                                                              | Adding Tailwind-style universal styling to Expo                          |
+| `upgrading-expo`          | Upgrade Expo SDK and fix dependency issues                                                               | Moving to a newer Expo SDK                                               |
+| `eas-update-insights`     | Check health of published EAS Updates                                                                    | Monitoring OTA update health, crash rates, install/launch counts         |
+| `expo-api-routes`         | Create API routes in Expo Router with EAS Hosting                                                        | Building API routes inside Expo Router                                   |
+| `expo-module`             | Create native Expo modules and native views                                                              | Building Swift/Kotlin/TypeScript native modules                          |
+| `use-dom`                 | Run web code in a WebView on native and as-is on web                                                     | Reusing web components inside Expo native apps                           |
+| `expo-ui-swift-ui`        | Use SwiftUI views/modifiers through Expo UI                                                              | iOS-native UI integration                                                |
+| `expo-ui-jetpack-compose` | Use Jetpack Compose views/modifiers through Expo UI                                                      | Android-native UI integration                                            |
 
 ---
 
@@ -196,19 +207,20 @@ Use Expo official skills for Expo-specific implementation details.
 
 Use our shared project skills for cross-platform workflow and quality gates.
 
-| Area | Preferred Skill |
-|---|---|
-| Expo screen/UI/navigation | `building-native-ui` |
-| Expo API/network/data fetching | `native-data-fetching` |
-| Expo build workflows | `expo-cicd-workflows` |
-| Expo app store deployment | `expo-deployment` |
-| Expo development builds | `expo-dev-client` |
-| Product API contract | `app-api-contract-workflow` |
-| Product design direction | `app-design-system` or design skills |
-| Final app code review | `app-code-review` |
-| Backend implementation | backend skills |
+| Area                           | Preferred Skill                      |
+| ------------------------------ | ------------------------------------ |
+| Expo screen/UI/navigation      | `building-native-ui`                 |
+| Expo API/network/data fetching | `native-data-fetching`               |
+| Expo build workflows           | `expo-cicd-workflows`                |
+| Expo app store deployment      | `expo-deployment`                    |
+| Expo development builds        | `expo-dev-client`                    |
+| Product API contract           | `app-api-contract-workflow`          |
+| Product design direction       | `app-design-system` or design skills |
+| Final app code review          | `app-code-review`                    |
+| Backend implementation         | backend skills                       |
 
-Do not create a custom Expo architecture skill unless the official skills are missing something important for the project.
+Do not create a custom Expo architecture skill unless the official skills are missing something
+important for the project.
 
 ---
 
@@ -381,10 +393,13 @@ Do not invoke all skills at once. Use the skill that matches the current phase.
 ### Do
 
 - Use official Expo Skills for Expo-specific implementation.
-- Use `building-native-ui` for screens, navigation, UI components, animations, and native UI patterns.
-- Use `native-data-fetching` for API calls, caching, offline behavior, auth tokens, and network debugging.
+- Use `building-native-ui` for screens, navigation, UI components, animations, and native UI
+  patterns.
+- Use `native-data-fetching` for API calls, caching, offline behavior, auth tokens, and network
+  debugging.
 - Use `expo-cicd-workflows` for `.eas/workflows/*.yml`.
-- Use `expo-deployment` for app store, TestFlight, Play Store, web deployment, and production build guidance.
+- Use `expo-deployment` for app store, TestFlight, Play Store, web deployment, and production build
+  guidance.
 - Use `expo-dev-client` when native modules or custom native configuration are involved.
 - Use `upgrading-expo` for SDK upgrades.
 - Use `eas-update-insights` after OTA update rollout.
@@ -414,31 +429,30 @@ This project uses official Expo Skills as the source of truth for Expo-specific 
 
 Use these skills when relevant:
 
-- `building-native-ui`:
-  Use for Expo Router screens, native UI components, styling, navigation, animations, patterns, and native tabs.
+- `building-native-ui`: Use for Expo Router screens, native UI components, styling, navigation,
+  animations, patterns, and native tabs.
 
-- `native-data-fetching`:
-  Use for API requests, fetch, React Query, SWR, error handling, caching, offline behavior, token/auth handling, and Expo Router loaders.
+- `native-data-fetching`: Use for API requests, fetch, React Query, SWR, error handling, caching,
+  offline behavior, token/auth handling, and Expo Router loaders.
 
-- `expo-cicd-workflows`:
-  Use for `.eas/workflows/*.yml`, EAS build pipelines, workflow automation, triggers, jobs, concurrency, and validation.
+- `expo-cicd-workflows`: Use for `.eas/workflows/*.yml`, EAS build pipelines, workflow automation,
+  triggers, jobs, concurrency, and validation.
 
-- `expo-deployment`:
-  Use for iOS App Store, TestFlight, Android Play Store, web deployment, EAS Build, EAS Submit, and app metadata.
+- `expo-deployment`: Use for iOS App Store, TestFlight, Android Play Store, web deployment, EAS
+  Build, EAS Submit, and app metadata.
 
-- `expo-dev-client`:
-  Use for Expo development builds and distribution when native modules or custom native config are required.
+- `expo-dev-client`: Use for Expo development builds and distribution when native modules or custom
+  native config are required.
 
-- `upgrading-expo`:
-  Use for Expo SDK upgrades and dependency compatibility.
+- `upgrading-expo`: Use for Expo SDK upgrades and dependency compatibility.
 
-- `eas-update-insights`:
-  Use to evaluate OTA update health after publishing EAS Updates.
+- `eas-update-insights`: Use to evaluate OTA update health after publishing EAS Updates.
 
 Project rules:
 
 - Do not recreate official Expo guidance unless a project-specific constraint requires it.
-- Use `app-api-contract-workflow` before implementing mobile API integration if the API contract is unclear.
+- Use `app-api-contract-workflow` before implementing mobile API integration if the API contract is
+  unclear.
 - Use design skills before UI implementation if the visual direction is unclear.
 - Use `app-code-review` before finishing mobile app changes.
 - Do not fabricate EAS build, submit, or update results.
@@ -479,18 +493,18 @@ Do not mix responsibilities:
 
 ## Quick Decision Guide
 
-| User Request | Use This Official Expo Skill |
-|---|---|
-| “Build a settings screen with navigation” | `building-native-ui` |
-| “Add API calls and caching” | `native-data-fetching` |
-| “Create EAS workflow for PR builds” | `expo-cicd-workflows` |
-| “Deploy to TestFlight / App Store / Play Store” | `expo-deployment` |
-| “Create a development build” | `expo-dev-client` |
-| “Upgrade Expo SDK” | `upgrading-expo` |
-| “Check if the latest OTA update is healthy” | `eas-update-insights` |
-| “Use Tailwind/NativeWind in Expo” | `expo-tailwind-setup` |
-| “Create native module/view” | `expo-module` |
-| “Reuse web code in native app” | `use-dom` |
+| User Request                                    | Use This Official Expo Skill |
+| ----------------------------------------------- | ---------------------------- |
+| “Build a settings screen with navigation”       | `building-native-ui`         |
+| “Add API calls and caching”                     | `native-data-fetching`       |
+| “Create EAS workflow for PR builds”             | `expo-cicd-workflows`        |
+| “Deploy to TestFlight / App Store / Play Store” | `expo-deployment`            |
+| “Create a development build”                    | `expo-dev-client`            |
+| “Upgrade Expo SDK”                              | `upgrading-expo`             |
+| “Check if the latest OTA update is healthy”     | `eas-update-insights`        |
+| “Use Tailwind/NativeWind in Expo”               | `expo-tailwind-setup`        |
+| “Create native module/view”                     | `expo-module`                |
+| “Reuse web code in native app”                  | `use-dom`                    |
 
 ---
 
@@ -515,4 +529,5 @@ expo-dev-client
 = development builds and native-module development workflow
 ```
 
-Our custom skills should only orchestrate product workflow, API contracts, design direction, and final review around the official Expo skills.
+Our custom skills should only orchestrate product workflow, API contracts, design direction, and
+final review around the official Expo skills.

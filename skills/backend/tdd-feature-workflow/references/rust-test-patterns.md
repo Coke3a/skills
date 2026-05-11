@@ -23,8 +23,7 @@ fn rejects_empty_name() {
 
 ## Inline test module
 
-Use inline tests only when tests are small and the project does not require sibling
-files.
+Use inline tests only when tests are small and the project does not require sibling files.
 
 ```rust
 #[cfg(test)]
@@ -98,8 +97,8 @@ impl ExampleRepository for FakeExampleRepository {
 }
 ```
 
-Prefer asserting outputs or resulting state over fake call counts. Assert a call count
-only when the call itself is behavior.
+Prefer asserting outputs or resulting state over fake call counts. Assert a call count only when the
+call itself is behavior.
 
 ## Assertions
 
@@ -109,8 +108,7 @@ Use `matches!` for typed error assertions:
 assert!(matches!(result, Err(UsecaseError::Conflict(_))));
 ```
 
-`unwrap` is acceptable in tests when it keeps setup readable. Avoid `unwrap` in
-production code.
+`unwrap` is acceptable in tests when it keeps setup readable. Avoid `unwrap` in production code.
 
 ## Test builders
 

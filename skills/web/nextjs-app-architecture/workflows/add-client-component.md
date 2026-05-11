@@ -1,6 +1,7 @@
 # Add Client Component
 
-Use this workflow when a component needs interactivity, browser APIs, local state, effects, refs, or event handlers.
+Use this workflow when a component needs interactivity, browser APIs, local state, effects, refs, or
+event handlers.
 
 ## Steps
 

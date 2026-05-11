@@ -2,8 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for measure-first optimization preserving
-architecture and avoids out-of-scope requests.
+These evals verify the skill triggers for measure-first optimization preserving architecture and
+avoids out-of-scope requests.
 
 ## Positive Trigger Prompts
 

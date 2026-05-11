@@ -1,18 +1,23 @@
 # Optimization Summary
 
 Performance goal:
+
 - ...
 
 Bottleneck found:
+
 - ...
 
 Optimization made:
+
 - ...
 
 Files changed:
+
 - ...
 
 Layer affected:
+
 - Handler:
 - Usecase:
 - Domain:
@@ -20,16 +25,21 @@ Layer affected:
 - Worker:
 
 Architecture safety:
+
 - ...
 
 Tests run:
+
 - ...
 
 Benchmarks/profiles run:
+
 - ...
 
 Before/after result:
+
 - ...
 
 Follow-up:
+
 - ...

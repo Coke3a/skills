@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Verify that `nextjs-app-architecture` triggers for Next.js App Router architecture work and defers out-of-scope testing, backend, mobile, CI/CD, and design-system concerns to companion skills.
+Verify that `nextjs-app-architecture` triggers for Next.js App Router architecture work and defers
+out-of-scope testing, backend, mobile, CI/CD, and design-system concerns to companion skills.
 
 ## Positive Trigger Prompts
 
@@ -22,10 +23,13 @@ Verify that `nextjs-app-architecture` triggers for Next.js App Router architectu
 
 ## Expected Behavior
 
-- Trigger for App Router structure, Server/Client boundaries, data fetching placement, Server Actions, component composition, feature folders, API client boundaries, UI states, accessibility-aware structure, and performance-aware architecture.
+- Trigger for App Router structure, Server/Client boundaries, data fetching placement, Server
+  Actions, component composition, feature folders, API client boundaries, UI states,
+  accessibility-aware structure, and performance-aware architecture.
 - Inspect the project shape before choosing standalone or monorepo paths.
 - Apply Cache Components guidance only when `cacheComponents: true` is detected in `next.config.*`.
-- Coordinate with companion skills when the request crosses API contract, design system, code review, TDD, backend, or mobile boundaries.
+- Coordinate with companion skills when the request crosses API contract, design system, code
+  review, TDD, backend, or mobile boundaries.
 
 ## Must Not Do
 
@@ -50,6 +54,10 @@ Verify that `nextjs-app-architecture` triggers for Next.js App Router architectu
 
 ## Example Evaluation
 
-- **Input prompt**: "Add a Server Action for this Next.js settings form and decide which pieces should be client components."
-- **Expected skill usage**: `nextjs-app-architecture` is selected; `nextjs-ui-tdd-workflow` is not selected unless tests are requested.
-- **Expected output qualities**: The agent validates/authenticates/authorizes the action, returns stable form state, keeps the client form shell small, keeps server logic out of Client Components, invalidates changed data, and reports verification commands from `package.json`.
+- **Input prompt**: "Add a Server Action for this Next.js settings form and decide which pieces
+  should be client components."
+- **Expected skill usage**: `nextjs-app-architecture` is selected; `nextjs-ui-tdd-workflow` is not
+  selected unless tests are requested.
+- **Expected output qualities**: The agent validates/authenticates/authorizes the action, returns
+  stable form state, keeps the client form shell small, keeps server logic out of Client Components,
+  invalidates changed data, and reports verification commands from `package.json`.

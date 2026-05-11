@@ -2,8 +2,8 @@
 
 ## Purpose
 
-These evals verify the skill triggers for build and harden automation workflows and
-avoids out-of-scope requests.
+These evals verify the skill triggers for build and harden automation workflows and avoids
+out-of-scope requests.
 
 ## Positive Trigger Prompts
 

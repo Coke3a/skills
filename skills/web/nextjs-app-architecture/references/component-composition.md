@@ -1,6 +1,7 @@
 # Component Composition
 
 Sources synthesized:
+
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/composition-patterns/SKILL.md
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md
 
@@ -38,4 +39,5 @@ Do not use compound components for one-off feature UI or simple display componen
 
 ## Accessibility Preservation
 
-Composition refactors must preserve labels, roles, focus behavior, keyboard interaction, and field/error relationships.
+Composition refactors must preserve labels, roles, focus behavior, keyboard interaction, and
+field/error relationships.

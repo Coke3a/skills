@@ -15,15 +15,15 @@
 ## Testing Library Pattern
 
 ```tsx
-const user = userEvent.setup()
+const user = userEvent.setup();
 
-render(<LoginForm />)
+render(<LoginForm />);
 
-await user.type(screen.getByLabelText(/email/i), 'user@example.com')
-await user.type(screen.getByLabelText(/password/i), 'correct horse battery staple')
-await user.click(screen.getByRole('button', { name: /sign in/i }))
+await user.type(screen.getByLabelText(/email/i), "user@example.com");
+await user.type(screen.getByLabelText(/password/i), "correct horse battery staple");
+await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-expect(await screen.findByText(/welcome/i)).toBeVisible()
+expect(await screen.findByText(/welcome/i)).toBeVisible();
 ```
 
 ## Assertions
@@ -39,4 +39,6 @@ Avoid testing form library internals or private state.
 
 ## Server Actions
 
-For Server Action-backed forms, component tests can mock the action result for validation and error mapping. Use Playwright for the full form submission flow when server integration is the behavior being protected.
+For Server Action-backed forms, component tests can mock the action result for validation and error
+mapping. Use Playwright for the full form submission flow when server integration is the behavior
+being protected.

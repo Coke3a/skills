@@ -1,6 +1,7 @@
 # Playwright Patterns
 
 Sources:
+
 - Official: https://playwright.dev/docs/best-practices
 - Community inspiration only: https://skillsauth.com/skills/absolutelyskilled/playwright-testing
 
@@ -9,8 +10,8 @@ Sources:
 Prefer locators that match user-visible contracts:
 
 ```ts
-await page.getByRole('button', { name: /sign in/i }).click()
-await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
+await page.getByRole("button", { name: /sign in/i }).click();
+await expect(page.getByRole("heading", { name: /dashboard/i })).toBeVisible();
 ```
 
 Use CSS/XPath only when there is no stable user-facing contract.
@@ -20,12 +21,13 @@ Use CSS/XPath only when there is no stable user-facing contract.
 Prefer Playwright assertions that wait automatically:
 
 ```ts
-await expect(page.getByText(/saved/i)).toBeVisible()
-await expect(page.getByRole('button', { name: /submit/i })).toBeEnabled()
-await expect(page).toHaveURL(/dashboard/)
+await expect(page.getByText(/saved/i)).toBeVisible();
+await expect(page.getByRole("button", { name: /submit/i })).toBeEnabled();
+await expect(page).toHaveURL(/dashboard/);
 ```
 
-Avoid manual assertions like `expect(await locator.isVisible()).toBe(true)` when a web-first assertion exists.
+Avoid manual assertions like `expect(await locator.isVisible()).toBe(true)` when a web-first
+assertion exists.
 
 ## Isolation
 
@@ -37,7 +39,8 @@ Avoid manual assertions like `expect(await locator.isVisible()).toBe(true)` when
 
 ## Network and Third Parties
 
-Test what the project controls. Mock, route, or stage external dependencies instead of testing third-party sites or services directly.
+Test what the project controls. Mock, route, or stage external dependencies instead of testing
+third-party sites or services directly.
 
 ## When E2E Is Worth It
 

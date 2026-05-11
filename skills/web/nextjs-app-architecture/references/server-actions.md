@@ -1,6 +1,7 @@
 # Server Actions
 
 Sources synthesized:
+
 - https://github.com/vercel-labs/agent-skills/blob/main/skills/react-best-practices/SKILL.md
 - https://skills.sh/vercel/next.js/cache-components
 
@@ -16,7 +17,8 @@ Sources synthesized:
 - Authorize against the target resource, not only the user session.
 - Validate all input with the project schema convention.
 - Treat `FormData` as untrusted.
-- Do not leak secrets, raw database errors, stack traces, or internal identifiers that users should not see.
+- Do not leak secrets, raw database errors, stack traces, or internal identifiers that users should
+  not see.
 
 ## Result Shape
 
@@ -34,7 +36,8 @@ Adapt this shape to the project convention if one exists.
 
 - Invalidate affected data after successful mutations.
 - Keep invalidation close to the mutation.
-- If Cache Components are enabled, align `cacheTag()` reads with action invalidation through `updateTag()` or `revalidateTag()`.
+- If Cache Components are enabled, align `cacheTag()` reads with action invalidation through
+  `updateTag()` or `revalidateTag()`.
 
 ## Form Integration
 

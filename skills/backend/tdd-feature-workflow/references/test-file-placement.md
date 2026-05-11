@@ -36,8 +36,7 @@ tests/
 Rules:
 
 - Domain and usecase unit tests may live beside the production module as `*_test.rs`.
-- Every `*_test.rs` file under `src/` must be declared from the parent module with
-  `#[cfg(test)]`.
+- Every `*_test.rs` file under `src/` must be declared from the parent module with `#[cfg(test)]`.
 - Repository and API integration tests live under `tests/`.
 - Shared integration test helpers live under `tests/common/mod.rs`.
 - Do not rely on the `*_test.rs` suffix alone for Rust source-level tests.

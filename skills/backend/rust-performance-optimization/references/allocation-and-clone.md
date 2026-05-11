@@ -1,7 +1,6 @@
 # Allocation and Clone
 
-Optimize allocations only when they are in a hot path or profiling shows allocation
-cost.
+Optimize allocations only when they are in a hot path or profiling shows allocation cost.
 
 Check for:
 

@@ -1,11 +1,13 @@
 # Refactor Component Composition
 
-Use this workflow when a component API is becoming hard to use, especially from boolean props or unclear ownership.
+Use this workflow when a component API is becoming hard to use, especially from boolean props or
+unclear ownership.
 
 ## Steps
 
 1. Find the pressure point.
-   - Look for multiple booleans, mode flags, render branches, repeated override props, or unclear slot ownership.
+   - Look for multiple booleans, mode flags, render branches, repeated override props, or unclear
+     slot ownership.
 2. Classify the component.
    - One-off feature UI: keep it local and simple.
    - Repeated reusable UI: improve the public API.
@@ -23,7 +25,8 @@ Use this workflow when a component API is becoming hard to use, especially from 
    - Lift state only when it clarifies ownership or enables coordination.
    - Use context only for truly shared state.
 6. Preserve accessibility.
-   - Keep semantic elements, labels, focus handling, keyboard behavior, and ARIA relationships intact.
+   - Keep semantic elements, labels, focus handling, keyboard behavior, and ARIA relationships
+     intact.
 7. Avoid premature abstraction.
    - Do not create generic components without repeated use cases.
 

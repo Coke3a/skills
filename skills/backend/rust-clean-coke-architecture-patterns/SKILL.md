@@ -5,8 +5,7 @@ description: Use when creating or refactoring Rust backend code with Axum, Diese
 
 # Rust Clean Architecture
 
-Use this skill to create or refactor Rust backend code around a focused Clean
-Architecture pattern:
+Use this skill to create or refactor Rust backend code around a focused Clean Architecture pattern:
 
 ```text
 handlers -> usecases -> domain
@@ -23,15 +22,14 @@ cargo test --all-features
 
 ## Purpose
 
-Keep Axum handlers, usecases, domain code, and Diesel infrastructure separated by
-explicit responsibilities and dependency direction.
+Keep Axum handlers, usecases, domain code, and Diesel infrastructure separated by explicit
+responsibilities and dependency direction.
 
 Use this skill for:
 
 - Layer responsibilities and dependency boundaries.
 - Project and file structure for Rust backend features.
-- Naming conventions for entities, value objects, repositories, usecases, DTOs, and
-  rows.
+- Naming conventions for entities, value objects, repositories, usecases, DTOs, and rows.
 - Error types and conversion flow.
 - Repository trait pattern in the domain layer.
 - Diesel repository implementation pattern in the infra layer.
@@ -59,8 +57,7 @@ infra -> domain traits
 
 Rules:
 
-- Handlers may instantiate infra implementations for wiring, but must not contain
-  business logic.
+- Handlers may instantiate infra implementations for wiring, but must not contain business logic.
 - Usecases own orchestration and user-facing error semantics.
 - Domain owns entities, value objects, invariants, and repository traits.
 - Infra implements repository traits and handles IO details.
@@ -70,12 +67,12 @@ Rules:
 
 ## Layer Responsibilities
 
-| Layer | Owns | Must Not Own |
-|---|---|---|
-| `handlers` | Axum extractors, request/response DTOs, repo wiring, usecase calls, HTTP response mapping | Business rules, Diesel queries, domain invariants |
-| `usecases` | Application orchestration, input/output structs, user-facing error semantics, repository calls | HTTP types, Diesel types, schema details |
-| `domain` | Entities, value objects, invariants, repository traits, domain errors | Axum, Diesel, infra implementations, DTOs |
-| `infra` | Diesel rows, query builder code, pool access, repository trait implementations, IO error mapping | HTTP behavior, user-facing semantics, domain decisions |
+| Layer      | Owns                                                                                             | Must Not Own                                           |
+| ---------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| `handlers` | Axum extractors, request/response DTOs, repo wiring, usecase calls, HTTP response mapping        | Business rules, Diesel queries, domain invariants      |
+| `usecases` | Application orchestration, input/output structs, user-facing error semantics, repository calls   | HTTP types, Diesel types, schema details               |
+| `domain`   | Entities, value objects, invariants, repository traits, domain errors                            | Axum, Diesel, infra implementations, DTOs              |
+| `infra`    | Diesel rows, query builder code, pool access, repository trait implementations, IO error mapping | HTTP behavior, user-facing semantics, domain decisions |
 
 ## Project Structure
 
@@ -115,20 +112,20 @@ src/
 
 ## Naming Conventions
 
-| Item | Pattern | Example |
-|---|---|---|
-| Module/file | snake_case | `create_example_entity.rs` |
-| Entity | PascalCase | `ExampleEntity` |
-| ID newtype | `{Entity}Id` | `ExampleEntityId` |
-| Validated value object | `{Entity}{Field}` | `ExampleEntityName` |
-| Repository trait | `{Entity}Repository` | `ExampleRepository` |
-| Repository impl | `{Entity}Postgres` | `ExamplePostgres` |
-| Usecase | `{Action}{Entity}UseCase` | `CreateExampleEntityUseCase` |
-| Input/output | `{Action}{Entity}Input/Output` | `CreateExampleEntityInput` / `CreateExampleEntityOutput` |
-| Request/response DTO | `{Action}{Entity}Request/Response` | `CreateExampleEntityRequest` / `CreateExampleEntityResponse` |
-| Row structs | `{Entity}Row` / `New{Entity}Row` | `ExampleEntityRow` / `NewExampleEntityRow` |
-| Route handler | snake_case action | `create_example_entity` |
-| Table | snake_case plural | `example_entities` |
+| Item                   | Pattern                            | Example                                                      |
+| ---------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| Module/file            | snake_case                         | `create_example_entity.rs`                                   |
+| Entity                 | PascalCase                         | `ExampleEntity`                                              |
+| ID newtype             | `{Entity}Id`                       | `ExampleEntityId`                                            |
+| Validated value object | `{Entity}{Field}`                  | `ExampleEntityName`                                          |
+| Repository trait       | `{Entity}Repository`               | `ExampleRepository`                                          |
+| Repository impl        | `{Entity}Postgres`                 | `ExamplePostgres`                                            |
+| Usecase                | `{Action}{Entity}UseCase`          | `CreateExampleEntityUseCase`                                 |
+| Input/output           | `{Action}{Entity}Input/Output`     | `CreateExampleEntityInput` / `CreateExampleEntityOutput`     |
+| Request/response DTO   | `{Action}{Entity}Request/Response` | `CreateExampleEntityRequest` / `CreateExampleEntityResponse` |
+| Row structs            | `{Entity}Row` / `New{Entity}Row`   | `ExampleEntityRow` / `NewExampleEntityRow`                   |
+| Route handler          | snake_case action                  | `create_example_entity`                                      |
+| Table                  | snake_case plural                  | `example_entities`                                           |
 
 ## Error Flow
 
@@ -142,10 +139,8 @@ RepoError   -> UsecaseError -> ApiError
 - `UsecaseError` owns user-facing semantics.
 - `ApiError` maps usecase errors to HTTP status and error body.
 - Use `thiserror` for error enums.
-- Use `anyhow` only for wrapping infra/internal context if the project already uses that
-  pattern.
-- Never use `unwrap()` or `expect()` outside tests or code explicitly marked as example-
-  only.
+- Use `anyhow` only for wrapping infra/internal context if the project already uses that pattern.
+- Never use `unwrap()` or `expect()` outside tests or code explicitly marked as example- only.
 
 ## Repository Pattern
 
@@ -163,35 +158,35 @@ RepoError   -> UsecaseError -> ApiError
 
 ## Templates
 
-| Template | Use For |
-|---|---|
-| `templates/domain_entity.rs` | Domain entity with private fields, `new()`, `from_existing()`, getters, and optional transitions |
-| `templates/value_object.rs` | ID newtype, validated value object, and generic enum/state object |
-| `templates/repo_trait.rs` | Domain repository trait and method return conventions |
-| `templates/repo_diesel_impl.rs` | Diesel repository implementation with rows and centralized error mapping |
-| `templates/usecase.rs` | Usecase input/output, orchestration, validation, and repository call |
-| `templates/handler_axum.rs` | Axum handler DTO mapping, repo wiring, usecase call, and JSON response |
-| `templates/error_types.rs` | Layered error enums and conversions |
+| Template                        | Use For                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `templates/domain_entity.rs`    | Domain entity with private fields, `new()`, `from_existing()`, getters, and optional transitions |
+| `templates/value_object.rs`     | ID newtype, validated value object, and generic enum/state object                                |
+| `templates/repo_trait.rs`       | Domain repository trait and method return conventions                                            |
+| `templates/repo_diesel_impl.rs` | Diesel repository implementation with rows and centralized error mapping                         |
+| `templates/usecase.rs`          | Usecase input/output, orchestration, validation, and repository call                             |
+| `templates/handler_axum.rs`     | Axum handler DTO mapping, repo wiring, usecase call, and JSON response                           |
+| `templates/error_types.rs`      | Layered error enums and conversions                                                              |
 
 ## Workflows
 
-| Workflow | Use For |
-|---|---|
-| `workflows/scaffold-feature.md` | Scaffold a feature across domain, usecase, infra, and handler layers |
-| `workflows/add-router-domain.md` | Add a new route group while preserving handler boundaries |
-| `workflows/refactor-to-layers.md` | Move mixed handler/business/IO code into clean layers |
+| Workflow                          | Use For                                                              |
+| --------------------------------- | -------------------------------------------------------------------- |
+| `workflows/scaffold-feature.md`   | Scaffold a feature across domain, usecase, infra, and handler layers |
+| `workflows/add-router-domain.md`  | Add a new route group while preserving handler boundaries            |
+| `workflows/refactor-to-layers.md` | Move mixed handler/business/IO code into clean layers                |
 
-`workflows/add-background-task.md` is optional architecture-only guidance. Use it only
-when a background task must preserve the same dependency direction.
+`workflows/add-background-task.md` is optional architecture-only guidance. Use it only when a
+background task must preserve the same dependency direction.
 
 ## References
 
-| Reference | Use For |
-|---|---|
-| `references/architecture.md` | Layer rules, file layout, dependency direction, and architecture checks |
-| `references/coding-style.md` | Naming and focused layer conventions |
-| `references/error-handling.md` | Error type responsibilities and conversion flow |
-| `references/repository-orm.md` | Repository trait and Diesel implementation patterns |
+| Reference                      | Use For                                                                 |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| `references/architecture.md`   | Layer rules, file layout, dependency direction, and architecture checks |
+| `references/coding-style.md`   | Naming and focused layer conventions                                    |
+| `references/error-handling.md` | Error type responsibilities and conversion flow                         |
+| `references/repository-orm.md` | Repository trait and Diesel implementation patterns                     |
 
 ## Definition of Done
 

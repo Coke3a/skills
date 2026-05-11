@@ -1,6 +1,7 @@
 # Setup Deploy Pipeline
 
 1. Choose deployment strategy
+
 - [ ] Identify provider or platform.
 - [ ] Identify deploy command or script.
 - [ ] Identify staging and production environments.
@@ -9,6 +10,7 @@
 - [ ] Identify rollback method.
 
 2. Staging deploy
+
 - [ ] Trigger after main branch CI or `workflow_dispatch`.
 - [ ] Use staging environment.
 - [ ] Use staging secrets only.
@@ -18,6 +20,7 @@
 - [ ] Publish deployment summary.
 
 3. Production deploy
+
 - [ ] Prefer `workflow_dispatch`, release tag, or protected environment approval.
 - [ ] Use production environment.
 - [ ] Use production secrets only.
@@ -28,6 +31,7 @@
 - [ ] Publish rollback instructions.
 
 4. Verify
+
 - [ ] Do not expose production secrets to PRs.
 - [ ] Do not deploy mutable `latest` without recording SHA or digest.
 - [ ] Do not run destructive migrations without approval.

@@ -1,25 +1,24 @@
 # Coding Style Reference
 
-This reference covers only naming and style conventions needed for the Clean
-Architecture pattern.
+This reference covers only naming and style conventions needed for the Clean Architecture pattern.
 
 ## Naming
 
-| Item | Pattern | Example |
-|---|---|---|
-| Module/file | snake_case | `create_example_entity.rs` |
-| Entity | PascalCase | `ExampleEntity` |
-| ID newtype | `{Entity}Id` | `ExampleEntityId` |
-| Validated value object | `{Entity}{Field}` | `ExampleEntityName` |
-| Repository trait | `{Entity}Repository` | `ExampleRepository` |
-| Repository impl | `{Entity}Postgres` | `ExamplePostgres` |
-| Usecase | `{Action}{Entity}UseCase` | `CreateExampleEntityUseCase` |
-| Input/output | `{Action}{Entity}Input/Output` | `CreateExampleEntityInput` / `CreateExampleEntityOutput` |
-| Request/response DTO | `{Action}{Entity}Request/Response` | `CreateExampleEntityRequest` / `CreateExampleEntityResponse` |
-| Row structs | `{Entity}Row` / `New{Entity}Row` | `ExampleEntityRow` / `NewExampleEntityRow` |
-| Route handler | snake_case action | `create_example_entity` |
-| Table | snake_case plural | `example_entities` |
-| Generic columns | snake_case | `owner_id`, `column_text`, `column_url`, `status` |
+| Item                   | Pattern                            | Example                                                      |
+| ---------------------- | ---------------------------------- | ------------------------------------------------------------ |
+| Module/file            | snake_case                         | `create_example_entity.rs`                                   |
+| Entity                 | PascalCase                         | `ExampleEntity`                                              |
+| ID newtype             | `{Entity}Id`                       | `ExampleEntityId`                                            |
+| Validated value object | `{Entity}{Field}`                  | `ExampleEntityName`                                          |
+| Repository trait       | `{Entity}Repository`               | `ExampleRepository`                                          |
+| Repository impl        | `{Entity}Postgres`                 | `ExamplePostgres`                                            |
+| Usecase                | `{Action}{Entity}UseCase`          | `CreateExampleEntityUseCase`                                 |
+| Input/output           | `{Action}{Entity}Input/Output`     | `CreateExampleEntityInput` / `CreateExampleEntityOutput`     |
+| Request/response DTO   | `{Action}{Entity}Request/Response` | `CreateExampleEntityRequest` / `CreateExampleEntityResponse` |
+| Row structs            | `{Entity}Row` / `New{Entity}Row`   | `ExampleEntityRow` / `NewExampleEntityRow`                   |
+| Route handler          | snake_case action                  | `create_example_entity`                                      |
+| Table                  | snake_case plural                  | `example_entities`                                           |
+| Generic columns        | snake_case                         | `owner_id`, `column_text`, `column_url`, `status`            |
 
 ## Entity style
 

@@ -1,6 +1,7 @@
 # Add Server Route E2E Test
 
-Use this workflow for route/page behavior that depends on async Server Components, routing, server rendering, auth redirects, or browser/server integration.
+Use this workflow for route/page behavior that depends on async Server Components, routing, server
+rendering, auth redirects, or browser/server integration.
 
 1. Define the route and user-visible outcome.
 2. Confirm lower-level tests cannot provide enough confidence.

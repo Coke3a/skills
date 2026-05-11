@@ -1,14 +1,17 @@
 ---
 name: rust-code-review
-description: Use when reviewing Rust backend changes for correctness, Clean Architecture boundaries, TDD test quality, Rust idioms, error handling, repository/handler patterns, async/concurrency safety, performance footguns, security issues, and final verification readiness. Pair with rust-clean-coke-architecture-patterns and tdd-feature-workflow.
+description:
+  Use when reviewing Rust backend changes for correctness, Clean Architecture boundaries, TDD test
+  quality, Rust idioms, error handling, repository/handler patterns, async/concurrency safety,
+  performance footguns, security issues, and final verification readiness. Pair with
+  rust-clean-coke-architecture-patterns and tdd-feature-workflow.
 ---
 
 # Rust Code Review
 
 ## Purpose
 
-Review Rust backend changes and produce actionable findings. Check whether
-implementation follows:
+Review Rust backend changes and produce actionable findings. Check whether implementation follows:
 
 - Rust clean architecture rules
 - TDD test quality rules
@@ -22,16 +25,15 @@ implementation follows:
 
 ## When to Use
 
-Use this skill before finishing a feature, after generated code, before opening or
-merging a PR, when refactoring mixed handler/usecase/domain/infra code, when
-tests/repositories/handlers changed, when async/background/concurrent code changed, or
-when the user asks to review, audit, check correctness, or check skill compliance.
+Use this skill before finishing a feature, after generated code, before opening or merging a PR,
+when refactoring mixed handler/usecase/domain/infra code, when tests/repositories/handlers changed,
+when async/background/concurrent code changed, or when the user asks to review, audit, check
+correctness, or check skill compliance.
 
 ## When Not to Use
 
-Do not use this for initial architecture scaffolding, TDD red/green/refactor
-implementation, CI/CD setup, deployment, formatting-only changes, full benchmarking,
-profiling, or load testing.
+Do not use this for initial architecture scaffolding, TDD red/green/refactor implementation, CI/CD
+setup, deployment, formatting-only changes, full benchmarking, profiling, or load testing.
 
 ## Review Priorities
 
@@ -49,12 +51,11 @@ profiling, or load testing.
 
 ## Companion Skills
 
-- `rust-clean-coke-architecture-patterns` owns layer structure, naming, error flow,
-  repository trait patterns, and Diesel implementation patterns.
-- `tdd-feature-workflow` owns TDD workflow, behavior-focused tests, test scope, and test
-  placement.
-- `rust-code-review` checks whether the change followed those skills. Do not duplicate
-  their full implementation workflows.
+- `rust-clean-coke-architecture-patterns` owns layer structure, naming, error flow, repository trait
+  patterns, and Diesel implementation patterns.
+- `tdd-feature-workflow` owns TDD workflow, behavior-focused tests, test scope, and test placement.
+- `rust-code-review` checks whether the change followed those skills. Do not duplicate their full
+  implementation workflows.
 
 ## Workflows
 
@@ -63,17 +64,17 @@ profiling, or load testing.
 - Failing implementation review: use `workflows/review-failing-implementation.md`.
 - Applying review fixes: use `workflows/apply-review-fixes.md`.
 
-Load only the references needed for the review scope. Use `references/review-
-priorities.md` for severity, `references/clean-architecture-review.md` for architecture,
-`references/tdd-test-review.md` for tests, and `references/performance-concurrency-
-review.md` for async/concurrency and performance footguns.
+Load only the references needed for the review scope. Use `references/review- priorities.md` for
+severity, `references/clean-architecture-review.md` for architecture,
+`references/tdd-test-review.md` for tests, and `references/performance-concurrency- review.md` for
+async/concurrency and performance footguns.
 
 ## Performance and Concurrency Scope
 
-Catch review-level Rust/Tokio performance and concurrency footguns: blocking work in
-async code, locks across `.await`, unbounded tasks/channels, ignored task failures,
-missing cancellation/shutdown behavior, DB pool exhaustion risks, excessive hot-path
-allocation/cloning, and unsafe concurrent access patterns.
+Catch review-level Rust/Tokio performance and concurrency footguns: blocking work in async code,
+locks across `.await`, unbounded tasks/channels, ignored task failures, missing
+cancellation/shutdown behavior, DB pool exhaustion risks, excessive hot-path allocation/cloning, and
+unsafe concurrent access patterns.
 
 Do not perform benchmarking, profiling, or load testing. If impact is uncertain or
 workload-dependent, recommend a dedicated benchmark/profiling workflow.
@@ -88,9 +89,8 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
 
-Do not fabricate command results. If the repository is only a skills repository and has
-no Cargo project, report that these are downstream verification commands for projects
-using the skill.
+Do not fabricate command results. If the repository is only a skills repository and has no Cargo
+project, report that these are downstream verification commands for projects using the skill.
 
 ## Review Report Format
 
@@ -98,18 +98,23 @@ using the skill.
 # Review Summary
 
 Overall status:
+
 - Pass / Pass with comments / Needs changes / Blocked
 
 Scope reviewed:
+
 - ...
 
 Commands run:
+
 - ...
 
 Commands not run:
+
 - ...
 
 Findings:
+
 1. [Severity] Title
    - File:
    - Issue:
@@ -118,23 +123,30 @@ Findings:
    - Related rule:
 
 Architecture:
+
 - ...
 
 Tests:
+
 - ...
 
 Rust quality:
+
 - ...
 
 Error handling:
+
 - ...
 
 Performance/concurrency:
+
 - ...
 
 Security/data safety:
+
 - ...
 
 Remaining risks:
+
 - ...
 ```

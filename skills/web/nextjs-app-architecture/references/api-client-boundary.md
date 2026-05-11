@@ -2,7 +2,8 @@
 
 ## Scope
 
-This skill owns consuming an existing backend or external API from the Next.js app. It does not own backend implementation or API contract design.
+This skill owns consuming an existing backend or external API from the Next.js app. It does not own
+backend implementation or API contract design.
 
 Use `app-api-contract-workflow` when endpoints, schemas, payloads, or contract behavior must change.
 

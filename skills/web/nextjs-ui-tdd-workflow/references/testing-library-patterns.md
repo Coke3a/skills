@@ -1,9 +1,12 @@
 # Testing Library Patterns
 
 Sources:
+
 - Official: https://testing-library.com/docs/guiding-principles/
-- Community inspiration only: https://agent-skills.md/skills/itechmeat/llm-code/react-testing-library
-- Community inspiration only: https://agent-skills.md/skills/pluginagentmarketplace/custom-plugin-react/react-testing-library
+- Community inspiration only:
+  https://agent-skills.md/skills/itechmeat/llm-code/react-testing-library
+- Community inspiration only:
+  https://agent-skills.md/skills/pluginagentmarketplace/custom-plugin-react/react-testing-library
 
 ## Query Priority
 
@@ -27,16 +30,17 @@ Use:
 Use `userEvent.setup()` and realistic interactions:
 
 ```tsx
-const user = userEvent.setup()
-await user.type(screen.getByLabelText(/email/i), 'user@example.com')
-await user.click(screen.getByRole('button', { name: /submit/i }))
+const user = userEvent.setup();
+await user.type(screen.getByLabelText(/email/i), "user@example.com");
+await user.click(screen.getByRole("button", { name: /submit/i }));
 ```
 
 Use `fireEvent` only for low-level events that user-event does not support well.
 
 ## Async UI
 
-Prefer `findBy*` for appearance and `waitFor` for state changes that do not map cleanly to one element query.
+Prefer `findBy*` for appearance and `waitFor` for state changes that do not map cleanly to one
+element query.
 
 Avoid arbitrary sleeps. Wait for user-visible outcomes.
 

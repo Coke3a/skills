@@ -1,12 +1,14 @@
 # Server Components Testing
 
 Sources:
+
 - Official: https://nextjs.org/docs/app/guides/testing
 - Official: https://nextjs.org/docs/app/guides/testing/jest
 
 ## Rule
 
-Prefer E2E tests for async Server Component behavior. Common unit test tools do not fully support async Server Components, and Next.js recommends E2E for async components.
+Prefer E2E tests for async Server Component behavior. Common unit test tools do not fully support
+async Server Components, and Next.js recommends E2E for async components.
 
 ## What to Test Lower
 
@@ -31,6 +33,7 @@ Use Playwright when behavior depends on:
 
 ## Avoid
 
-- Rewriting Server Component architecture to make tests easier; use `nextjs-app-architecture` for structural decisions.
+- Rewriting Server Component architecture to make tests easier; use `nextjs-app-architecture` for
+  structural decisions.
 - Snapshot-only coverage for async page behavior.
 - Mocking so much server behavior that the E2E no longer proves the route behavior.

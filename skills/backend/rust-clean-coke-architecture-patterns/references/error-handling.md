@@ -11,12 +11,12 @@ RepoError   -> UsecaseError -> ApiError
 
 ## Responsibilities
 
-| Error | Layer | Responsibility |
-|---|---|---|
-| `DomainError` | `domain` | Validation failures and business invariant violations |
-| `RepoError` | `domain/repositories` | Persistence and IO details returned by repository traits |
-| `UsecaseError` | `usecases` | User-facing application semantics |
-| `ApiError` | `handlers` | HTTP status and response body mapping |
+| Error          | Layer                 | Responsibility                                           |
+| -------------- | --------------------- | -------------------------------------------------------- |
+| `DomainError`  | `domain`              | Validation failures and business invariant violations    |
+| `RepoError`    | `domain/repositories` | Persistence and IO details returned by repository traits |
+| `UsecaseError` | `usecases`            | User-facing application semantics                        |
+| `ApiError`     | `handlers`            | HTTP status and response body mapping                    |
 
 ## DomainError
 
@@ -123,12 +123,12 @@ impl From<RepoError> for UsecaseError {
 
 `ApiError` is a thin handler-layer wrapper that implements `IntoResponse`.
 
-| UsecaseError | HTTP Status | Error Code |
-|---|---|---|
-| `NotFound` | 404 | `NOT_FOUND` |
-| `Validation` | 400 | `VALIDATION_ERROR` |
-| `Conflict` | 409 | `CONFLICT` |
-| `Infra` | 500 | `INTERNAL_ERROR` |
+| UsecaseError | HTTP Status | Error Code         |
+| ------------ | ----------- | ------------------ |
+| `NotFound`   | 404         | `NOT_FOUND`        |
+| `Validation` | 400         | `VALIDATION_ERROR` |
+| `Conflict`   | 409         | `CONFLICT`         |
+| `Infra`      | 500         | `INTERNAL_ERROR`   |
 
 Rules:
 
@@ -137,7 +137,5 @@ Rules:
 - Do not expose database, pool, schema, or infrastructure details in HTTP responses.
 - Use `?` in handlers and usecases so `From` conversions carry errors across layers.
 - Use `thiserror` for error enums.
-- Use `anyhow` only to wrap infra/internal context when the project follows that
-  pattern.
-- Do not use `unwrap()` or `expect()` outside tests or code explicitly marked as
-  example-only.
+- Use `anyhow` only to wrap infra/internal context when the project follows that pattern.
+- Do not use `unwrap()` or `expect()` outside tests or code explicitly marked as example-only.

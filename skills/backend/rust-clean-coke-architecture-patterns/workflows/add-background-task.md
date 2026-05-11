@@ -1,7 +1,7 @@
 # Optional background task architecture variant
 
-Background job workflow is not owned by this skill. Use this note only when a periodic
-task must preserve the same Clean Architecture dependency direction.
+Background job workflow is not owned by this skill. Use this note only when a periodic task must
+preserve the same Clean Architecture dependency direction.
 
 ## Dependency direction
 
