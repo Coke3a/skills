@@ -107,7 +107,7 @@ confidence.
 When used with `rust-clean-coke-architecture-patterns`, let that companion skill define
 architecture, file structure, names, error flow, repository trait shape, Diesel
 implementation shape, and handler -> usecase -> domain boundaries. In this workspace,
-the companion folder is `backend/rust-clean-coke-architecture-patterns/`.
+the companion folder is `skills/backend/rust-clean-coke-architecture-patterns/`.
 
 Use this skill to decide test order, test level, test file placement, and the
 red/green/refactor loop:
