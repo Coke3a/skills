@@ -1,0 +1,29 @@
+# Review Smells
+
+- Huge diff.
+- Speculative abstraction.
+- Handler with business logic.
+- Usecase importing Axum/Diesel.
+- Domain importing infra/schema/DTOs.
+- Repository returning DTOs.
+- Rows exposed outside infra.
+- `unwrap()` in production.
+- Broad catch-all errors.
+- Tests that assert implementation details.
+- Missing tests for changed behavior.
+- Test file under `src` not wired.
+- Fake call count assertions when output would be better.
+- Raw SQL without justification.
+- Logging sensitive data.
+- TODO without owner/context.
+- Dead code introduced by agent.
+- Duplicated validation in every layer.
+- Blocking operation in async handler.
+- `std::thread::sleep` inside async code.
+- `MutexGuard`/`RwLockGuard` held across `.await`.
+- Unbounded channel/task spawning.
+- Ignored `JoinHandle`.
+- Background worker without cancellation/shutdown path.
+- Retry loop without timeout/backoff/cap.
+- Unnecessary clone/allocation in hot path.
+- `Arc<Mutex<T>>` used without clear need.

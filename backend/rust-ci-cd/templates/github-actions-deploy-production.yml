@@ -1,0 +1,63 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_ref:
+        description: Immutable image ref or digest to deploy
+        required: true
+      previous_image_ref:
+        description: Previous known-good image ref for rollback
+        required: false
+        default: PREVIOUS_IMAGE_REF
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      IMAGE_REF: ${{ inputs.image_ref }}
+      PREVIOUS_IMAGE_REF: ${{ inputs.previous_image_ref }}
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+      MIGRATION_COMMAND: MIGRATION_COMMAND
+      DEPLOY_COMMAND: DEPLOY_COMMAND
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy selected image
+        run: |
+          set -euo pipefail
+          echo "Deploying ${IMAGE_REF} to production"
+          ${DEPLOY_COMMAND}
+
+      - name: Run migrations
+        if: env.MIGRATION_COMMAND != 'MIGRATION_COMMAND'
+        run: |
+          set -euo pipefail
+          ${MIGRATION_COMMAND}
+
+      - name: Smoke test
+        env:
+          BASE_URL: ${{ env.PRODUCTION_URL }}
+        run: bash templates/smoke-test.sh
+
+      - name: Rollback summary
+        run: |
+          {
+            echo "## Production deployment"
+            echo ""
+            echo "- Image: \`${IMAGE_REF}\`"
+            echo "- Previous image: \`${PREVIOUS_IMAGE_REF}\`"
+            echo "- Smoke test: completed"
+            echo "- Rollback: redeploy \`${PREVIOUS_IMAGE_REF}\` if it is known-good and migrations are compatible."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,45 @@
+name: Security-Hardened Example
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check
+        run: cargo test --all-features
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      # Use environment secrets only in deploy jobs, not PR jobs.
+      # Pin third-party actions to SHA when the project requires high security.
+      - name: Deploy with OIDC
+        run: |
+          set -euo pipefail
+          echo "Authenticate with OIDC and run the version-controlled deploy script."

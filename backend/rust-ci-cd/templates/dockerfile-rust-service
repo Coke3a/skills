@@ -1,0 +1,22 @@
+# Optimize this Dockerfile based on the actual workspace structure.
+# Do not bake secrets into the image. Provide runtime config through environment variables.
+
+FROM rust:1-bookworm AS builder
+WORKDIR /app
+
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+
+RUN cargo build --release
+
+FROM debian:bookworm-slim AS runtime
+WORKDIR /app
+
+RUN useradd --create-home --shell /usr/sbin/nologin appuser
+
+COPY --from=builder /app/target/release/APP_BINARY /usr/local/bin/APP_BINARY
+
+USER appuser
+EXPOSE APP_PORT
+
+CMD ["APP_BINARY"]

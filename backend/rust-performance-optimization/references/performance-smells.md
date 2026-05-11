@@ -1,0 +1,22 @@
+# Performance Smells
+
+- Optimizing without measurement.
+- Huge rewrite before identifying the bottleneck.
+- Handler with DB query for speed.
+- Domain importing infra.
+- Bypassing repository trait.
+- Unsafe without proof.
+- `clone()` in hot loop.
+- `format!` / `to_string()` in loop.
+- `collect()` before filtering.
+- Unbounded channel.
+- Unbounded task spawning.
+- Lock held across `.await`.
+- Broad transaction.
+- N+1 repository calls.
+- DB pool exhaustion.
+- No timeout.
+- No cancellation.
+- Benchmark that measures setup instead of target.
+- Benchmark with unrealistic input.
+- Claiming improvement without before/after data.
