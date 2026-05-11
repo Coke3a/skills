@@ -1,6 +1,6 @@
 ---
 name: rust-performance-optimization
-description: Use when optimizing Rust backend performance with measurement-first workflow. Guides benchmark/profiling, hot path identification, allocation/clone reduction, async/Tokio performance, lock contention, DB/repository performance, worker/queue throughput, and before/after reporting while preserving rust-clean-architecture boundaries.
+description: Use when optimizing Rust backend performance with measurement-first workflow. Guides benchmark/profiling, hot path identification, allocation/clone reduction, async/Tokio performance, lock contention, DB/repository performance, worker/queue throughput, and before/after reporting while preserving rust-clean-coke-architecture-patterns boundaries.
 ---
 
 # Rust Performance Optimization
