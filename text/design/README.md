@@ -239,10 +239,10 @@ Use the skills in this order.
 2. frontend-design
    → make the design distinctive and polished
 
-3. nextjs-app-architecture
+3. coke-nextjs-app-architecture
    → implement using maintainable Next.js structure
 
-4. nextjs-ui-tdd-workflow
+4. coke-nextjs-ui-tdd-workflow
    → test user-visible behavior
 
 5. web-design-guidelines
@@ -258,7 +258,7 @@ Use the skills in this order.
 2. web-design-guidelines
    → review accessibility and UX quality
 
-3. nextjs-app-architecture
+3. coke-nextjs-app-architecture
    → refactor implementation only if structure is messy
 ```
 
@@ -278,7 +278,7 @@ Use the skills in this order.
 ### Before shipping a UI feature
 
 ```text
-1. nextjs-ui-tdd-workflow
+1. coke-nextjs-ui-tdd-workflow
    → ensure behavior is tested
 
 2. web-design-guidelines
@@ -297,8 +297,8 @@ Use the skills in this order.
 | `ui-ux-pro-max-skill`     | Design system generator / style intelligence      | You need design direction, tokens, style, palette, typography, layout pattern |
 | `frontend-design`         | Creative polish / distinctive frontend            | You want the UI to look premium, memorable, and less generic                  |
 | `web-design-guidelines`   | Final UX/accessibility/design review              | You already implemented UI and need review findings                           |
-| `nextjs-app-architecture` | Next.js structure and implementation architecture | You need App Router, Server/Client boundaries, component structure            |
-| `nextjs-ui-tdd-workflow`  | UI behavior testing                               | You need tests for forms, loading, error, navigation, critical journeys       |
+| `coke-nextjs-app-architecture` | Next.js structure and implementation architecture | You need App Router, Server/Client boundaries, component structure            |
+| `coke-nextjs-ui-tdd-workflow`  | UI behavior testing                               | You need tests for forms, loading, error, navigation, critical journeys       |
 
 ---
 
@@ -345,8 +345,8 @@ Find form/focus/responsive problems.
 - Keep visual decisions consistent across pages.
 - Review accessibility before shipping.
 - Keep UI behavior tests separate from visual design review.
-- Use `nextjs-app-architecture` after design direction is clear.
-- Use `nextjs-ui-tdd-workflow` for behavior, not pixel-perfect styling.
+- Use `coke-nextjs-app-architecture` after design direction is clear.
+- Use `coke-nextjs-ui-tdd-workflow` for behavior, not pixel-perfect styling.
 
 ### Do Not
 
@@ -406,7 +406,7 @@ Do not make it generic AI SaaS purple-gradient UI.
 ```text
 Step 3: Implementation
 
-Use nextjs-app-architecture to implement this landing page in Next.js App Router.
+Use coke-nextjs-app-architecture to implement this landing page in Next.js App Router.
 
 Rules:
 - use design tokens
@@ -455,7 +455,7 @@ Output:
 ```text
 Step 2: Architecture
 
-Use nextjs-app-architecture to structure the dashboard.
+Use coke-nextjs-app-architecture to structure the dashboard.
 
 Rules:
 - Server Components for initial data where possible
@@ -468,7 +468,7 @@ Rules:
 ```text
 Step 3: Behavior testing
 
-Use nextjs-ui-tdd-workflow to test:
+Use coke-nextjs-ui-tdd-workflow to test:
 - empty state
 - loading state
 - failed API state
@@ -508,8 +508,8 @@ Target users:
 
 First, use ui-ux-pro-max-skill to define the design direction.
 Then use frontend-design to polish the visual concept.
-Then use nextjs-app-architecture to implement it.
-Then use nextjs-ui-tdd-workflow to test user-visible behavior.
+Then use coke-nextjs-app-architecture to implement it.
+Then use coke-nextjs-ui-tdd-workflow to test user-visible behavior.
 Finally use web-design-guidelines to review UX/accessibility quality.
 
 Do not mix responsibilities:

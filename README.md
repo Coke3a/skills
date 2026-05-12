@@ -10,16 +10,16 @@ This repository is separated into two kinds of content:
 
 ### Backend
 
-- `skills/backend/rust-clean-coke-architecture-patterns`
-- `skills/backend/tdd-feature-workflow`
-- `skills/backend/rust-code-review`
-- `skills/backend/rust-performance-optimization`
-- `skills/backend/rust-ci-cd`
+- `skills/backend/coke-rust-clean-architecture`
+- `skills/backend/coke-tdd-feature-workflow`
+- `skills/backend/coke-rust-code-review`
+- `skills/backend/coke-rust-performance-optimization`
+- `skills/backend/coke-rust-ci-cd`
 
 ### Web
 
-- `skills/web/nextjs-app-architecture`
-- `skills/web/nextjs-ui-tdd-workflow`
+- `skills/web/coke-nextjs-app-architecture`
+- `skills/web/coke-nextjs-ui-tdd-workflow`
 
 ## Text Playbooks
 

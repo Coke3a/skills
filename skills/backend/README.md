@@ -2,16 +2,16 @@
 
 ## Skills
 
-- **rust-clean-coke-architecture-patterns**: Owns Rust Clean Architecture layer rules, file
+- **coke-rust-clean-architecture**: Owns Rust Clean Architecture layer rules, file
   structure, naming, error flow, repository trait pattern, Diesel repository implementation pattern,
   and handler/usecase/domain boundaries.
-- **tdd-feature-workflow**: Owns TDD workflow, acceptance criteria, red/green/refactor cycle, test
+- **coke-tdd-feature-workflow**: Owns TDD workflow, acceptance criteria, red/green/refactor cycle, test
   scope selection, and Rust test file placement.
-- **rust-code-review**: Owns correctness review, architecture review, TDD test review, Rust quality
+- **coke-rust-code-review**: Owns correctness review, architecture review, TDD test review, Rust quality
   checks, error handling review, async/concurrency review, security review, and review findings.
-- **rust-ci-cd**: Owns GitHub Actions, Rust CI checks, Docker builds, deployment workflows,
+- **coke-rust-ci-cd**: Owns GitHub Actions, Rust CI checks, Docker builds, deployment workflows,
   migrations, smoke tests, rollback guidance, secrets, permissions, and OIDC hardening.
-- **rust-performance-optimization**: Owns measure-first performance optimization, benchmark/profile
+- **coke-rust-performance-optimization**: Owns measure-first performance optimization, benchmark/profile
   workflow, hot-path identification, async/Tokio performance, allocation/clone optimization,
   DB/repository performance, and before/after reporting while preserving architecture boundaries.
 
@@ -19,30 +19,30 @@
 
 ### Project start
 
-1. Use `rust-ci-cd` to set up CI.
-2. Use `rust-clean-coke-architecture-patterns` to create the architecture skeleton.
-3. Use `rust-code-review` before first commit.
+1. Use `coke-rust-ci-cd` to set up CI.
+2. Use `coke-rust-clean-architecture` to create the architecture skeleton.
+3. Use `coke-rust-code-review` before first commit.
 
 ### Feature development
 
-1. Use `tdd-feature-workflow` to define behavior and test order.
-2. Use `rust-clean-coke-architecture-patterns` for layer/file/error/repository structure.
+1. Use `coke-tdd-feature-workflow` to define behavior and test order.
+2. Use `coke-rust-clean-architecture` for layer/file/error/repository structure.
 3. Implement one behavior at a time.
-4. Use `rust-code-review` before finishing.
+4. Use `coke-rust-code-review` before finishing.
 
 ### Bug fix
 
-1. Use `tdd-feature-workflow` to add regression test first.
+1. Use `coke-tdd-feature-workflow` to add regression test first.
 2. Fix the smallest correct behavior.
-3. Use `rust-code-review`.
+3. Use `coke-rust-code-review`.
 
 ### CI/CD
 
-1. Use `rust-ci-cd` for GitHub Actions, Docker, deployment, migration, smoke test, and rollback.
+1. Use `coke-rust-ci-cd` for GitHub Actions, Docker, deployment, migration, smoke test, and rollback.
 
 ### Performance
 
-1. Use `rust-performance-optimization` only when there is a performance goal, hot path,
+1. Use `coke-rust-performance-optimization` only when there is a performance goal, hot path,
    benchmark/profile, or suspected bottleneck.
 2. Use a measure-first workflow.
 3. Do not break clean architecture boundaries.
@@ -51,30 +51,30 @@
 
 ### New project
 
-"Use rust-ci-cd to set up initial CI, then use rust-clean-coke-architecture-patterns to create a
-minimal Rust backend clean architecture skeleton. Before finishing, use rust- code-review."
+"Use coke-rust-ci-cd to set up initial CI, then use coke-rust-clean-architecture to create a
+minimal Rust backend clean architecture skeleton. Before finishing, use coke-rust-code-review."
 
 ### New feature
 
-"Use tdd-feature-workflow together with rust-clean-coke-architecture-patterns to implement this
+"Use coke-tdd-feature-workflow together with coke-rust-clean-architecture to implement this
 feature one behavior at a time. Do not create all test levels upfront. Before finishing, use
-rust-code-review."
+coke-rust-code-review."
 
 ### Code review
 
-"Use rust-code-review to review the current changes for correctness, architecture boundaries, TDD
+"Use coke-rust-code-review to review the current changes for correctness, architecture boundaries, TDD
 test quality, Rust idioms, error handling, async/concurrency safety, security, and verification
 readiness."
 
 ### Performance
 
-"Use rust-performance-optimization with rust-clean-coke-architecture-patterns. Measure first,
+"Use coke-rust-performance-optimization with coke-rust-clean-architecture. Measure first,
 identify the hot path, optimize the smallest safe change, preserve architecture boundaries, then
 re-measure."
 
 ### CI/CD
 
-"Use rust-ci-cd to create or fix GitHub Actions workflows for Rust CI, Docker build,
+"Use coke-rust-ci-cd to create or fix GitHub Actions workflows for Rust CI, Docker build,
 staging/production deploy, migrations, smoke tests, rollback, and secrets/permissions."
 
 ## Required Verification

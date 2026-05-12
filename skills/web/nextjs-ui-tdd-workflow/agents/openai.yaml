@@ -1,4 +1,0 @@
-interface:
-  display_name: "Next.js UI TDD Workflow"
-  short_description: "Next.js UI testing workflow with TDD"
-  default_prompt: "Use $nextjs-ui-tdd-workflow to implement this Next.js UI behavior with TDD."
