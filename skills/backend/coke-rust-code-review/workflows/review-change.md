@@ -23,9 +23,16 @@
 - [ ] handlers -> usecases -> domain.
 - [ ] infra -> domain traits.
 - [ ] No business logic in handlers.
+- [ ] App composition, shared handler utilities, and endpoint routers are separated.
+- [ ] Endpoint router groups are named by traffic boundary or API surface.
+- [ ] `mod.rs` files are declaration-only and contain only `pub mod ...;`.
 - [ ] No Axum/Diesel/schema dependency in domain/usecases.
+- [ ] Usecases are grouped by feature/domain with action leaf files.
+- [ ] External-service traits live in domain services, with implementations in infra.
 - [ ] Repository traits in domain.
 - [ ] Repository implementations in infra.
+- [ ] Entities use private fields, constructors, getters, and explicit transitions.
+- [ ] Value objects are split into IDs, validated fields, and enums/state where applicable.
 - [ ] DTOs do not leak into domain.
 - [ ] Row structs do not leak outside infra.
 

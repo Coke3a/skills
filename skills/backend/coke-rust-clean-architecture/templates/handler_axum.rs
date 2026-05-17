@@ -10,9 +10,9 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::repositories::ExampleRepository;
-use crate::handlers::app::AppState;
-use crate::handlers::extractors::AuthenticatedUser;
-use crate::handlers::routers::ApiError;
+use crate::handlers::app::state::AppState;
+use crate::handlers::shared::auth::AuthenticatedUser;
+use crate::handlers::shared::error::ApiError;
 use crate::infra::db::repositories::ExamplePostgres;
 use crate::usecases::{CreateExampleEntityInput, CreateExampleEntityOutput, CreateExampleEntityUseCase};
 

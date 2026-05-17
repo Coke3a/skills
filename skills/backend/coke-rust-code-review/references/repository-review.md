@@ -3,15 +3,19 @@
 ## Traits
 
 - Traits live in domain.
+- Persistence traits live in `src/domain/repositories/`; external IO traits live in
+  `src/domain/services/`.
 - Methods are named by behavior.
 - Return types are consistent.
 - `find_by_*` uses `Result<Option<T>, RepoError>`.
 - Write operations are clear about created/updated/deleted semantics.
 - Domain types are used instead of DTOs or row structs.
+- Repository traits do not mention Diesel, schema, row structs, pools, or provider SDK types.
 
 ## Diesel Implementations
 
 - Implementations live in infra.
+- Diesel implementations live under `src/infra/db/repositories/`.
 - Queries stay in infra.
 - Row structs are private to infra.
 - Row to entity mapping is correct.

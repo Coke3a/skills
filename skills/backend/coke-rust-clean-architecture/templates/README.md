@@ -25,6 +25,6 @@ Template targets:
 | `value_object.rs`     | `src/domain/value_objects/ids/`, `validated/`, and `enums/`            |
 | `repo_trait.rs`       | `src/domain/repositories/{entity}_repository.rs`                       |
 | `repo_diesel_impl.rs` | `src/infra/db/repositories/{entity}_postgres.rs`                       |
-| `usecase.rs`          | `src/usecases/{feature}/{action}_{entity}.rs`                          |
-| `handler_axum.rs`     | `src/handlers/routers/{feature}/{action}.rs`                           |
-| `error_types.rs`      | Layer error files across `domain`, `usecases`, `handlers`, and `infra` |
+| `usecase.rs`          | `src/usecases/{feature}/{action}.rs`                                    |
+| `handler_axum.rs`     | `src/handlers/routers/{surface}/{feature_or_action}.rs`                 |
+| `error_types.rs`      | Layer error files across `domain`, `usecases`, `handlers/shared`, and `infra` |

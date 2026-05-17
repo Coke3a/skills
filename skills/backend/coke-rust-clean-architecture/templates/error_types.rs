@@ -117,7 +117,7 @@ impl From<RepoError> for UsecaseError {
     }
 }
 
-// src/handlers/routers/error_response.rs
+// src/handlers/shared/error.rs
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Json},

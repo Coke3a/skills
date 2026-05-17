@@ -9,8 +9,12 @@ out-of-scope requests.
 
 - "Create a new Rust backend feature following clean architecture."
 - "Refactor this handler/usecase/domain code into proper layers."
+- "Organize this Rust handlers directory into app, shared, and router modules."
+- "Add a new endpoint surface while keeping handler boundaries clean."
 - "Add a Diesel repository implementation for this entity."
 - "Define repository trait and usecase structure."
+- "Organize usecases, domain services, repositories, entities, and value objects for this Rust backend."
+- "Refactor this backend into feature/action usecases and domain service ports."
 - "Check whether this module follows handler -> usecase -> domain."
 
 ## Negative Trigger Prompts

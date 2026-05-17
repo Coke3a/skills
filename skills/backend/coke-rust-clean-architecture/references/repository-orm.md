@@ -5,11 +5,15 @@ Use this reference for repository traits and Diesel repository implementations.
 ## Repository port pattern
 
 - Define traits in `src/domain/repositories/{entity}_repository.rs`.
+- Keep repository traits as persistence ports only; do not put Diesel, schema, row structs, or pool
+  types in domain.
 - Implement traits in `src/infra/db/repositories/{entity}_postgres.rs`.
+- Use `src/domain/services/` for external-service ports that are not persistence concerns.
 - Use `async_trait` for async trait methods.
 - Return `Result<T, RepoError>`.
 - `find_by_*` methods return `Result<Option<T>, RepoError>`.
 - Updates/deletes that expect an existing row return `RepoError::NotFound` when no row is affected.
+- Keep `mod.rs` files declaration-only with only `pub mod ...;`.
 
 ```rust
 #[async_trait]
@@ -29,6 +33,7 @@ pub trait ExampleRepository: Send + Sync {
 - Use Diesel query builder only.
 - Use centralized `map_diesel_error()` and `map_pool_error()`.
 - Keep rows private to infra.
+- Return domain entities or value objects from repository methods, never row structs or DTOs.
 
 ```rust
 pub struct ExamplePostgres {

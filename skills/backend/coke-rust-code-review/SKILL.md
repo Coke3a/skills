@@ -2,9 +2,9 @@
 name: coke-rust-code-review
 description:
   Use when reviewing Rust backend changes for correctness, Clean Architecture boundaries, TDD test
-  quality, Rust idioms, error handling, repository/handler patterns, async/concurrency safety,
-  performance footguns, security issues, and final verification readiness. Pair with
-  coke-rust-clean-architecture and coke-tdd-feature-workflow.
+  quality, Rust idioms, error handling, usecase/domain/repository/handler organization,
+  async/concurrency safety, performance footguns, security issues, and final verification
+  readiness. Pair with coke-rust-clean-architecture and coke-tdd-feature-workflow.
 ---
 
 # Rust Code Review
@@ -17,7 +17,8 @@ Review Rust backend changes and produce actionable findings. Check whether imple
 - TDD test quality rules
 - Rust idioms and safety
 - Error handling patterns
-- Repository and handler boundaries
+- Usecase, domain service, repository, entity, value object, and handler boundaries
+- Handler directory organization and endpoint grouping
 - Async/concurrency safety
 - Performance footgun checks
 - Security basics
@@ -51,8 +52,9 @@ setup, deployment, formatting-only changes, full benchmarking, profiling, or loa
 
 ## Companion Skills
 
-- `coke-rust-clean-architecture` owns layer structure, naming, error flow, repository trait
-  patterns, and Diesel implementation patterns.
+- `coke-rust-clean-architecture` owns layer structure, naming, error flow, usecase organization,
+  domain service ports, repository trait patterns, entity/value object structure, and Diesel
+  implementation patterns.
 - `coke-tdd-feature-workflow` owns TDD workflow, behavior-focused tests, test scope, and test placement.
 - `coke-rust-code-review` checks whether the change followed those skills. Do not duplicate their full
   implementation workflows.

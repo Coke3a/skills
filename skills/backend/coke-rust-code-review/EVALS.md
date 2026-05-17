@@ -10,6 +10,10 @@ out-of-scope requests.
 - "Review this Rust backend change."
 - "Check if this follows the architecture and TDD skills."
 - "Audit this handler/usecase/repository implementation."
+- "Review whether this handlers directory is organized cleanly."
+- "Check a handler refactor that splits app, shared, and router modules."
+- "Review whether usecases, domain services, repositories, entities, and value objects are organized cleanly."
+- "Check a refactor that groups usecases by feature/action and moves external IO behind domain service traits."
 - "Review async/concurrency safety."
 - "Check for Rust quality and error handling issues."
 

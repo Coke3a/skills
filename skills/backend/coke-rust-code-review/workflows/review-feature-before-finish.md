@@ -13,8 +13,13 @@ Use this before the agent says the feature is done.
 - [ ] Check changed files are in correct layers.
 - [ ] Check dependency direction.
 - [ ] Check naming conventions.
+- [ ] Check handler files are organized into app composition, shared utilities, and endpoint routers.
+- [ ] Check `mod.rs` files are declaration-only with only `pub mod ...;`.
 - [ ] Check error flow.
 - [ ] Check repository pattern.
+- [ ] Check usecases are grouped by feature/domain with action leaf files.
+- [ ] Check external IO uses domain service traits and infra implementations.
+- [ ] Check entities and value objects live in the expected domain subfolders.
 
 3. Confirm tests
 

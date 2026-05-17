@@ -1,6 +1,6 @@
 ---
 name: coke-rust-clean-architecture
-description: Use when creating or refactoring Rust backend code with Axum, Diesel, and Postgres and you need the coke-rust-clean-architecture layer model, file structure, naming, error flow, repository traits, Diesel repository implementations, and handler/usecase/domain boundaries. Do not use as the primary skill for TDD workflow, CI/CD setup, code review process, performance optimization, or general Rust development.
+description: Use when creating or refactoring Rust backend code with Axum, Diesel, and Postgres and you need the coke-rust-clean-architecture layer model, file structure, naming, error flow, usecase organization, domain services, repository traits, Diesel repository implementations, entities, value objects, and handler/usecase/domain boundaries. Do not use as the primary skill for TDD workflow, CI/CD setup, code review process, performance optimization, or general Rust development.
 ---
 
 # Coke Rust Clean Architecture
@@ -30,6 +30,9 @@ Use this skill for:
 
 - Layer responsibilities and dependency boundaries.
 - Project and file structure for Rust backend features.
+- Handler organization for app composition, shared handler utilities, and endpoint surfaces.
+- Usecase grouping by feature/domain with action leaf files.
+- Domain services, repository ports, entities, and value object organization.
 - Naming conventions for entities, value objects, repositories, usecases, DTOs, and rows.
 - Error types and conversion flow.
 - Repository trait pattern in the domain layer.
@@ -65,8 +68,8 @@ Rules:
 
 - Handlers may instantiate infra implementations for wiring, but must not contain business logic.
 - Usecases own orchestration and user-facing error semantics.
-- Domain owns entities, value objects, invariants, and repository traits.
-- Infra implements repository traits and handles IO details.
+- Domain owns entities, value objects, invariants, repository traits, and external-service traits.
+- Infra implements repository/service traits and handles IO details.
 - Domain must not depend on Axum, Diesel, database schema, HTTP DTOs, or infra code.
 - DTOs must not leak into domain.
 - Diesel row structs must not leak into domain or handlers.
@@ -76,9 +79,9 @@ Rules:
 | Layer      | Owns                                                                                             | Must Not Own                                           |
 | ---------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
 | `handlers` | Axum extractors, request/response DTOs, repo wiring, usecase calls, HTTP response mapping        | Business rules, Diesel queries, domain invariants      |
-| `usecases` | Application orchestration, input/output structs, user-facing error semantics, repository calls   | HTTP types, Diesel types, schema details               |
-| `domain`   | Entities, value objects, invariants, repository traits, domain errors                            | Axum, Diesel, infra implementations, DTOs              |
-| `infra`    | Diesel rows, query builder code, pool access, repository trait implementations, IO error mapping | HTTP behavior, user-facing semantics, domain decisions |
+| `usecases` | Application orchestration, input/output structs, user-facing error semantics, repository/service calls | HTTP types, Diesel types, schema details          |
+| `domain`   | Entities, value objects, invariants, repository traits, service traits, domain errors                 | Axum, Diesel, infra implementations, DTOs         |
+| `infra`    | Diesel rows, query builder code, pool access, repository/service trait implementations, IO error mapping | HTTP behavior, user-facing semantics, domain decisions |
 
 ## Project Structure
 
@@ -91,22 +94,44 @@ src/
     repositories/
       error.rs
       example_repository.rs
+    services/
+      error.rs
+      example_service.rs
     value_objects/
       ids/
+        example_entity_id.rs
       validated/
+        example_entity_name.rs
       enums/
+        example_entity_status.rs
   usecases/
     error.rs
     example_feature/
-      create_example_entity.rs
+      create.rs
+      update.rs
   handlers/
-    app.rs
-    extractors/
+    app/
+      mod.rs
+      state.rs
+      server.rs
+      routes.rs
+      middleware.rs
+    shared/
+      mod.rs
+      auth.rs
+      error.rs
+      response.rs
     routers/
-      error_response.rs
-      example_feature/
+      mod.rs
+      public_api/
         mod.rs
-        create.rs
+        example_feature.rs
+        example_action.rs
+      admin_api/
+        mod.rs
+      webhook/
+        mod.rs
+        example_event.rs
   infra/
     db/
       postgres_connection.rs
@@ -114,7 +139,40 @@ src/
       repositories/
         error_mapping.rs
         example_entity_postgres.rs
+    services/
+      example_client.rs
 ```
+
+## Layer File Organization
+
+- Put usecases in `usecases/{feature}/{action}.rs`. The feature directory groups related actions;
+  the leaf file owns one usecase struct, input/output structs, orchestration, and user-facing error
+  decisions.
+- Put repository ports in `domain/repositories/{entity}_repository.rs` and persistence errors in
+  `domain/repositories/error.rs`. These traits return domain entities and `RepoError`.
+- Put external-service ports in `domain/services/{example_service}.rs` and service errors in
+  `domain/services/error.rs`. Use these for auth, payment, notification, webhook, provider, or
+  other external IO abstractions.
+- Put Diesel implementations in `infra/db/repositories/{entity}_postgres.rs`. Row structs, schema
+  imports, query builder calls, pool access, and DB error mapping stay there.
+- Put entities in `domain/entities/{entity}.rs`. Entities use private fields, constructors,
+  `from_existing()`, getters, and state transition methods.
+- Put value objects under `domain/value_objects/ids/`, `validated/`, and `enums/` for typed IDs,
+  validated fields, and domain state/enums.
+- Keep every `mod.rs` declaration-only: only `pub mod ...;`; no `pub use`, functions, consts,
+  type aliases, route builders, tests, or wiring logic.
+
+## Handler Organization
+
+- Put app composition in `handlers/app/`: state, server startup, route assembly, middleware, and
+  dispatch glue.
+- Put cross-route handler utilities in `handlers/shared/`: auth extractors, API error mapping, and
+  response helpers.
+- Put endpoint groups in `handlers/routers/{surface}/`, where `{surface}` names a traffic boundary
+  or API surface such as `public_api`, `admin_api`, `webhook`, or `dashboard`.
+- Keep route/action logic in leaf files under the surface. Do not put handler logic in app startup.
+- Keep every `mod.rs` declaration-only: only `pub mod ...;`; no `pub use`, functions, consts,
+  type aliases, route builders, tests, or wiring logic.
 
 ## Naming Conventions
 
@@ -152,6 +210,8 @@ RepoError   -> UsecaseError -> ApiError
 
 - Define repository traits in `src/domain/repositories/`.
 - Implement repository traits in `src/infra/db/repositories/`.
+- Define external-service traits in `src/domain/services/` and implement their clients/adapters in
+  `src/infra/`.
 - Use `async_trait` for async repository trait methods.
 - Return `Result<T, RepoError>`.
 - `find_by_*` methods return `Result<Option<T>, RepoError>`.

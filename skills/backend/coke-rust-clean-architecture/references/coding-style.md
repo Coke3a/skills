@@ -34,18 +34,34 @@ This reference covers only naming and style conventions needed for the Clean Arc
 
 - Use ID newtypes for domain IDs.
 - Use validated value objects for user-provided fields that have invariants.
+- Put ID newtypes in `domain/value_objects/ids/`.
+- Put validated strings/fields in `domain/value_objects/validated/`.
+- Put domain enums and state objects in `domain/value_objects/enums/`.
 - Use `new()` for validation.
 - Use `from_trusted()` only for database reconstruction or internally trusted values.
 - Return `DomainError` for validation failures.
 
 ## Usecase style
 
+- Put usecases in `usecases/{feature}/{action}.rs`.
+- Keep one main usecase struct per leaf file.
 - Inject repositories as `Arc<dyn RepositoryTrait>`.
+- Inject external service ports as `Arc<dyn ServiceTrait>`.
 - Define explicit input and output structs.
 - Validate input by constructing domain value objects.
+- Call concrete infra only through domain repository/service traits.
 - Keep orchestration and user-facing error decisions in the usecase.
 - Prefer guard clauses and `?` over nested control flow.
 - Do not import Axum, Diesel, schema modules, row structs, or handler DTOs.
+
+## Domain service style
+
+- Put external-service traits in `domain/services/{example_service}.rs`.
+- Put `ServiceError` in `domain/services/error.rs`.
+- Use service traits for provider clients, auth clients, payment clients, notification dispatchers,
+  webhook verifiers, and other external IO ports.
+- Keep concrete HTTP/SDK clients in `infra/`.
+- Do not put provider SDK types in entities, value objects, repository traits, or usecase DTOs.
 
 ## Handler style
 
@@ -58,6 +74,14 @@ This reference covers only naming and style conventions needed for the Clean Arc
 - Map usecase output to response DTOs.
 - Return `Result<impl IntoResponse, ApiError>`.
 - Do not put business logic in handlers.
+- Keep `handlers/app/` for state, server startup, route assembly, middleware, and dispatch glue.
+- Keep `handlers/shared/` for cross-route handler utilities such as auth extractors, API errors,
+  and response helpers.
+- Keep `handlers/routers/{surface}/` grouped by traffic boundary or API surface before feature
+  files, such as `public_api`, `admin_api`, `webhook`, or `dashboard`.
+- Keep `mod.rs` files declaration-only: only `pub mod ...;`; no `pub use`, functions, consts,
+  route builders, tests, type aliases, or wiring logic.
+- Keep route/action logic in leaf files, not in `mod.rs` or app startup.
 
 ## Infra repository style
 
@@ -67,3 +91,9 @@ This reference covers only naming and style conventions needed for the Clean Arc
 - Use Diesel query builder only.
 - Use centralized error mapping helpers.
 - Return domain entities, not row structs.
+
+## Module declaration style
+
+- Keep every `mod.rs` declaration-only with only `pub mod ...;`.
+- Do not put `pub use`, functions, consts, type aliases, route builders, tests, or wiring logic in
+  `mod.rs`.

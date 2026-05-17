@@ -3,9 +3,20 @@
 - Huge diff.
 - Speculative abstraction.
 - Handler with business logic.
+- Catch-all `handlers/routers/` directory with unrelated endpoint surfaces mixed together.
+- Logic, route builders, constants, tests, or re-exports in `mod.rs`.
+- App startup mixed with route handler logic.
+- Project-specific handler layout copied into an unrelated project without matching traffic
+  boundaries.
 - Usecase importing Axum/Diesel.
+- Usecase directory as a flat dump of unrelated actions instead of `usecases/{feature}/{action}.rs`.
+- Usecase constructing concrete external clients instead of using a domain service trait.
 - Domain importing infra/schema/DTOs.
+- Domain service trait leaking provider SDK or HTTP client types.
+- Entity with public mutable fields or invariants enforced only in handlers.
+- Validated user input represented as raw `String` across layers.
 - Repository returning DTOs.
+- Repository trait leaking Diesel/schema/pool details.
 - Rows exposed outside infra.
 - `unwrap()` in production.
 - Broad catch-all errors.
