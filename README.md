@@ -21,6 +21,10 @@ This repository is separated into two kinds of content:
 - `skills/web/coke-nextjs-app-architecture`
 - `skills/web/coke-nextjs-ui-tdd-workflow`
 
+### app
+
+- `skills/app/coke-workspace-orientation`
+
 ## Text Playbooks
 
 - `text/mobile-expo`: explains when to use official Expo skills.
