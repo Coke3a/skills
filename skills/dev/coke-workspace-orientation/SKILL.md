@@ -134,14 +134,15 @@ Correct:
 cd api && git diff
 cd web && npm test
 project/scripts/test-e2e.sh
+cd frontend && npm run dev
 ```
 
 Incorrect:
 
 ```bash
 git diff
-cd backend && npm test
-cd frontend && npm test
+npm test
+npm run dev
 ```
 
 The incorrect examples assume the workspace root is a git repository or assume repositories named `backend/` and `frontend/` exist. Also avoid editing code before reading `project/AGENTS.md` when that file is present.

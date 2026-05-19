@@ -21,9 +21,9 @@ This repository is separated into two kinds of content:
 - `skills/web/coke-nextjs-app-architecture`
 - `skills/web/coke-nextjs-ui-tdd-workflow`
 
-### app
+### dev
 
-- `skills/app/coke-workspace-orientation`
+- `skills/dev/coke-workspace-orientation`
 
 ## Text Playbooks
 
