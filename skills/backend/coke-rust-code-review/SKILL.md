@@ -1,89 +1,86 @@
 ---
 name: coke-rust-code-review
-description:
-  Use when reviewing Rust backend changes for correctness, Clean Architecture boundaries, TDD test
-  quality, Rust idioms, error handling, usecase/domain/repository/handler organization,
-  async/concurrency safety, performance footguns, security issues, and final verification
-  readiness. Pair with coke-rust-clean-architecture and coke-tdd-feature-workflow.
+description: Reviews Rust backend changes against Clean Architecture boundaries, TDD test quality, Rust idioms, error handling, async/concurrency safety, performance footguns, security basics, and final verification. Use before finishing a feature, before opening or merging a PR, when refactoring across layers, when async/concurrent code changed, or when asked to audit. Do not use for initial scaffolding, TDD red/green/refactor, CI/CD setup, deployment, or full benchmarking/profiling.
 ---
 
 # Rust Code Review
 
-## Purpose
+## Use this when
 
-Review Rust backend changes and produce actionable findings. Check whether implementation follows:
+- Before finishing a feature or marking a task done.
+- After generated or large-scale code changes.
+- Before opening or merging a pull request.
+- When refactoring mixes handler/usecase/domain/infra code.
+- When tests, repositories, handlers, or async/background/concurrent code changed.
+- When asked to review, audit, check correctness, or check skill compliance.
 
-- Rust clean architecture rules
-- TDD test quality rules
-- Rust idioms and safety
-- Error handling patterns
-- Usecase, domain service, repository, entity, value object, and handler boundaries
-- Handler directory organization and endpoint grouping
-- Async/concurrency safety
-- Performance footgun checks
-- Security basics
-- Final verification expectations
+## Do not use this when
 
-## When to Use
+- Initial architecture scaffolding → use `coke-rust-clean-architecture`.
+- Running the TDD red/green/refactor loop → use `coke-tdd-feature-workflow`.
+- Setting up CI/CD or deployment → use `coke-rust-ci-cd`.
+- Formatting-only changes.
+- Full benchmarking, profiling, or load testing → use `coke-rust-performance-optimization`.
 
-Use this skill before finishing a feature, after generated code, before opening or merging a PR,
-when refactoring mixed handler/usecase/domain/infra code, when tests/repositories/handlers changed,
-when async/background/concurrent code changed, or when the user asks to review, audit, check
-correctness, or check skill compliance.
+## Core rules
 
-## When Not to Use
+- Review against existing skill rules; do not duplicate their full implementation workflows.
+- Cite the specific file and rule for each finding.
+- Severities run highest to lowest in this priority order: correctness, architecture boundaries, error handling, concurrency/async safety, test quality, security/data safety, performance footguns, simplicity, Rust idioms/naming, documentation, tool verification.
+- Catch review-level Rust/Tokio footguns: blocking work in async code, locks held across `.await`, unbounded tasks/channels, ignored task failures, missing cancellation/shutdown, DB pool exhaustion risks, excessive hot-path allocation/cloning, unsafe concurrent access.
+- Do not perform benchmarking, profiling, or load testing here. Recommend a dedicated performance workflow when impact is uncertain.
+- Never fabricate command results.
 
-Do not use this for initial architecture scaffolding, TDD red/green/refactor implementation, CI/CD
-setup, deployment, formatting-only changes, full benchmarking, profiling, or load testing.
+## Workflow
 
-## Review Priorities
-
-1. Correctness
-2. Architecture boundaries
-3. Error handling and failure behavior
-4. Concurrency and async safety
-5. Test quality
-6. Security/data safety
-7. Performance footguns
-8. Simplicity/maintainability
-9. Rust idioms/naming
-10. Documentation/comments
-11. Tool verification
-
-## Companion Skills
-
-- `coke-rust-clean-architecture` owns layer structure, naming, error flow, usecase organization,
-  domain service ports, repository trait patterns, entity/value object structure, and Diesel
-  implementation patterns.
-- `coke-tdd-feature-workflow` owns TDD workflow, behavior-focused tests, test scope, and test placement.
-- `coke-rust-code-review` checks whether the change followed those skills. Do not duplicate their full
-  implementation workflows.
+1. Pick the workflow file matching the situation (see Workflows below).
+2. Load only the reference files needed for the scope under review.
+3. Verify or request the three final commands (see Final verification).
+4. Produce findings using `templates/review-finding.md` and a summary using `templates/review-report.md` or `templates/final-review-summary.md`.
 
 ## Workflows
 
-- Full change review: use `workflows/review-change.md`.
-- Before claiming a feature is done: use `workflows/review-feature-before-finish.md`.
-- Failing implementation review: use `workflows/review-failing-implementation.md`.
-- Applying review fixes: use `workflows/apply-review-fixes.md`.
+| Workflow                                          | Use for                                              |
+| ------------------------------------------------- | ---------------------------------------------------- |
+| `workflows/review-change.md`                      | Full change review                                   |
+| `workflows/review-feature-before-finish.md`       | Before claiming a feature is done                    |
+| `workflows/review-failing-implementation.md`      | Reviewing a failing implementation                   |
+| `workflows/apply-review-fixes.md`                 | Applying findings from a review                      |
 
-Load only the references needed for the review scope. Use `references/review- priorities.md` for
-severity, `references/clean-architecture-review.md` for architecture,
-`references/tdd-test-review.md` for tests, and `references/performance-concurrency- review.md` for
-async/concurrency and performance footguns.
+## Load more detail
 
-## Performance and Concurrency Scope
+| Scope                                       | Reference                                       |
+| ------------------------------------------- | ----------------------------------------------- |
+| Review priorities and severity              | `references/review-priorities.md`               |
+| Core review principles                      | `references/review-principles.md`               |
+| Clean Architecture boundary review          | `references/clean-architecture-review.md`       |
+| Repository/Diesel review                    | `references/repository-review.md`               |
+| Handler/API review                          | `references/handler-api-review.md`              |
+| Error handling review                       | `references/error-handling-review.md`           |
+| TDD test review                             | `references/tdd-test-review.md`                 |
+| Async/concurrency and performance footguns  | `references/performance-concurrency-review.md`  |
+| Security/data safety review                 | `references/security-review.md`                 |
+| Rust quality checklist                      | `references/rust-quality-checklist.md`          |
+| Common review smells                        | `references/review-smells.md`                   |
+| Review comment style                        | `references/review-comment-style.md`            |
 
-Catch review-level Rust/Tokio performance and concurrency footguns: blocking work in async code,
-locks across `.await`, unbounded tasks/channels, ignored task failures, missing
-cancellation/shutdown behavior, DB pool exhaustion risks, excessive hot-path allocation/cloning, and
-unsafe concurrent access patterns.
+## Templates
 
-Do not perform benchmarking, profiling, or load testing. If impact is uncertain or
-workload-dependent, recommend a dedicated benchmark/profiling workflow.
+- `templates/review-report.md` — full review summary (status, findings by area, risks).
+- `templates/review-finding.md` — single finding format.
+- `templates/review-comment.md` — line-level review comment.
+- `templates/final-review-summary.md` — short, end-of-review summary.
 
-## Final Verification
+## Related skills
 
-When reviewing a downstream Rust project, verify or ask the implementing agent to run:
+- `coke-rust-clean-architecture` — owns layer structure, naming, error flow, repository shape. This skill checks compliance.
+- `coke-tdd-feature-workflow` — owns TDD workflow and test placement. This skill checks test quality.
+- `coke-rust-performance-optimization` — when an issue needs measured impact, defer to it.
+- `coke-rust-ci-cd` — owns automation that runs the final verification commands.
+
+## Final verification
+
+When reviewing a downstream Rust project, run or request:
 
 ```bash
 cargo fmt --all -- --check
@@ -91,64 +88,11 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
 
-Do not fabricate command results. If the repository is only a skills repository and has no Cargo
-project, report that these are downstream verification commands for projects using the skill.
+If the current repo is a skills repo only and has no Cargo project, report these as downstream verification commands.
 
-## Review Report Format
+## Definition of done
 
-```markdown
-# Review Summary
-
-Overall status:
-
-- Pass / Pass with comments / Needs changes / Blocked
-
-Scope reviewed:
-
-- ...
-
-Commands run:
-
-- ...
-
-Commands not run:
-
-- ...
-
-Findings:
-
-1. [Severity] Title
-   - File:
-   - Issue:
-   - Why it matters:
-   - Suggested fix:
-   - Related rule:
-
-Architecture:
-
-- ...
-
-Tests:
-
-- ...
-
-Rust quality:
-
-- ...
-
-Error handling:
-
-- ...
-
-Performance/concurrency:
-
-- ...
-
-Security/data safety:
-
-- ...
-
-Remaining risks:
-
-- ...
-```
+- Findings are concrete, cite file/line, name the violated rule, and propose a fix.
+- Severity is assigned using `references/review-priorities.md`.
+- Final summary uses `templates/review-report.md` (or `templates/final-review-summary.md` for a short review).
+- The three final commands were run or were explicitly requested with the reason.

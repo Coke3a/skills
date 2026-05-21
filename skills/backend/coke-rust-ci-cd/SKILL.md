@@ -1,59 +1,49 @@
 ---
 name: coke-rust-ci-cd
-description:
-  Use when creating, reviewing, or fixing CI/CD for Rust backend projects. Covers GitHub Actions
-  Rust checks, cargo fmt/clippy/test/build, caching, Docker image builds, staging/production
-  deployment workflows, migrations, smoke tests, rollback guidance, concurrency, least-privilege
-  permissions, secrets, and OIDC. Pair with coke-rust-clean-architecture,
-  coke-tdd-feature-workflow, and coke-rust-code-review.
+description: Guides CI/CD for Rust backend projects on GitHub Actions — fmt/clippy/test/build, caching, Docker image builds, staging/production deploys, database migrations, smoke tests, rollback, concurrency, least-privilege permissions, secrets, and OIDC. Use when setting up, hardening, or fixing CI/CD pipelines for a Rust service. Do not use for feature implementation, TDD, code review, or performance profiling.
 ---
 
 # Rust CI/CD
 
-## Purpose
+## Use this when
 
-Create and repair CI/CD pipelines for Rust backend services. Focus on reliable Rust CI, safe
-deployment automation, repeatable artifacts, environment separation, deployment smoke tests,
-rollback readiness, and GitHub Actions security.
-
-## When to Use
-
-- Setting up CI for a Rust project.
-- Adding cargo fmt, clippy, test, and release build checks.
+- Setting up CI for a Rust project (fmt, clippy, test, release build).
 - Creating or reviewing GitHub Actions workflows.
 - Adding Docker image build and push workflows.
 - Deploying to staging or production.
-- Adding database migration steps.
+- Wiring database migrations into the pipeline.
 - Adding smoke tests and rollback guidance.
-- Hardening GitHub Actions permissions, secrets, and OIDC.
-- Fixing failed CI/CD workflows.
-- Reviewing deployment pipeline structure.
+- Hardening permissions, secrets, OIDC, or shell usage.
+- Fixing a failed CI/CD workflow.
 
-## When Not to Use
+## Do not use this when
 
-- Designing Rust clean architecture.
-- Writing feature code.
-- Choosing TDD test cases.
-- Performing final Rust implementation code review.
-- Benchmarking or load testing.
+- Designing Rust clean architecture → use `coke-rust-clean-architecture`.
+- Writing feature code or designing tests → use `coke-tdd-feature-workflow`.
+- Producing a final code review → use `coke-rust-code-review`.
+- Benchmarking, profiling, or load testing → use `coke-rust-performance-optimization`.
 - Designing observability platforms.
-- Provisioning cloud-provider-specific infrastructure unless explicitly requested.
+- Provisioning cloud-provider infrastructure unless explicitly requested.
 
-## Core Rules
+## Core rules
 
-- CI must run on pull requests.
-- Main branch must be protected by CI before deployment.
-- Use default Rust checks in this order: fmt, clippy, test, build.
+- CI must run on pull requests; main branch must be protected by CI before deployment.
+- Default Rust check order: `fmt`, `clippy`, `test`, `build`.
 - Deploy from a CI artifact or image, not a local machine.
 - Prefer the same artifact for staging and production.
-- Keep secrets out of PR workflows.
-- Use least-privilege permissions.
+- Keep secrets out of PR workflows; use least-privilege permissions.
 - Use concurrency to prevent duplicate deploys.
-- Run smoke tests after deploy.
-- Document rollback.
+- Run smoke tests after deploy and document rollback.
 - Never fabricate command results.
 
-## Default Rust Commands
+## Workflow
+
+1. Pick the workflow file matching the change (see Workflows below).
+2. Inspect `Cargo.toml`, existing `Makefile`/`justfile`/scripts before choosing flags or commands.
+3. Use templates as starting points; adapt to the repository.
+4. Load reference files only when the relevant area needs deeper guidance.
+
+## Default Rust commands
 
 ```bash
 cargo fmt --all -- --check
@@ -62,43 +52,49 @@ cargo test --all-features
 cargo build --release
 ```
 
-Inspect `Cargo.toml` before choosing workspace-specific flags. Use existing Makefile, justfile, or
-script commands when the repository already defines canonical local checks.
+Use existing canonical commands (Makefile, justfile, or scripts) when the repository already defines them.
 
-## Resource Guide
+## Workflows
 
-- Use `workflows/setup-rust-ci.md` for pull request and main-branch Rust CI.
-- Use `workflows/setup-docker-build.md` for Dockerfile and image publishing setup.
-- Use `workflows/setup-deploy-pipeline.md` for staging and production deployment.
-- Use `workflows/setup-db-migration-pipeline.md` for database migration integration.
-- Use `workflows/fix-ci-failure.md` to diagnose and repair failing CI/CD.
-- Use `workflows/harden-github-actions.md` for permissions, secrets, OIDC, and shell hardening.
-- Use `references/` for detailed guidance only when relevant.
-- Use `templates/` as starting points, then adapt to the repository.
+| Workflow                                          | Use for                                                  |
+| ------------------------------------------------- | -------------------------------------------------------- |
+| `workflows/setup-rust-ci.md`                      | Pull-request and main-branch Rust CI                     |
+| `workflows/setup-docker-build.md`                 | Dockerfile and image publishing                          |
+| `workflows/setup-deploy-pipeline.md`              | Staging and production deployment                        |
+| `workflows/setup-db-migration-pipeline.md`        | Database migration integration                           |
+| `workflows/fix-ci-failure.md`                     | Diagnosing and repairing failing CI/CD                   |
+| `workflows/harden-github-actions.md`              | Permissions, secrets, OIDC, and shell hardening          |
 
-## Companion Skills
+## Load more detail
 
-- `coke-rust-clean-architecture` owns architecture, layers, naming, error flow, and
-  repository patterns.
-- `coke-tdd-feature-workflow` owns test design and the red/green/refactor workflow.
-- `coke-rust-code-review` owns final code review, quality review, security review, and async/concurrency
-  review.
-- `coke-rust-ci-cd` owns automation that verifies and ships the code produced by those skills.
+- CI principles and pipeline shape → `references/ci-principles.md`
+- Standard Rust checks and flags → `references/rust-ci-checks.md`
+- GitHub Actions patterns and caching → `references/github-actions-patterns.md`
+- Permissions, secrets, OIDC, hardening → `references/github-actions-security.md`, `references/secrets-and-oidc.md`
+- Docker image build patterns → `references/docker-image-build.md`
+- Deployment automation, staging vs prod → `references/deployment-automation.md`
+- Environment strategy → `references/environment-strategy.md`
+- Migration safety in pipelines → `references/database-migrations.md`
+- Smoke tests and rollback patterns → `references/smoke-tests-and-rollback.md`
+- Common CI/CD smells → `references/ci-cd-smells.md`
 
-## Final Response Format
+## Templates
 
-Summarize:
+- `templates/deploy-summary.md` for the final deploy report.
 
-- Workflows created or changed.
-- Triggers.
-- Rust checks.
-- Deployment environments.
-- Required secrets and vars.
-- Permissions used.
-- Concurrency behavior.
-- Artifact or image strategy.
-- Migration behavior.
-- Smoke test behavior.
-- Rollback method.
-- Commands or validations run.
-- Risks or follow-up.
+## Related skills
+
+- `coke-rust-clean-architecture` — feature architecture and layer rules.
+- `coke-tdd-feature-workflow` — tests that the CI runs.
+- `coke-rust-code-review` — final review of the code shipped through this pipeline.
+
+## Definition of done
+
+Summarise:
+
+- Workflows created or changed and their triggers.
+- Rust checks, deployment environments, required secrets/vars.
+- Permissions used and concurrency behaviour.
+- Artifact or image strategy and migration behaviour.
+- Smoke test behaviour and rollback method.
+- Commands or validations run, plus risks or follow-up.

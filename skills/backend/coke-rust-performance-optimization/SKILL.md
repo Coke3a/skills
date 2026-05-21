@@ -1,136 +1,108 @@
 ---
 name: coke-rust-performance-optimization
-description:
-  Use when optimizing Rust backend performance with measurement-first workflow. Guides
-  benchmark/profiling, hot path identification, allocation/clone reduction, async/Tokio performance,
-  lock contention, DB/repository performance, worker/queue throughput, and before/after reporting
-  while preserving coke-rust-clean-architecture boundaries.
+description: Optimizes Rust backend performance with a measurement-first loop — benchmark, profile, identify hot paths, reduce allocation/clone, tune async/Tokio, fix lock contention, speed up DB/repository queries, raise worker/queue throughput, then verify before/after. Use when latency, throughput, memory, CPU, async runtime, locking, or a hot path is the goal. Do not use for normal feature work, speculative optimization, style cleanup, CI/CD, or general code review.
 ---
 
 # Rust Performance Optimization
 
-## Purpose
+## Use this when
 
-Use this skill to optimize Rust backend performance without breaking clean architecture. Prefer
-measured, small, layer-correct changes over speculative rewrites.
-
-## When to Use
-
-- API latency is too high.
-- Throughput is too low.
-- Memory usage is too high.
-- CPU usage is too high.
-- DB/repository query is slow.
+- API latency, throughput, memory, or CPU is the explicit goal.
+- A DB/repository query is slow.
 - Worker/queue throughput is poor.
-- Async runtime appears blocked or starved.
+- Async runtime appears blocked, starved, or stuck.
 - Lock contention is suspected.
-- Allocation/clone hot path is suspected.
-- User asks to optimize performance.
-- Benchmark shows regression.
-- Profile shows hot path.
+- Allocation/clone in a hot path is suspected.
+- A benchmark shows regression or a profile shows a hot path.
+- The user asks to optimize performance.
 
-## When Not to Use
+## Do not use this when
 
-- Normal feature implementation.
-- Speculative optimization with no performance goal.
-- Code style cleanup.
-- CI/CD setup.
-- General code review.
-- Security review.
-- Deployment.
+- Implementing a normal feature → use `coke-rust-clean-architecture` + `coke-tdd-feature-workflow`.
+- Speculative optimization with no measured goal.
+- Code style cleanup, CI/CD setup, deployment, security review, or general code review.
+- Cloud infrastructure provisioning.
 
-## Core Rules
+## Core rules
 
-- Measure first.
+- Measure first; no optimization without a baseline.
 - Optimize hot paths only.
-- Make the smallest safe change.
-- Preserve architecture boundaries.
-- Keep correctness tests passing.
-- Re-measure after changes.
-- Do not introduce unsafe code by default.
-- Do not optimize by moving logic into the wrong layer.
-- Report tradeoffs.
+- Make the smallest safe change and re-measure.
+- Preserve architecture boundaries — if an optimization needs a layer change, propose it and wait for approval.
+- Keep correctness tests passing throughout.
+- Do not introduce `unsafe` by default.
+- Report tradeoffs, not just speedups.
 
-## Companion Skills
-
-- `coke-rust-clean-architecture` owns layer structure, dependency direction, naming, error
-  flow, repository traits, and Diesel implementation patterns.
-- `coke-tdd-feature-workflow` owns correctness and regression test workflow.
-- `coke-rust-code-review` owns final code review, security review, async/concurrency review, and
-  architecture review.
-- `coke-rust-ci-cd` owns CI/CD and deployment automation.
-
-## Default Optimization Loop
-
-1. Define performance goal.
-2. Identify workload.
-3. Measure baseline.
-4. Profile if bottleneck is unclear.
-5. Choose smallest safe optimization.
-6. Preserve architecture boundaries.
-7. Run correctness tests.
-8. Re-run benchmark/profile.
-9. Compare before/after.
-10. Summarize tradeoffs and risks.
-
-## Architecture Safety
+## Architecture safety
 
 ```text
 handlers -> usecases -> domain
 infra -> domain traits
 ```
 
-- Handlers stay thin and only own HTTP parsing, DTO mapping, serialization, and usecase calls.
+- Handlers stay thin (HTTP parsing, DTO mapping, serialization, usecase calls).
 - Usecases own orchestration and user-facing semantics.
-- Domain stays pure and owns entities, value objects, invariants, pure rules, and repository traits.
+- Domain stays pure — entities, value objects, invariants, repository traits.
 - Infra owns DB queries, Diesel rows, pool access, IO, and DB-specific optimization.
-- Repository traits remain the boundary.
-- DTOs must not leak into domain.
-- Diesel row structs must not leak into domain or handlers.
-- Do not bypass layers for performance without explicit approval.
-- If an optimization needs an architecture change, propose it first and wait for approval.
+- DTOs never reach domain; row structs never leak past infra.
+
+See `references/architecture-safe-optimization.md`.
+
+## Optimization loop
+
+1. Define the performance goal (latency, throughput, memory, CPU, p95/p99, etc.).
+2. Identify the workload that produces the symptom.
+3. Measure a baseline.
+4. Profile if the bottleneck is unclear.
+5. Pick the smallest safe optimization for the layer that owns the bottleneck.
+6. Run correctness tests.
+7. Re-run the benchmark or profile.
+8. Compare before/after.
+9. Summarise tradeoffs and risks.
 
 ## Workflows
 
-- `workflows/define-performance-goal.md`
-- `workflows/benchmark-hot-path.md`
-- `workflows/profile-and-identify-bottleneck.md`
-- `workflows/optimize-domain-usecase.md`
-- `workflows/optimize-repository-db.md`
-- `workflows/optimize-async-worker.md`
-- `workflows/optimize-allocation-clone.md`
-- `workflows/add-performance-regression-benchmark.md`
-- `workflows/verify-performance-change.md`
+| Workflow                                                | Use for                                              |
+| ------------------------------------------------------- | ---------------------------------------------------- |
+| `workflows/define-performance-goal.md`                  | Turning a vague complaint into a measurable goal     |
+| `workflows/benchmark-hot-path.md`                       | Writing or running a hot-path benchmark              |
+| `workflows/profile-and-identify-bottleneck.md`          | Profiling to find the bottleneck                     |
+| `workflows/optimize-domain-usecase.md`                  | Domain or usecase-level optimization                 |
+| `workflows/optimize-repository-db.md`                   | Repository, query, or database-level optimization    |
+| `workflows/optimize-async-worker.md`                    | Async / Tokio / worker optimization                  |
+| `workflows/optimize-allocation-clone.md`                | Allocation and clone reduction                       |
+| `workflows/add-performance-regression-benchmark.md`     | Locking in the gain with a regression benchmark      |
+| `workflows/verify-performance-change.md`                | Verifying the change before reporting done           |
 
-## References
+## Load more detail
 
-Load the narrow reference needed for the current bottleneck:
-
-- `references/performance-principles.md`
-- `references/measure-first.md`
-- `references/rust-profiling-tools.md`
-- `references/rust-benchmarking.md`
-- `references/allocation-and-clone.md`
-- `references/bounds-checks-and-hot-loops.md`
-- `references/async-tokio-performance.md`
-- `references/locking-and-shared-state.md`
-- `references/database-performance.md`
-- `references/worker-queue-performance.md`
-- `references/architecture-safe-optimization.md`
-- `references/performance-smells.md`
+| Decision                                            | Reference                                           |
+| --------------------------------------------------- | --------------------------------------------------- |
+| Core performance principles                         | `references/performance-principles.md`              |
+| Measurement-first discipline                        | `references/measure-first.md`                       |
+| Profiling tools (flamegraph, samply, etc.)          | `references/rust-profiling-tools.md`                |
+| Criterion + microbenchmarks                         | `references/rust-benchmarking.md`                   |
+| Allocation and clone reduction                      | `references/allocation-and-clone.md`                |
+| Bounds checks and hot loops                         | `references/bounds-checks-and-hot-loops.md`         |
+| Async / Tokio performance                           | `references/async-tokio-performance.md`             |
+| Locking and shared state                            | `references/locking-and-shared-state.md`            |
+| Database / repository performance                   | `references/database-performance.md`                |
+| Worker / queue performance                          | `references/worker-queue-performance.md`            |
+| Keeping architecture boundaries during optimization | `references/architecture-safe-optimization.md`      |
+| Common performance smells                           | `references/performance-smells.md`                  |
 
 ## Templates
 
-- `templates/performance-investigation.md`
-- `templates/criterion-benchmark.rs`
-- `templates/api-latency-benchmark.md`
-- `templates/repository-query-benchmark.md`
-- `templates/worker-throughput-benchmark.md`
-- `templates/profiling-report.md`
-- `templates/before-after-report.md`
-- `templates/optimization-summary.md`
+- `templates/performance-investigation.md`, `templates/api-latency-benchmark.md`, `templates/repository-query-benchmark.md`, `templates/worker-throughput-benchmark.md`, `templates/profiling-report.md`, `templates/before-after-report.md`, `templates/optimization-summary.md`, and a Criterion benchmark template if the project uses one.
 
-## Final Verification
+## Related skills
+
+- `coke-rust-clean-architecture` — layer structure that must be preserved.
+- `coke-tdd-feature-workflow` — correctness and regression tests.
+- `coke-rust-code-review` — final code review including async/concurrency review.
+- `coke-rust-ci-cd` — running benchmarks in CI when appropriate.
+
+## Final verification
 
 If source code changed:
 
@@ -140,38 +112,21 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 ```
 
-If benchmark exists:
+If a benchmark exists:
 
 ```sh
 cargo bench
 ```
 
-## Final Response Format
+## Definition of done
 
-Summarize:
+Summarise:
 
-- Performance goal.
-- Baseline.
-- Benchmark/profile command.
+- Performance goal and baseline.
+- Benchmark or profile command used.
 - Bottleneck found.
-- Optimization made.
+- Optimization made and which layer it touched.
 - Architecture boundaries preserved.
-- Before/after result.
-- Tests run.
-- Benchmark run.
-- Risks/follow-up.
-
-## Out of Scope
-
-This skill does not define:
-
-- Rust clean architecture structure.
-- TDD workflow.
-- CI/CD pipeline setup.
-- Deployment.
-- Broad code review.
-- Security audit.
-- Load testing infrastructure.
-- Cloud infrastructure provisioning.
-
-Use dedicated companion skills for those areas.
+- Before / after results.
+- Tests run and benchmark run.
+- Risks and follow-up.

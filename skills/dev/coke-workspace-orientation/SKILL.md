@@ -1,143 +1,56 @@
 ---
 name: coke-workspace-orientation
-description: Orient Codex inside multi-repository workspaces where the root may contain several independent repositories plus a stable project/ directory. Use when working in a workspace with project/AGENTS.md, cross-repository code, workspace-level docs/tests/scripts, or when repository names and git roots must be discovered rather than assumed.
+description: Orients a coding agent inside multi-repository workspaces whose root may contain several independent repositories plus a stable `project/` directory. Use when starting work in a workspace with `project/AGENTS.md`, cross-repository code, workspace-level docs/tests/scripts, or when repository names and git roots must be discovered rather than assumed. Run before editing code so commands, git, and tests run in the right directory.
 ---
 
 # Coke Workspace Orientation
 
-## Purpose
+## Use this when
 
-Use this skill when working inside a workspace that may contain multiple repositories or project areas. The goal is to discover the actual structure, choose the relevant repositories, run commands from the correct directories, and report work by repository.
+- Starting work inside a workspace that may contain multiple repositories or project areas.
+- `project/AGENTS.md`, `project/docs/`, `project/tests/`, or `project/scripts/` exists.
+- The task spans more than one repository or area.
+- Repository names and git roots have not been verified for the current task.
 
-## Workspace Pattern
+## Do not use this when
 
-The workspace root may contain several repositories or project areas plus a stable `project/` directory:
+- The repo is a single-package monorepo or standalone project that you have already worked in this session.
+- The task is a trivial edit confined to a known file and tool.
 
-```text
-workspace/
-  api/
-  web/
-  worker/
-  project/
-    docs/
-    tests/
-    scripts/
-    AGENTS.md
-```
+## Core rules
 
-Repository names vary by project. Examples may include `api/`, `web/`, `mobile/`, `worker/`, `admin/`, `docs-site/`, or other names. Do not assume `backend/` or `frontend/` exist.
+- The `project/` directory is the only stable convention. Repository names like `api/`, `web/`, `worker/`, `mobile/`, `admin/`, `docs-site/` vary by project — discover them; never assume.
+- Read `project/AGENTS.md` first when it exists. Treat it as the source of truth for structure, commands, docs locations, testing strategy, and verification.
+- Discover repositories from `project/AGENTS.md`, top-level inspection, `.git` directories, package/build/dependency files, and task-specific imports.
+- The workspace root may not be a git repository. Each subdirectory may be its own independent git repo.
+- Always run `git`, build, lint, and test commands from the directory that owns them, not the workspace root.
+- Use `project/docs/` for project-level specs, architecture notes, decisions, and cross-repository behaviour. Update it when changing documented behaviour, architecture, or cross-repo contracts.
+- Use repo-level tests for changes isolated to one repository. Use `project/tests/` for workspace-level or cross-repository end-to-end tests.
+- Choose the smallest relevant verification set; do not run every possible test by default.
 
-Treat only `project/` as a stable convention. It contains project-level documentation, workspace-level tests, shared scripts, and agent instructions when present.
+## Workflow
 
-## First Step
-
-Every time this skill is invoked, first read `project/AGENTS.md` if it exists.
-
-If `project/AGENTS.md` exists, treat it as the source of truth for:
-
-- workspace structure
-- repository list
-- project-specific commands
-- documentation locations
-- testing strategy
-- development rules
-- verification requirements
-
-If it does not exist, inspect the workspace carefully and state that no project-level agent instructions were found.
-
-## Repository Discovery
-
-Identify repositories by combining:
-
-- `project/AGENTS.md`
-- top-level directory inspection
-- `.git` directories
-- package, build, or dependency files
-- source, test, config, and docs directories
-- task-specific imports, paths, or references
-
-Do not hard-code repository names. Discover the relevant repositories for the task before editing.
-
-## Docs Rules
-
-Use `project/docs/` for project-level specs, architecture notes, decisions, and cross-repository behavior. Read relevant docs before changing behavior or architecture. Update `project/docs/` when a change affects documented behavior, architecture, shared workflows, or cross-repository contracts.
-
-## Before Editing
-
-Before modifying files:
-
-1. Read `project/AGENTS.md` if it exists.
-2. Identify the repositories affected by the task.
-3. Read relevant files in `project/docs/` and the affected repositories.
-4. Confirm where repo-specific and workspace-level commands should run.
+1. Read `project/AGENTS.md` if it exists. If not, state that no project-level agent instructions were found.
+2. Inspect the workspace root to identify the repositories or project areas relevant to the task.
+3. Read relevant files in `project/docs/` and inside the affected repositories.
+4. Confirm where repo-specific vs workspace-level commands should run.
 5. Decide the smallest relevant verification set based on `project/AGENTS.md`, the task, and the changed files.
+6. Run commands from the correct directory, group git status and diffs per affected repository.
+7. Report changes grouped by repository.
 
-## Working Directory Rules
-
-Run commands from the directory that owns the command:
-
-- Run repo-specific commands inside the relevant repository.
-- Run workspace-level scripts from `project/scripts/` or exactly as documented in `project/AGENTS.md`.
-- Do not assume commands work from the workspace root.
-
-Examples:
-
-```bash
-cd api && npm test
-cd web && npm run lint
-project/scripts/test-e2e.sh
-```
-
-Adjust the repository names and commands to the discovered workspace.
-
-## Git Rules
-
-The workspace root may not be a git repository. Each subdirectory may be its own independent git repository.
-
-Always run git commands inside the relevant repository:
-
-```bash
-cd {$repo} && git status
-cd {$repo} && git diff
-cd {$repo} && git diff --stat
-cd {$repo} && git log --oneline -n 5
-```
-
-If multiple repositories are affected, check git status and diffs in each affected repository separately.
-
-Do not run `git status`, `git diff`, `git diff --stat`, or `git log` from the workspace root unless `project/AGENTS.md` explicitly says the root is a git repository.
-
-## Test Rules
-
-Use repo-level tests for changes isolated to one repository. Use `project/tests/` for workspace-level or cross-repository end-to-end tests when the change crosses repository boundaries.
-
-Do not run every possible test by default. Choose relevant commands from `project/AGENTS.md`, repo docs, package files, and the risk of the change. Do not add workspace-level end-to-end tests for trivial isolated changes.
-
-## Final Report
-
-Group the final response by repository when changes span repositories. Include:
-
-- repositories inspected
-- repositories changed
-- docs consulted
-- files changed grouped by repository
-- commands run and the directory each ran from
-- git status or diff checked per affected repository
-- tests or verification performed
-- anything not verified
-
-## Examples
+## Working directory and git examples
 
 Correct:
 
 ```bash
+cd api && git status
 cd api && git diff
 cd web && npm test
+cd web && npm run lint
 project/scripts/test-e2e.sh
-cd frontend && npm run dev
 ```
 
-Incorrect:
+Incorrect (assumes the root is a git repo or assumes fixed repo names):
 
 ```bash
 git diff
@@ -145,4 +58,24 @@ npm test
 npm run dev
 ```
 
-The incorrect examples assume the workspace root is a git repository or assume repositories named `backend/` and `frontend/` exist. Also avoid editing code before reading `project/AGENTS.md` when that file is present.
+Adjust the repository names and commands to the discovered workspace.
+
+## Related skills
+
+- `coke-project-progress` — read and update `project/PROGRESS.md` after orienting.
+- Verification skills (if present) — running the right end-to-end checks before finishing.
+
+Recommended order: workspace orientation → project progress (read) → implementation → verification → project progress (update) → final report.
+
+## Definition of done
+
+The final response should group results by repository when changes span repositories and include:
+
+- Repositories inspected.
+- Repositories changed.
+- Docs consulted.
+- Files changed, grouped by repository.
+- Commands run and the directory each ran from.
+- Git status or diff checked per affected repository.
+- Tests or verification performed.
+- Anything not verified.

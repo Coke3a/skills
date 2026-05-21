@@ -1,216 +1,82 @@
 ---
 name: coke-project-progress
-description: Read and maintain project progress across coding agent sessions in multi-repository workspaces with a stable project/ directory. Use when implementing non-trivial features, fixing complex bugs, refactoring across files or repositories, changing API, database, auth, payment, files, background jobs, or cross-repo behavior, or continuing work from a previous session; ensures project/AGENTS.md and project/PROGRESS.md are read, project state is summarized, affected areas are identified, and project/PROGRESS.md is updated after meaningful milestones and before final response.
+description: Maintains `project/PROGRESS.md` across coding-agent sessions in multi-repository workspaces with a stable `project/` directory. Use when implementing non-trivial features, fixing complex bugs, refactoring across files or repositories, changing API/database/auth/payment/files/background-job/cross-repo behaviour, or continuing work from a previous session. Skip for one-line or trivial changes.
 ---
 
 # Coke Project Progress
 
-## Purpose
+## Use this when
 
-Keep project progress understandable across coding agent sessions.
+- Starting a non-trivial task in a workspace that uses `project/PROGRESS.md`.
+- Continuing work from a previous coding-agent session.
+- Implementing a feature, fixing a complex bug, or refactoring across files or repositories.
+- Changing API, database, auth, payment, files, background-job, or cross-repo behaviour.
+- Reaching a meaningful milestone that future sessions need to pick up from.
 
-Use this skill to preserve useful project-level state so future agents can quickly understand what is being worked on, what changed, what remains incomplete, what verification has already been done, and what risks or blockers still exist.
+## Do not use this when
 
-Do not use this skill to create noisy logs. Record useful project state, not every action.
+- The task is a trivial one-line or formatting change.
+- Pure exploration with no code change.
+- The user explicitly asks for a quiet, log-free response.
 
-## Responsibilities
+## Core rules
 
-1. Read current project progress before starting non-trivial work.
-2. Update progress after meaningful milestones and before finishing non-trivial tasks.
+- Progress lives at `project/PROGRESS.md`. Project-level agent instructions may live at `project/AGENTS.md`.
+- The `project/` directory is the only stable convention. Repository names (e.g. `api/`, `web/`, `worker/`) vary — discover them; never assume.
+- Read `project/AGENTS.md` and `project/PROGRESS.md` (when they exist) before editing code for a non-trivial task.
+- Update `project/PROGRESS.md` at meaningful milestones and before the final response for non-trivial tasks.
+- Record useful project-level state, not every action. See `references/recording-rules.md`.
+- If `project/PROGRESS.md` does not exist and the task is non-trivial with meaningful state to preserve, create it using `templates/progress-template.md`.
+- Group `Changed Areas` by the actual discovered repository or project area names.
 
-## Expected Location
+## Workflow
 
-Progress lives at:
-
-```text
-project/PROGRESS.md
-```
-
-Project-level agent instructions may live at:
-
-```text
-project/AGENTS.md
-```
-
-The workspace may contain multiple repositories or project areas. Repository names are not fixed. Do not assume names such as `backend/`, `frontend/`, `api/`, `web/`, or `worker/` exist.
-
-The only stable convention is the `project/` directory.
-
-## Phase 1: Read Progress
-
-Before editing code for a non-trivial task:
+### Phase 1 — Read
 
 1. Read `project/AGENTS.md` if it exists.
 2. Read `project/PROGRESS.md` if it exists.
-3. Summarize the current project/task state before editing.
+3. Summarise current task, completed work, incomplete work, next steps, blockers, risks, open questions, and verification already done.
 4. Identify affected repositories or project areas through workspace inspection.
-5. Use the existing progress state to continue work instead of starting blindly.
+5. Continue from the existing state instead of starting blind.
 
-Extract from `project/PROGRESS.md`:
+### Phase 2 — Update
 
-- current task
-- current status
-- completed work
-- incomplete work
-- next steps
-- blockers
-- risks
-- open questions
-- changed areas
-- verification already done
+Update `project/PROGRESS.md`:
 
-If `project/PROGRESS.md` does not exist, create it when the task is non-trivial and there is meaningful state to preserve.
+- After understanding the workspace and affected areas.
+- After meaningful implementation milestones.
+- After tests or verification.
+- When blockers, risks, decisions, or open questions appear.
+- Before the final response for non-trivial tasks.
 
-## Phase 2: Update Progress
+Do not update for every tiny action — see `references/recording-rules.md`.
 
-Update `project/PROGRESS.md` at meaningful milestones.
+## Load more detail
 
-Update progress:
+- PROGRESS.md format and `Changed Areas` grouping → `templates/progress-template.md`
+- What to record / not record, when to update, style → `references/recording-rules.md`
 
-- at the start of a non-trivial task
-- when continuing work from a previous session
-- after understanding the workspace and affected areas
-- after meaningful implementation milestones
-- after tests or verification
-- when blockers, risks, decisions, or open questions appear
-- before the final response for non-trivial tasks
+## Related skills
 
-Do not update progress for every tiny action.
+- `coke-workspace-orientation` — discovering the workspace and repository structure before editing. Run this first.
+- Verification skills (if present) — running the right checks before the final progress update.
 
-## When To Use
+Recommended order: workspace orientation → read progress → implementation → verification → update progress → final response.
 
-Use this skill for:
+## Definition of done
 
-- implementing features
-- fixing complex bugs
-- refactoring across multiple files
-- changing API, database, auth, payment, files, background jobs, or cross-repo behavior
-- continuing work from a previous session
-- tasks where future agents need reliable handoff context
+The final response must state:
 
-For trivial one-line changes, a final report may be enough.
+- Whether `project/PROGRESS.md` was read.
+- Whether `project/PROGRESS.md` was updated.
+- Current task status.
+- What was completed and what should happen next.
+- Verification performed and anything left unverified.
 
-## Recommended PROGRESS.md Format
-
-Use this structure unless the existing file already has a clear project-specific format. Preserve useful existing content and update it in place.
-
-```markdown
-# Project Progress
-
-## Current Snapshot
-
-Status:
-Current task:
-Current objective:
-Last updated:
-
-## What Was Done
-
-## Current State
-
-## Verification Done
-
-## Next Steps
-
-## Open Questions
-
-## Risks / Blockers
-
-## Changed Areas
-```
-
-In `Changed Areas`, group work by repository or project area, for example:
-
-```markdown
-## Changed Areas
-
-- `api/`: Updated authentication handler and request validation.
-- `web/`: Added login form error state.
-- `project/tests/`: Added cross-repo smoke test notes.
-```
-
-Use the actual discovered repository or area names. Do not invent fixed names.
-
-## Update Rules
-
-Record:
-
-- meaningful implementation progress
-- changed repositories or project areas
-- important decisions
-- incomplete work
-- verification status
-- commands that matter
-- next steps
-- blockers
-- risks
-- open questions
-
-Do not record:
-
-- every file opened
-- every minor edit
-- every command attempt unless it matters
-- speculative thoughts that do not affect the project
-- private reasoning
-- noisy chronological logs
-
-Prefer concise project-level summaries over detailed transcripts.
-
-## Multi-Repository Rules
-
-Repository names are not fixed.
-
-Use `project/AGENTS.md`, workspace inspection, and the task context to identify repositories and project areas.
-
-Group progress by repository or project area. If a change spans multiple repositories, make the relationship clear.
-
-Examples of project areas include:
-
-- application repository
-- service repository
-- worker repository
-- shared package
-- `project/docs/`
-- `project/tests/`
-- `project/scripts/`
-- database or migration area
-- deployment or CI area
-
-Do not assume any repository exists until inspected.
-
-## Final Response Requirement
-
-The final response must include:
-
-- whether `project/PROGRESS.md` was read
-- whether `project/PROGRESS.md` was updated
-- current task status
-- what was completed
-- what should happen next
-- verification performed
-- anything not verified
-
-Keep the final response concise. Mention progress updates directly, for example:
+Keep the final response concise. Example:
 
 ```text
 Read `project/PROGRESS.md` before starting and updated it with the implementation summary, verification results, and next steps.
 ```
 
 If the task was trivial and progress was not updated, say so.
-
-## Relationship With Other Skills
-
-This skill works well with:
-
-- `coke-workspace-orientation`
-- `coke-end-to-end-verification`
-
-Recommended order:
-
-1. `coke-workspace-orientation`
-2. `coke-project-progress`
-3. implementation
-4. `coke-end-to-end-verification`
-5. `coke-project-progress` final update
-6. final response
