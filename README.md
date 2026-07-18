@@ -25,6 +25,10 @@ This repository is separated into two kinds of content:
 
 - `skills/dev/coke-workspace-orientation`
 
+### Writing
+
+- `skills/writing/coke-community-reply` — draft answer-first replies to community / forum posts (n8n community, Reddit, Make/Zapier, IndieHackers). Future siblings: `coke-email-reply`, `coke-marketing-post`.
+
 ## Text Playbooks
 
 - `text/mobile-expo`: explains when to use official Expo skills.
