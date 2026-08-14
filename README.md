@@ -98,3 +98,57 @@ so it doubles as a pre-push check (`--dry-run` to look without tagging).
 
 Verified 2026-08-14 by pushing a marker without a bump (not picked up), then with one (picked
 up), and confirming the cache contents by hash in both directions.
+
+## Testing that a skill triggers
+
+A skill that never fires is indistinguishable from a skill that does not exist, and nothing in
+`claude plugin validate` catches it — two skills here shipped with malformed frontmatter and
+went unnoticed for months. `evals/run_trigger_eval.py` measures it directly:
+
+```
+python3 evals/run_trigger_eval.py \
+    --eval-set plugins/eng/skills/rust-code-review/evals/trigger_eval.json \
+    --expect coke-eng:rust-code-review \
+    --cwd ~/Projects/checkilo/backend \
+    --runs 3
+```
+
+Each skill's prompts live in `<skill>/evals/trigger_eval.json` — half that should fire it, half
+near-misses aimed at whichever skill ought to win instead. These files are dev-time only; they
+are not loaded at runtime, so adding or editing them needs no version bump.
+
+Two things about the method are worth keeping:
+
+- **Run the prompts in a directory where they make sense.** A prompt about an Axum handler,
+  asked inside a repo with no Rust in it, sends the agent hunting for files that do not exist
+  until it times out. That measures the working directory, not the description.
+- **`skill-creator`'s trigger eval cannot be used here.** It installs a proxy copy of the skill
+  and watches for the proxy to fire. Once the real skill is installed the real one always wins,
+  so every query reports "did not trigger" and the resulting score is an artifact, not a
+  finding. This runner uses no proxy and records which skill actually won.
+
+### Measured baseline — 2026-08-15
+
+Six highest-risk skills, 10 prompts each, 3 runs per prompt, run inside real projects:
+
+| | result |
+| --- | --- |
+| Prompts that should **not** fire the skill | **30/30 correct** |
+| Prompts that should fire it | **10/30** |
+
+No over-triggering anywhere, and every near-miss was won by a sensible alternative. The
+under-triggering is almost entirely one effect: 23 of 28 losses went to `superpowers`, whose
+SessionStart hook instructs the agent that process skills come first — `brainstorming` before
+building, `systematic-debugging` before fixing, `test-driven-development` before writing a test.
+
+A follow-up run recorded the first three skill calls instead of the first, to see whether
+`superpowers` hands off to the specialist afterwards. It does not: of 40 runs, 26 fired exactly
+one skill and stopped, 13 fired none, and the expected skill — when it appeared at all — was
+always the first call. Handoffs after ten or more tool calls were not measured.
+
+Two skills are unaffected: `marketing-sell-the-outcome` (5/5) and `stack-go-react-postgres`
+(3/5) sit in lanes `superpowers` does not claim.
+
+Nothing was changed in response to these numbers. They describe how the skills behave alongside
+the other plugins installed on one machine — a different install set gives a different answer,
+and the fix, if one is wanted, is a description question rather than a packaging one.

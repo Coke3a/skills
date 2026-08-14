@@ -41,8 +41,15 @@ BLOCKED = ["Write", "Edit", "MultiEdit", "NotebookEdit", "Bash"]
 DEFAULT_MAX_TOOLS = 4
 
 
-def run_once(query: str, cwd: str, timeout: int, max_tools: int) -> str:
-    """Return the skill name that fired first, '' if none, or '(timeout)'."""
+def run_once(query: str, cwd: str, timeout: int, max_tools: int, max_skills: int = 1) -> list[str]:
+    """Return the skill names that fired, in order, up to max_skills.
+
+    max_skills=1 answers "who wins the prompt". Raising it answers a different
+    and equally important question: when a generic process skill wins, does it
+    then hand off to the specialist, or does it swallow the task? A loss at
+    position 1 that becomes a hit at position 2 is a sequencing detail, not a
+    triggering failure, and the two call for opposite fixes.
+    """
     cmd = [
         "claude", "-p", query,
         "--output-format", "stream-json",
@@ -57,8 +64,8 @@ def run_once(query: str, cwd: str, timeout: int, max_tools: int) -> str:
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
         text=True, bufsize=1,
     )
-    result = {"value": ""}
-    timer = threading.Timer(timeout, lambda: (result.__setitem__("value", "(timeout)"), proc.kill()))
+    skills: list[str] = []
+    timer = threading.Timer(timeout, proc.kill)
     timer.start()
     try:
         tools = 0
@@ -72,17 +79,19 @@ def run_once(query: str, cwd: str, timeout: int, max_tools: int) -> str:
                 if not isinstance(block, dict) or block.get("type") != "tool_use":
                     continue
                 if block.get("name") == "Skill":
-                    result["value"] = (block.get("input") or {}).get("skill", "") or "(unnamed)"
-                    proc.kill()
-                    return result["value"]
+                    skills.append((block.get("input") or {}).get("skill", "") or "(unnamed)")
+                    if len(skills) >= max_skills:
+                        proc.kill()
+                        return skills
+                    continue
                 tools += 1
                 if tools >= max_tools:
                     proc.kill()
-                    return result["value"]
+                    return skills
     finally:
         timer.cancel()
         proc.kill()
-    return result["value"]
+    return skills
 
 
 def main() -> int:
@@ -94,6 +103,8 @@ def main() -> int:
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--timeout", type=int, default=180)
     ap.add_argument("--max-tools", type=int, default=DEFAULT_MAX_TOOLS)
+    ap.add_argument("--max-skills", type=int, default=1,
+                    help="Record this many skill calls per run. >1 reveals handoffs")
     ap.add_argument("--json", dest="json_out", default=None)
     args = ap.parse_args()
 
@@ -103,41 +114,45 @@ def main() -> int:
 
     print(f"{args.expect}  —  {len(items)} queries x {args.runs} runs  in {cwd}", file=sys.stderr)
 
-    fired: dict[int, list[str]] = {i: [] for i in range(len(items))}
+    fired: dict[int, list[list[str]]] = {i: [] for i in range(len(items))}
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {
-            pool.submit(run_once, item["query"], cwd, args.timeout, args.max_tools): i
+            pool.submit(run_once, item["query"], cwd, args.timeout, args.max_tools, args.max_skills): i
             for i, item in jobs
         }
-        for fut in futures:
-            pass  # submitted; collected below
         for fut, i in futures.items():
             try:
                 fired[i].append(fut.result())
             except Exception as exc:  # a dead subprocess should not sink the run
-                fired[i].append(f"(error: {type(exc).__name__})")
+                fired[i].append([f"(error: {type(exc).__name__})"])
 
     results, passed = [], 0
     for i, item in enumerate(items):
         got = fired[i]
-        hits = sum(1 for g in got if g == args.expect)
+        hits = sum(1 for seq in got if args.expect in seq)
         rate = hits / len(got)
         ok = rate >= 0.5 if item["should_trigger"] else rate < 0.5
         passed += ok
-        others = Counter(g for g in got if g and g != args.expect)
+        # Where in the sequence the expected skill landed — 1 means it won outright.
+        positions = [seq.index(args.expect) + 1 for seq in got if args.expect in seq]
+        others = Counter(seq[0] for seq in got if seq and seq[0] != args.expect)
         results.append({
             "query": item["query"],
             "should_trigger": item["should_trigger"],
             "trigger_rate": rate,
             "pass": ok,
-            "won_instead": others.most_common(),
+            "positions": positions,
+            "won_first": others.most_common(),
+            "sequences": got,
         })
         mark = "PASS" if ok else "FAIL"
-        instead = ""
+        note = ""
         if others:
-            instead = "  <- " + ", ".join(f"{n} x{c}" for n, c in others.most_common(2))
+            note = "  <- " + ", ".join(f"{n} x{c}" for n, c in others.most_common(2))
+        if positions and any(p > 1 for p in positions):
+            note += f"  [handoff at position {sorted(set(positions))}]"
         print(f"  [{mark}] {hits}/{len(got)} expect={str(item['should_trigger']):5} "
-              f"{item['query'][:58]}{instead}", file=sys.stderr)
+              f"{item['query'][:52]}{note}", file=sys.stderr)
 
     summary = {"expect": args.expect, "cwd": cwd, "runs": args.runs,
                "total": len(items), "passed": passed, "failed": len(items) - passed,
