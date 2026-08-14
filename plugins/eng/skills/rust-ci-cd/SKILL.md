@@ -98,5 +98,3 @@ Summarise:
 - Artifact or image strategy and migration behaviour.
 - Smoke test behaviour and rollback method.
 - Commands or validations run, plus risks or follow-up.
-
-<!-- update-probe: PROBE-1 -->
