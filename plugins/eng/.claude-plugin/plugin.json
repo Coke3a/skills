@@ -1,6 +1,6 @@
 {
   "name": "coke-eng",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Rust and Go clean architecture, TDD, code review, CI/CD, Next.js app and UI workflows, full-stack baseline, spec review, feature implementation, and Docker/VM deploy.",
   "author": { "name": "Coke3a" },
   "repository": "https://github.com/Coke3a/skills",
