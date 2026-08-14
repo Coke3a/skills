@@ -60,4 +60,41 @@ Within each plugin, skill names carry a topic prefix (`rust-`, `go-`, `nextjs-`,
 1. Create `plugins/<group>/skills/<prefix>-<name>/SKILL.md`.
 2. Set frontmatter `name:` to the folder name exactly.
 3. Add one row to the table above.
-4. Bump that plugin's `version` in `.claude-plugin/marketplace.json` and its `plugin.json`.
+4. Release it with the steps below.
+
+## Releasing a change
+
+**A version bump is mandatory.** The update check compares version *strings*, not commit
+SHAs. Push a skill edit without bumping and `claude plugin update` fetches the new commit,
+reports `already at the latest version`, and leaves the installed copy untouched — the edit
+never reaches the agent.
+
+1. Edit the skill.
+2. Bump `version` in `plugins/<group>/.claude-plugin/plugin.json`. **This is the one that
+   decides** — the CLI's own words are "plugin.json wins at install time".
+3. Set the matching entry in `.claude-plugin/marketplace.json` to the same value. It does not
+   trigger the update, but `claude plugin tag` refuses to tag while the two disagree.
+4. `claude plugin validate .` — stricter than eyeballing; it catches malformed frontmatter
+   that grep-based checks miss.
+5. Commit and push to `main`.
+6. `claude plugin update coke-eng@coke-skills` — the qualified name is required; a bare
+   `coke-eng` fails with `Plugin "coke-eng" not found`.
+7. Restart Claude Code. The CLI prints `Restart to apply changes`; a session already running
+   keeps the copy it started with.
+
+Plugins version independently — releasing `coke-eng` does not touch the other two.
+
+Optional, for a release marker: `claude plugin tag --push plugins/eng` creates
+`coke-eng--v<version>`. It refuses to run on a dirty working tree or on mismatched manifests,
+so it doubles as a pre-push check (`--dry-run` to look without tagging).
+
+### Where things live
+
+| Path | What |
+| --- | --- |
+| `~/.claude/plugins/marketplaces/coke-skills/` | Git clone of this repo. `plugin update` fetches it — no separate `marketplace update` needed. |
+| `~/.claude/plugins/cache/coke-skills/<plugin>/<version>/` | The copy the agent actually reads. A new directory per version; the previous one is stamped `.orphaned_at` and swept later. |
+| `~/.claude/plugins/installed_plugins.json` | Records the installed `version` and `gitCommitSha`. The SHA is stored but not used to decide whether to update. |
+
+Verified 2026-08-14 by pushing a marker without a bump (not picked up), then with one (picked
+up), and confirming the cache contents by hash in both directions.
