@@ -1,10 +1,63 @@
 # Subagent dispatch templates
 
-Three subagent roles. Each prompt is self-contained — the subagent has zero conversation history. Brief like a smart colleague who just walked in.
+Four subagent roles: plan critic (Phase 2.5), implementer, spec reviewer, quality reviewer. Each prompt is self-contained — the subagent has zero conversation history. Brief like a smart colleague who just walked in.
+
+**Model tier.** Dispatch each role on the model that fits the work: implementer and quality reviewer follow the batch's tier from the plan (`model: "sonnet"` for mechanical batches, `model: "opus"` for reasoning-heavy ones); the plan critic is always `model: "opus"`; the spec compliance reviewer can stay on Sonnet (it's a requirement-by-requirement compare). Assumption-evidence gathering in Phase 2.5 is mechanical lookup → Sonnet.
 
 ---
 
-## 1. Implementer (`subagent_type: general-purpose`)
+## 0. Plan critic (`subagent_type: general-purpose`, `model: "opus"`) — Phase 2.5
+
+```
+You are the **plan critic** for <feature name>. Your job is to BREAK this plan on
+paper before anyone writes code. Attack it — do not admire it. A plan that survives
+you saves a costly rewrite later; a manufactured finding just wastes a fix cycle, so
+report only what's real.
+
+## Apply these skills as your lens
+
+- **`/scrutinize`** — you ARE the outsider red-team. Trace the plan, don't trust it.
+- **`/karpathy-guidelines`** — flag speculative scope and over-engineered batches too,
+  not just gaps. A plan that builds more than the spec asks is also a defect.
+- **Implementation lens** (user-selected): <list — same as the implementer's, for
+  judging whether the plan's approach is idiomatic for this stack>.
+
+## Read these (paths)
+
+- Spec: <path> — the source of truth for what should be built
+- Design plan: <path>
+- Implementation checklist: <path>
+
+## Attack these failure modes specifically
+
+1. **Batch ordering / dependencies** — does any batch depend on something a *later*
+   batch produces? When batch N runs, is its stated "state of the world" actually
+   reachable? Walk the sequence.
+2. **Unverified assumptions** — for every assumption marked `UNVERIFIED` (and any
+   load-bearing claim that SHOULD be listed but isn't), state exactly what breaks if
+   it's false and the cheapest way to check it (a grep, a file:line, a query).
+3. **Batch sizing** — any batch too big to review as one unit? Any two batches that
+   should be merged?
+4. **Missing scope** — a spec requirement no batch covers, or an acceptance
+   criterion nothing verifies?
+5. **Model tier sanity** — any batch tagged `Sonnet` that actually needs judgment,
+   or `Opus` that's pure mechanics?
+
+## Report format
+
+A short list of concrete defects. For each:
+- Severity: **blocker** / **worth-fixing** / **nit**
+- One-line description citing the batch ID / assumption ID / spec section
+- One-line suggested fix
+
+If the plan is genuinely sound, say so plainly and list what you actually checked
+(which batches you traced, which assumptions you probed) — do not invent findings to
+look thorough.
+```
+
+---
+
+## 1. Implementer (`subagent_type: general-purpose`, `model` per batch tier)
 
 ```
 You are the implementer for **Batch <ID> — <name>** of <feature name>.
@@ -248,6 +301,7 @@ Three slots, two sourced from the project config (Phase 0), one always-on baseli
 | Dispatch | Always-on | User-selected slot | Sourced from |
 |---|---|---|---|
 | Plan writer (controller, Phase 2) | `/karpathy-guidelines` + `/scrutinize` | Implementation skills | `<project>/.claude/coke-feature-implementation.json` → `implementation_skills` |
+| Plan critic (Phase 2.5) | `/karpathy-guidelines` + `/scrutinize` | Implementation skills | same — as a lens for judging the plan's approach |
 | Implementer | `/karpathy-guidelines` | Implementation skills | same — subset matching the affected component |
 | Spec reviewer | `/karpathy-guidelines` | (none — pure spec compare) | — |
 | Quality reviewer | `/karpathy-guidelines` + `/scrutinize` | Review skills | `<project>/.claude/coke-feature-implementation.json` → `review_skills` |

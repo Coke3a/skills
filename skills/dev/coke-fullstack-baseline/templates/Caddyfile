@@ -1,0 +1,65 @@
+# <project>/deployment/Caddyfile — one Caddy per browser-facing unit.
+#
+# ⚠ <host> and backend:8080 are PLACEHOLDERS. `caddy validate` fails until they are real,
+#   and a placeholder that ships is a config nobody can reload. Substitute first.
+#
+# The block order below is deliberate: Caddy applies `header` BEFORE `try_files`, so cache
+# headers have to live inside `handle` blocks or they never fire for a deep link.
+#
+# ⚠ Mount /data AND /config as named volumes. /data is not a cache — it holds the issued
+#   certificates and the ACME account key, and losing it means re-issuing into Let's
+#   Encrypt's duplicate-certificate rate limit (5 per week per identical name set).
+# ⚠ On staging, add:  acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+
+<host> {
+    encode zstd gzip
+
+    # job 1 — TLS is automatic; HSTS is NOT. Caddy never emits this header on its own.
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # job 4 — the backend publishes no public port
+    handle /api/v1/* {
+        reverse_proxy backend:8080 {
+            # ⚠ These default to UNSET. Setting them is how Caddy STARTS being able to emit a
+            #   504 — so if you already get one at ~60s, something in front of Caddy owns it
+            #   (nginx proxy_read_timeout / ALB idle are both 60s). Find the emitter first.
+            # ⚠ response_header_timeout measures time to FIRST BYTE, so a buffered export has
+            #   TTFB == total and every raise is temporary. Stream instead, and then:
+            #   flush_interval -1   (or the proxy re-buffers what the handler flushed)
+            transport http {
+                response_header_timeout 120s
+                read_timeout 120s
+            }
+        }
+    }
+
+    # job 3 — hashed filenames make this safe by construction
+    handle /assets/* {
+        root * /srv
+        header Cache-Control "public, max-age=31536000, immutable"
+        file_server
+    }
+
+    # job 2 + job 3 — SPA fallback, and the shell is never cached.
+    # ⚠ Cache index.html and users keep loading an old shell asking for asset hashes that no
+    #   longer exist — a white screen a redeploy does NOT fix, because it is in their browser.
+    handle {
+        root * /srv
+        header Cache-Control "no-cache"
+        try_files {path} /index.html
+        file_server
+    }
+
+    # ⚠ Every path not routed above falls into the SPA fallback and returns 200 + index.html.
+    #   Register the health paths explicitly or a health check passes against a dead backend.
+
+    log {
+        output stdout
+        format filter {                            # the log rule applies to the proxy too
+            fields {
+                request>uri regexp "[?].*" ""      # strip the query string before the line is written
+            }
+            wrap json
+        }
+    }
+}

@@ -1,6 +1,6 @@
 ---
 name: coke-feature-implementation
-description: Use this skill whenever the user wants to implement a feature from a spec file. Trigger phrases include "implement this spec", "implement the feature from <path>", "ทำตาม spec", "build this feature end-to-end", or any request to drive a multi-batch implementation against a written design. Always writes a plan + implementation checklist first (for agent reference and user post-review), then implements all batches with two-stage review (spec compliance + quality with scrutinize), and final verification (tests, dev servers, browser smoke, database data alignment). Applies surgical Karpathy YAGNI throughout and never commits — the user reviews the diff before deploy. Prefer this skill over manually orchestrating subagents whenever the user has a written spec or plan they want executed.
+description: Use this skill whenever the user wants to implement a feature from a spec file. Trigger phrases include "implement this spec", "implement the feature from <path>", "ทำตาม spec", "build this feature end-to-end", or any request to drive a multi-batch implementation against a written design. Always writes a plan + implementation checklist first (for agent reference and user post-review), red-teams that plan with a reasoning-heavy subagent before any code is written, then implements all batches — tiering each batch to Opus or Sonnet by difficulty — with two-stage review (spec compliance + quality with scrutinize), and final verification (tests, dev servers, browser smoke, database data alignment). Applies surgical Karpathy YAGNI throughout and never commits — the user reviews the diff before deploy. Prefer this skill over manually orchestrating subagents whenever the user has a written spec or plan they want executed.
 ---
 
 # Coke Feature Implementation
@@ -16,14 +16,16 @@ Invoke when the user wants to implement a feature from a spec. The trigger phras
 Every invocation follows the same flow — no mode selection needed:
 
 ```
-Phase 0 (project config) → Phase 1 (setup) → Phase 2 (write plan + checklist) → Phase 3 (implement) → Phase 4 (final verification)
+Phase 0 (project config) → Phase 1 (setup) → Phase 2 (write plan + checklist) → Phase 2.5 (red-team the plan) → Phase 3 (implement) → Phase 4 (final verification)
 ```
 
 Phase 2 always writes a plan and implementation checklist. These serve as:
 1. **Agent reference** — subagents read the plan to stay aligned during implementation.
 2. **User post-review** — the user checks implementation details after the work is done.
 
-The agent does NOT stop after Phase 2 for user approval — it continues straight to Phase 3. The plan is a working document, not a checkpoint.
+Phase 2.5 red-teams the plan with one reasoning-heavy subagent *before* any code gets written. The reasoning: this skill already hard-reviews the *code* (two-stage review per batch), but a wrong plan means every batch faithfully implements the wrong thing — and the reviewers pass it, because they check against the plan. A plan defect surfaced at Phase 4 or in the user's diff review is far more expensive than one caught here. This is an **agent gate, not a user gate**: if nothing serious turns up, the controller revises nothing and moves on; the user is not asked to approve.
+
+Neither Phase 2 nor Phase 2.5 stops for user approval — the flow runs straight through to Phase 3. The plan is a working document, not a checkpoint.
 
 ## Per-invocation questions (ask before Phase 1)
 
@@ -162,10 +164,17 @@ Structure:
 - **Header for agentic execution** — "REQUIRED SUB-SKILL: superpowers:subagent-driven-development. Backend `B*` batches block frontend `F*` batches. Do NOT commit — user reviews diff."
 - **Architecture overview** — minimal ASCII or text diagram of data/control flow
 - **Engineering principles applied (Karpathy + scrutinize)** — numbered list of the load-bearing judgment calls and the rationale
-- **Task batches table** — one row per batch (B1, B2, ..., F1, F2, ..., V1). Columns: batch ID, primary files, acceptance criteria
+- **Load-bearing assumptions + evidence** — numbered (A1, A2, ...). Each row is one assumption the plan *depends on* being true (e.g., "this function has a single caller", "this DTO field is unused by the frontend", "migration N runs before N+1") paired with the evidence that confirms it — a `grep` result, a file:line, a query. An assumption with no evidence yet is flagged `UNVERIFIED`; those get checked in Phase 2.5 before implementation relies on them. The point: a wrong assumption makes a batch fail silently, and no code reviewer catches it because the code faithfully matches the (wrong) plan.
+- **Task batches table** — one row per batch (B1, B2, ..., F1, F2, ..., V1). Columns: batch ID, primary files, acceptance criteria, **model**. The `model` column is `Sonnet` or `Opus` (see tiering rule below).
 - **Risk callouts (from scrutinize pass)** — numbered (R1, R2, ...) with what could go wrong and what to verify
 - **What NOT to do (locked by spec)** — bullet list
 - **Definition of done**
+
+**Batch model tiering (Sonnet vs Opus).** Each batch is dispatched to whichever tier fits its difficulty — no reason to burn Opus on a rename, or hand a concurrency rewrite to Sonnet:
+- **Sonnet** — mechanical or small: renames, moving code, wiring an already-designed call site, boilerplate DTOs, straightforward CRUD, following an explicit step list with no judgment calls.
+- **Opus** — reasoning-heavy or risky: concurrency / async ordering, migration sequencing, auth / permissions / money paths, anything touching a `UNVERIFIED` assumption or a scrutinize risk callout, or a batch where the "exact steps" still require the implementer to make design decisions.
+
+When genuinely unsure, prefer Opus — a wrong mechanical call is cheap to redo, a wrong reasoning call is not. Record the chosen tier in the batches table so Phase 3 dispatches read it straight from the plan.
 
 ### `<date>-<topic>-implementation.md` — todo checklist
 
@@ -178,7 +187,39 @@ Structure:
 
 Keep both files focused and non-duplicative of the spec. The spec already documents what should be built; the plan documents how, in what order, with what risk mitigations.
 
-After writing both files, **proceed directly to Phase 3** — do not stop for user approval. The plan exists for agent reference and user post-review, not as a gate.
+After writing both files, **proceed to Phase 2.5** — do not stop for user approval. The plan exists for agent reference and user post-review, not as a gate.
+
+---
+
+## Phase 2.5 — Red-team the plan (agent gate, before any code)
+
+Before the implementation loop spends real effort, one reasoning-heavy subagent tries to *break the plan on paper*. Catching a batching mistake or an unverified assumption here costs one dispatch; catching it after five batches are built costs a rewrite.
+
+### Step 1 — Dispatch the plan critic
+
+Use `Agent` with `subagent_type: general-purpose` and **`model: "opus"`** (this is exactly the reasoning-heavy work Opus is for). The prompt is self-contained — see `references/subagent-prompts.md` for the full template. It must:
+
+- Point the critic at the spec, the design plan, and the implementation checklist (paths).
+- Ask it to *attack*, not admire — its job is to find what's wrong, not confirm the plan is fine.
+- Focus on these failure modes specifically:
+  1. **Batch ordering / dependencies** — does any batch depend on something a later batch produces? Is a batch's "state of the world" actually reachable when it runs?
+  2. **Unverified assumptions** — for every `A*` marked `UNVERIFIED` (and any load-bearing claim that *should* have been listed but wasn't), state what breaks if it's false and how to check it cheaply.
+  3. **Batch sizing** — any batch doing too much to review as one unit, or two batches that should be one?
+  4. **Missing scope** — a spec requirement no batch covers, or an acceptance criterion nothing verifies.
+  5. **Model tier sanity** — any batch tagged `Sonnet` that actually needs judgment, or `Opus` that's pure mechanics?
+- Report format: a short list of concrete defects, each with severity (blocker / worth-fixing / nit) and a one-line suggested fix. If the plan is sound, say so plainly and list what it actually checked — no manufactured findings.
+
+### Step 2 — Verify UNVERIFIED assumptions with evidence
+
+For each assumption the critic flags as load-bearing and still unproven, get evidence *before* trusting it — don't carry a guess into implementation. Cheap checks (a `grep`, reading a file:line) the controller can just run. For anything that needs a real trace across files, dispatch a **Sonnet** agent to gather the evidence — this is mechanical lookup, not reasoning. Update the plan's assumptions section from `UNVERIFIED` to the evidence found (or correct the plan if the assumption was wrong).
+
+### Step 3 — Triage and revise
+
+- **Blocker / worth-fixing** defects that are real → edit the design plan and/or implementation checklist to fix them (reorder batches, split a batch, add a missing batch, retag a model tier, correct a wrong assumption).
+- **Nits or things the critic misread** → leave as-is; keep a one-line record so the Final Report can note "plan-critique findings (considered, not actioned)".
+- If a defect reveals a genuine spec ambiguity only the user can resolve → escalate to the user (this is one of the sanctioned stop points).
+
+Do **not** loop this indefinitely — one critic pass plus the resulting fixes is the intent. If the revision was substantial (batches reordered or added), a second quick critic pass on just the changed parts is reasonable; otherwise proceed to Phase 3.
 
 ---
 
@@ -194,7 +235,7 @@ For each batch in order:
 
 ### Step 2 — Dispatch the implementer subagent
 
-Use `Agent` with `subagent_type: general-purpose`. The prompt must be self-contained — the subagent has no conversation history. See `references/subagent-prompts.md` for the full template; the gist is:
+Use `Agent` with `subagent_type: general-purpose`, and set **`model`** from this batch's tier in the plan's batches table — `model: "sonnet"` for a Sonnet batch, `model: "opus"` for an Opus batch. The prompt must be self-contained — the subagent has no conversation history. See `references/subagent-prompts.md` for the full template; the gist is:
 
 ```
 You are the implementer for Batch <ID> — <name> of <feature name>.
@@ -255,6 +296,8 @@ If the implementer's report contradicts the diff (e.g., claims they kept field X
 ### Step 4 — Dispatch BOTH reviewers in PARALLEL
 
 Send both in the same Agent call message (parallel tool use). They're independent.
+
+Tier the reviewers to match the batch: for an **Opus batch**, dispatch the **quality reviewer with `model: "opus"`** — reasoning-heavy code deserves a reasoning-heavy reviewer. The spec compliance reviewer is a requirement-by-requirement compare and can stay on Sonnet regardless of tier. For a Sonnet batch, both reviewers on Sonnet is fine. (If a Sonnet batch's diff turns out to hide something subtle, nothing stops you re-running the quality reviewer on Opus.)
 
 **Spec reviewer** (`subagent_type: feature-dev:code-reviewer`):
 ```
@@ -448,6 +491,7 @@ Status: changes uncommitted (user reviews before deploy)
 - **Reuse types and helpers** instead of inventing new ones — Karpathy: don't expand surface area unless required.
 - **Surgical scope** — every changed line should trace to the spec. Reject "while we're here" refactors.
 - **Read before editing** — the implementer subagent should read the file before editing it; the controller should read the diff before trusting the implementer's report.
+- **Evidence over assumption** — any load-bearing assumption (single caller, unused field, ordering guarantee) gets a `grep`/file:line/query behind it before code depends on it. If you catch yourself writing "this is probably only called here", verify it instead of guessing — a wrong assumption fails a batch silently and no code reviewer will catch it, because the code matches the plan.
 - **Memory and CLAUDE.md override defaults** — when in doubt, defer to what the project documents.
 
 ## When to escalate to user
