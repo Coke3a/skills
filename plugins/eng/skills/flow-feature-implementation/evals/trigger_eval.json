@@ -1,13 +1,13 @@
 [
-  {"query": "implement the spec at docs/tasks/TASK-BE-014.md end to end", "should_trigger": true},
+  {"query": "implement the spec at docs/tasks/integrations-ux-spec.md end to end", "should_trigger": true},
   {"query": "here's the design doc for the multi-branch inventory feature — build it. it's big so it'll probably need several batches", "should_trigger": true},
-  {"query": "follow the plan in project/PROGRESS.md and implement the batches that are still open", "should_trigger": true},
-  {"query": "i wrote a spec for the notification system at checkilo/docs/specs/notifications.md. drive the implementation against it, review as you go", "should_trigger": true},
-  {"query": "build this feature end-to-end from the written design, dont commit anything, i want to review the diff myself", "should_trigger": true},
+  {"query": "follow the plan in docs/tasks/monitoring and implement the batches that are still open", "should_trigger": true},
+  {"query": "i wrote the integrations UX spec at docs/tasks/integrations-ux-spec.md. drive the implementation against it, review as you go, dont commit", "should_trigger": true},
+  {"query": "build this feature end-to-end from the written design in docs/tasks/incidents-surface, i want to review the diff myself before anything ships", "should_trigger": true},
 
-  {"query": "review this spec against the current codebase before we start building — i suspect half of it already exists", "should_trigger": false},
+  {"query": "review docs/tasks/integrations-ux-spec.md against the current codebase before we start building — i suspect half of it already exists", "should_trigger": false},
   {"query": "add a cancel button to the booking detail screen", "should_trigger": false},
   {"query": "write a spec for the notification system so we can hand it to someone", "should_trigger": false},
   {"query": "implement this rust usecase test-first", "should_trigger": false},
-  {"query": "what's actually in TASK-BE-014.md? just summarise it for me", "should_trigger": false}
+  {"query": "what's actually in docs/tasks/integrations-ux-spec.md? just summarise it for me", "should_trigger": false}
 ]
