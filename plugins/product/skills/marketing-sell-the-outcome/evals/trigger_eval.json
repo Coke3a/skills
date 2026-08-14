@@ -1,0 +1,13 @@
+[
+  {"query": "we're about to add a 'bulk export to csv' feature to checkilo. before i write the spec — are we actually selling the outcome here or just adding another button?", "should_trigger": true},
+  {"query": "read this landing page copy i wrote for talkrai and tell me honestly, would a normal person understand what they GET out of it, or does it just describe the app?", "should_trigger": true},
+  {"query": "look at this feature spec from a product owner angle. i keep feeling like it's feature-led but i can't articulate why", "should_trigger": true},
+  {"query": "help me position the new scheduling thing. right now the headline is 'automated shift scheduling with conflict detection' and it feels flat", "should_trigger": true},
+  {"query": "does this sell the future or just the tool — 'Store: inventory management with real-time sync and multi-branch support'", "should_trigger": true},
+
+  {"query": "write me 5 headline variations for the talkrai landing page hero", "should_trigger": false},
+  {"query": "check this blog draft against our brand voice and flag anything that's off-tone", "should_trigger": false},
+  {"query": "build the pricing page for checkilo — 3 tiers with a monthly/annual toggle", "should_trigger": false},
+  {"query": "put together a launch campaign plan for the store app — channels, content calendar, success metrics", "should_trigger": false},
+  {"query": "review this PR for bugs before i merge, it's the payment webhook handler", "should_trigger": false}
+]

@@ -1,0 +1,13 @@
+[
+  {"query": "here's the figma for the new checkout flow — tear it apart. what breaks when the cart is empty or the network is slow?", "should_trigger": true},
+  {"query": "second opinion on this settings screen. it feels cluttered but i cant tell if thats just me being too close to it", "should_trigger": true},
+  {"query": "review the UX of the onboarding flow in talkrai, screenshots attached. honestly does this screen even need to exist?", "should_trigger": true},
+  {"query": "audit this dashboard page for accessibility and visual hierarchy before we ship it friday", "should_trigger": true},
+  {"query": "look at this mockup and tell me what a first-time user would be confused by", "should_trigger": true},
+
+  {"query": "review this react component for bugs and unnecessary re-renders", "should_trigger": false},
+  {"query": "scrutinize my database migration plan before i run it in prod", "should_trigger": false},
+  {"query": "build a landing page for the new pricing tiers", "should_trigger": false},
+  {"query": "the button colors don't match our brand, fix the tailwind classes on this component", "should_trigger": false},
+  {"query": "check this API design before we freeze the contract — the endpoint shapes feel inconsistent", "should_trigger": false}
+]

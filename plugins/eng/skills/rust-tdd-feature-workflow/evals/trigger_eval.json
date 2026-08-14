@@ -1,0 +1,13 @@
+[
+  {"query": "add a rule to the rust api that bookings can't overlap for the same room. i want the test written first", "should_trigger": true},
+  {"query": "there's a bug where cancelling an already-cancelled booking returns 200 instead of 409. write a regression test then fix it, it's axum/diesel", "should_trigger": true},
+  {"query": "changing the create_reservation usecase contract to take a date range instead of two separate dates — do this test-driven please", "should_trigger": true},
+  {"query": "need validation on the guest email field in the rust service. red green refactor", "should_trigger": true},
+  {"query": "i want to add pagination to the list handler in the rust api but i keep breaking stuff. drive it with tests so i know when im done", "should_trigger": true},
+
+  {"query": "review my rust changes before i merge", "should_trigger": false},
+  {"query": "set up the layout for a brand new `payments` feature in the rust codebase — which files go where", "should_trigger": false},
+  {"query": "write tests for the react booking form with testing library", "should_trigger": false},
+  {"query": "benchmark this rust function, i think the allocation inside the loop is killing us", "should_trigger": false},
+  {"query": "do TDD on this go handler — acceptance criteria are in the ticket", "should_trigger": false}
+]

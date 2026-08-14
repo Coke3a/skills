@@ -1,0 +1,13 @@
+[
+  {"query": "before i open the PR — can you go over this axum handler + usecase change? i'm not confident about the error mapping and there's a new tokio::spawn in there", "should_trigger": true},
+  {"query": "i refactored the reservation repo to move validation out of the handler and into the domain. check i didn't break the layer boundaries", "should_trigger": true},
+  {"query": "audit this rust diff. it touches diesel transactions and i want to know if i've introduced anything unsound before it goes to staging", "should_trigger": true},
+  {"query": "just finished the payments feature in the rust api and the tests pass. what did i miss before i merge?", "should_trigger": true},
+  {"query": "theres a .unwrap() in this async block and a few clone()s im not sure about. review the whole file not just those lines", "should_trigger": true},
+
+  {"query": "write the failing test first for a new 'cancel booking' rule in the rust api, then make it pass", "should_trigger": false},
+  {"query": "this rust endpoint's p99 is 800ms. profile it and find the hot path", "should_trigger": false},
+  {"query": "set up the github actions workflow for this rust service — fmt, clippy, test, then build the image", "should_trigger": false},
+  {"query": "scaffold a new `invoices` feature in the rust api with the usual handler/usecase/domain/repository layout", "should_trigger": false},
+  {"query": "review this go service's error handling before i merge it", "should_trigger": false}
+]

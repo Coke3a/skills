@@ -1,0 +1,13 @@
+[
+  {"query": "starting a new internal tool at work — go backend, react with vite on the front, postgres. what should the repo layout look like and which versions should i pin? i've been burned by a pgx/sqlc mismatch before", "should_trigger": true},
+  {"query": "we're restructuring `store` — right now the go api and the react app are two separate repos each with their own docker setup and it's a mess. how should this actually be put together?", "should_trigger": true},
+  {"query": "my session cookie isn't being set in local dev. react is on 5173, go api on 8080. works fine in prod behind the same domain. whats the right way to run this locally", "should_trigger": true},
+  {"query": "about to kick off a greenfield project for a hotel booking thing, go + react + postgres. before i write any code — what should CI check and what gates do i want in from day one?", "should_trigger": true},
+  {"query": "i have a go + react + postgres project and honestly i'm not sure which of my skills owns what here. can you lay out which lane belongs to which?", "should_trigger": true},
+
+  {"query": "add a booking cancellation usecase to the go api in `hotel` — handler, usecase, domain, repository, the usual layering", "should_trigger": false},
+  {"query": "this postgres query on the reservations table takes 4s. here's the EXPLAIN ANALYZE output, help me figure out what index i'm missing", "should_trigger": false},
+  {"query": "the <BookingCard> component re-renders on every keystroke in the search box. how do i stop that without rewriting the whole form", "should_trigger": false},
+  {"query": "ship the current docker image from github actions to the staging VM over ssh", "should_trigger": false},
+  {"query": "set up a new Next.js 15 project with app router for the marketing site", "should_trigger": false}
+]
