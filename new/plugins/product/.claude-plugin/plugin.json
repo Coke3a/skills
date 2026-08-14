@@ -1,0 +1,8 @@
+{
+  "name": "coke-product",
+  "version": "1.0.0",
+  "description": "Outcome-led positioning, landing page design and CRO, and outsider-perspective UX/UI review.",
+  "author": { "name": "Coke3a" },
+  "repository": "https://github.com/Coke3a/skills",
+  "skills": "./skills/"
+}

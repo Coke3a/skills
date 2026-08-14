@@ -1,0 +1,37 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "coke-skills",
+  "owner": {
+    "name": "Coke3a",
+    "url": "https://github.com/Coke3a"
+  },
+  "metadata": {
+    "description": "Coke's agent skills, split into engineering, product, and productivity."
+  },
+  "plugins": [
+    {
+      "name": "coke-eng",
+      "source": "./plugins/eng",
+      "version": "1.0.0",
+      "category": "development",
+      "description": "Rust and Go clean architecture, TDD, code review, CI/CD, Next.js app and UI workflows, full-stack baseline, spec review, feature implementation, and Docker/VM deploy.",
+      "author": { "name": "Coke3a" }
+    },
+    {
+      "name": "coke-product",
+      "source": "./plugins/product",
+      "version": "1.0.0",
+      "category": "design",
+      "description": "Outcome-led positioning, landing page design and CRO, and outsider-perspective UX/UI review.",
+      "author": { "name": "Coke3a" }
+    },
+    {
+      "name": "coke-productivity",
+      "source": "./plugins/productivity",
+      "version": "1.0.0",
+      "category": "productivity",
+      "description": "Multi-repository workspace orientation, cross-session progress tracking, and community/forum reply drafting.",
+      "author": { "name": "Coke3a" }
+    }
+  ]
+}

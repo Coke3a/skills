@@ -1,0 +1,8 @@
+{
+  "name": "coke-productivity",
+  "version": "1.0.0",
+  "description": "Multi-repository workspace orientation, cross-session progress tracking, and community/forum reply drafting.",
+  "author": { "name": "Coke3a" },
+  "repository": "https://github.com/Coke3a/skills",
+  "skills": "./skills/"
+}

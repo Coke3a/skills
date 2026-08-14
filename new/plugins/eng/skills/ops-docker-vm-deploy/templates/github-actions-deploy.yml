@@ -1,0 +1,111 @@
+# Replace: <APP>, <PORT>, and the action pins.
+# Requires: environment `production` with SSH_HOST / SSH_USER / SSH_PRIVATE_KEY,
+#           repository variable DEPLOY_ENABLED.
+name: Deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# main: one queue, never cancelled. PR: one queue per PR, cancelled on new push.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'deploy-production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # PR: build only. Push to main / manual dispatch: build + push to the registry.
+  build:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Emits sha-xxxxxxx, lowercased to match the image in deploy/docker-compose.yml.
+      - name: Compute image tag
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Values baked into a shipped bundle at build time. Variables, not secrets.
+          # build-args: |
+          #   PUBLIC_API_URL=${{ vars.PUBLIC_API_URL }}
+          # PRs read the cache but never write to it.
+          cache-from: type=gha
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
+
+  # Skipped entirely unless the repo variable DEPLOY_ENABLED is 'true'.
+  deploy:
+    name: Deploy to production
+    needs: build
+    if: github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # SSH_* are environment secrets; this line is what puts them in scope.
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Staged in incoming/; deploy.sh installs it. The action runs mkdir -p on the target.
+      - name: Upload compose file
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: deploy/docker-compose.yml
+          target: /opt/<APP>/incoming
+          strip_components: 1
+
+      - name: Pull & restart on the target host
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.tag }}
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_LABEL: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # No `passphrase:` — the CI key is unencrypted, and naming the input would
+          # pick up an inherited secret and fail on a key that has none.
+          envs: IMAGE_TAG,REGISTRY_USER,REGISTRY_TOKEN,IMAGE_LABEL
+          # Read from the checkout above; its contents are piped to the remote shell.
+          script_path: deploy/deploy.sh

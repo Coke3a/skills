@@ -1,0 +1,21 @@
+# CI/CD Smells
+
+- `permissions: write-all`.
+- No explicit `permissions` block.
+- Deployment from `pull_request`.
+- Production secrets in a PR workflow.
+- Mutable `latest`-only deployment.
+- No smoke test.
+- No rollback instruction.
+- No concurrency for deploys.
+- Destructive migration without approval.
+- Huge inline deploy script.
+- Unpinned `curl | bash` installer.
+- Action versions not pinned where security requires pinning.
+- Secrets printed in logs.
+- Skipped tests to make CI pass.
+- CI uses different commands than local development.
+- Production artifact is rebuilt differently than staging.
+- Production deploys from a local machine.
+- Migration failures are ignored.
+- Smoke test failures are ignored.

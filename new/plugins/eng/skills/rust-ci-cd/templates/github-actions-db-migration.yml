@@ -1,0 +1,46 @@
+name: Database Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      migration_command:
+        description: Project migration command to run
+        required: true
+        default: MIGRATION_COMMAND
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-migration-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Warn about destructive migrations
+        run: |
+          {
+            echo "## Migration review"
+            echo ""
+            echo "- Confirm destructive migrations have explicit approval before running production."
+            echo "- This template does not guess provider-specific migration behavior."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run project migration command
+        run: |
+          set -euo pipefail
+          ${{ inputs.migration_command }}

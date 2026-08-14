@@ -1,0 +1,79 @@
+# <project>/docker-compose.yml
+#
+# ⚠ DEVELOPMENT ONLY. `deployment/` is production; neither file is derived from the other,
+#   and this one shares no network, no volume and no credential with any deployed environment.
+#
+# ⚠ Every version below is a fact with a shelf life — run scripts/check-pins.sh before use.
+#   the postgres tag in particular follows the *image* tag list, not the upstream
+#   PostgreSQL release: plausible-looking minors do not all exist as images.
+#
+# Requires three files that are not optional:
+#   backend/Dockerfile          → templates/backend.Dockerfile
+#   frontend/vite.config.ts     → templates/vite.config.ts
+#   local/postgres-init/01-roles.sql → templates/postgres-init.sql
+#     ⚠ without it, app_owner and app_user below do not exist and NOTHING starts.
+# And requires migration/ to already contain at least one up/down pair — see below.
+
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: app
+    ports: ["5432:5432"]              # so psql and a GUI can attach
+    volumes:
+      - pgdata:/var/lib/postgresql    # ⚠ NOT /var/lib/postgresql/data — PG18 moved it
+      # ⚠ runs ONCE, as superuser, on an empty data dir. `down -v` is what replays it.
+      - ./local/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # ⚠ -h forces TCP. Without it this goes green during initdb, migrate gets
+      #   connection-refused, and backend never starts. Worst on a cold first `up`.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d app"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  migrate:                            # one-shot; exits 0 when the schema is current
+    image: migrate/migrate:v4.19.1
+    depends_on: { postgres: { condition: service_healthy } }
+    volumes: ["./migration:/migration:ro"]
+    # ⚠ `migrate up` on an EMPTY directory fails rather than no-ops, and
+    #   service_completed_successfully then blocks `backend` forever.
+    # ⚠ Runs as app_owner — the SCHEMA OWNER, not the bootstrap superuser. The superuser
+    #   exists only to create the roles above; using it here would make every table it
+    #   creates owned by a superuser, and a superuser bypasses RLS.
+    command: ["-path", "/migration", "-database", "postgres://app_owner:local@postgres:5432/app?sslmode=disable", "up"]
+
+  backend:
+    build: ./backend                  # ⚠ needs backend/Dockerfile — nothing works without it
+    depends_on: { migrate: { condition: service_completed_successfully } }
+    ports: ["8080:8080"]
+    environment:
+      ENV: local
+      PORT: "8080"
+      LOG_LEVEL: debug
+      # ⚠ one DSN per role, and NEVER the superuser above — a superuser bypasses RLS,
+      #   so every query works locally and the real grants are first exercised in staging.
+      DATABASE_URL_APP: postgres://app_user:local@postgres:5432/app?sslmode=disable
+
+  frontend:
+    image: node:24.19.0-alpine        # ⚠ exact, so scripts/version-check.sh can assert it
+    working_dir: /app
+    depends_on: [backend]
+    ports: ["5173:5173"]
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules          # ⚠ anonymous volume — unmasks what the image installed
+    environment:
+      # ⚠ read by the dev-server PROCESS, never by the bundle. Nothing named VITE_* may
+      #   point at an API host — that prefix is what makes a value ship to the browser.
+      DEV_PROXY_TARGET: http://backend:8080
+      # CHOKIDAR_USEPOLLING: "1"   # only if edits do not trigger a reload; burns CPU
+    command: sh -c "npm ci && npm run dev -- --host"   # ⚠ npm ci, never npm install
+
+  # A second SPA is a second service on 5174 with its own DEV_PROXY_TARGET.
+  # Caddy is NOT here — locally Vite's proxy does Caddy's job.
+
+volumes:
+  pgdata:
