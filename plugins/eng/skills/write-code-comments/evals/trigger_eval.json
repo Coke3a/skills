@@ -1,0 +1,13 @@
+[
+  {"query": "internal/billing/reconcile.go is like 40% comments and most of them just say what the next line does. go through it and cut the ones that arent pulling their weight, but dont touch the ones that actually explain something", "should_trigger": true},
+  {"query": "need docstrings on the exported funcs in src/lib/pricing.ts before this ships. a couple of them take amounts and its genuinely not clear which ones are satang and which are baht", "should_trigger": true},
+  {"query": "i added a `?? []` guard in the profile loader because the upstream api returns null for users with no orders instead of an empty array. worth leaving a note there or is that obvious enough from context", "should_trigger": true},
+  {"query": "lifted this debounce hook off a stackoverflow answer and changed the leading edge behaviour. whats the right way to note where it came from in the file", "should_trigger": true},
+  {"query": "we set the http timeout to 27s on purpose because cloudflare kills the connection at 30. right now that reasoning only exists in a slack thread — can you get it written down in the code itself", "should_trigger": true},
+
+  {"query": "write the README for this repo. needs the setup steps, the env var table, and how to run the compose stack locally", "should_trigger": false},
+  {"query": "im commenting out chunks of this fiber handler one at a time to find which one blows up the request. help me narrow down where it dies", "should_trigger": false},
+  {"query": "write the PR description for this branch, theres 12 commits on it and i need a summary of whats actually changed for the reviewer", "should_trigger": false},
+  {"query": "before i merge — go over this axum handler and the usecase underneath it. im not confident about the error mapping and theres a new tokio::spawn in there", "should_trigger": false},
+  {"query": "i dont understand what this regex in validate.ts is doing, theres a lookahead and some escaping i cant follow. walk me through it", "should_trigger": false}
+]

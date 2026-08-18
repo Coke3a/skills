@@ -12,9 +12,9 @@
     {
       "name": "coke-eng",
       "source": "./plugins/eng",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "development",
-      "description": "Rust and Go clean architecture, TDD, code review, CI/CD, Next.js app and UI workflows, full-stack baseline, spec review, feature implementation, and Docker/VM deploy.",
+      "description": "Rust and Go clean architecture, TDD, code review, CI/CD, Next.js app and UI workflows, full-stack baseline, spec review, feature implementation, Docker/VM deploy, and code comment discipline.",
       "author": { "name": "Coke3a" }
     },
     {

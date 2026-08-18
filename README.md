@@ -36,6 +36,7 @@ Within each plugin, skill names carry a topic prefix (`rust-`, `go-`, `nextjs-`,
 | `rust-performance-optimization` | A Rust service has a measured performance goal or a suspected hot path |
 | `rust-tdd-feature-workflow` | Turning Rust acceptance criteria into tests, then red/green/refactor |
 | `stack-go-react-postgres` | Starting or restructuring a Go + React (Vite) + PostgreSQL project — layout, pins, Compose, CI, gates |
+| `write-code-comments` | Deciding what earns a code comment and what to delete — any language, writing or auditing |
 
 ## coke-product
 
