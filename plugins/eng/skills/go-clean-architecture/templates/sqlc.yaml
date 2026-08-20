@@ -1,11 +1,17 @@
 # Template: project-root sqlc.yaml.
-# Schema comes from goose migrations so schema and queries stay verifiably in
-# sync. Generated code lands in internal/infra/postgres/gen (package gen) and
-# must never be edited by hand or imported outside internal/infra/postgres.
+# Schema comes from golang-migrate migrations so schema and queries stay
+# verifiably in sync. Generated code lands in internal/infra/postgres/gen
+# (package gen) and must never be edited by hand or imported outside
+# internal/infra/postgres.
+#
+# ⚠ Standalone Go repo only. In a coke-eng:stack-go-react-postgres monorepo,
+#   sqlc.yaml lives one level down in backend/ and migration/ sits at the
+#   repository root instead — use that skill's templates/sqlc.yaml
+#   (schema: "../migration") so there is only ever one migration directory.
 version: "2"
 sql:
   - engine: "postgresql"
-    schema: "db/migrations"
+    schema: "migration"
     queries: "db/queries"
     gen:
       go:

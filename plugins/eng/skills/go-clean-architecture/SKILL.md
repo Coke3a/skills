@@ -89,7 +89,7 @@ infra -> domain interfaces
 | `templates/error_types.go`          | Layered error values and conversion helpers                                 |
 | `templates/background_job.go`       | Background worker with owned goroutine lifecycle                            |
 | `templates/example_entity_queries.sql` | sqlc query file shape                                                    |
-| `templates/sqlc.yaml`               | sqlc configuration (schema from goose migrations, pgx/v5 output)            |
+| `templates/sqlc.yaml`               | sqlc configuration (schema from golang-migrate migrations, pgx/v5 output)   |
 
 ## Related skills
 

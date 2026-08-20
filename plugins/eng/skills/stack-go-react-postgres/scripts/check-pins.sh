@@ -172,7 +172,7 @@ check_pg() {
 
 # ---------------------------------------------------------------- image tags
 
-IMAGES=("postgres|18" "node|24" "caddy|2")
+IMAGES=("postgres|18" "node|24" "caddy|2" "golang|$(pinned "Go" | cut -d. -f1,2)")
 
 read -r -d '' P_TAGS <<'PY'
 import json, sys, re

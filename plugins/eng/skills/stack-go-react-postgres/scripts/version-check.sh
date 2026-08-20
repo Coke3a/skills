@@ -93,7 +93,7 @@ report() {
     if exact "$base"; then
       note "$base" "$where"
     elif [[ "$where" == *"go directive"* ]]; then
-      # `go 1.26` is a legitimate minimum, not a floating pin. It constrains the minor only.
+      # `go 1.27` is a legitimate minimum, not a floating pin. It constrains the minor only.
       note "$base  (minimum)" "$where"
     else
       bad "$base  ⚠ floating — not an exact x.y.z" "$where"

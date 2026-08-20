@@ -50,7 +50,7 @@
 
 ## 7. Add migration and sqlc queries
 
-- [ ] Add goose migration in `db/migrations/` (`-- +goose Up` / `-- +goose Down`)
+- [ ] Add golang-migrate migration in `migration/` (`{version}_{title}.up.sql` / `.down.sql` pair)
 - [ ] Add queries in `db/queries/{entity}.sql` with `{Action}{Entity}` names and the right
       annotation (`:one`, `:many`, `:exec`, `:execrows`)
 - [ ] Run `sqlc generate` and commit the generated diff

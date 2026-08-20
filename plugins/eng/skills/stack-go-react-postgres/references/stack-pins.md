@@ -28,12 +28,12 @@ something newer sit until its ecosystem catches up.
 
 | | Pin | Why this one |
 |---|---|---|
-| **Go** | `1.26.6` | Newest stable at the time of writing; `1.27` was still a release candidate, and an rc is not a production floor. Go supports the last two majors |
+| **Go** | `1.27.0` | `1.27` GA'd August 2026, confirmed stable on `go.dev/dl` (this table pinned `1.26.6` while `1.27` was still a release candidate — that's resolved now). Go supports the last two majors, so `1.27` is the floor to take on a new project |
 | **Fiber** | `v3.5.0` | v3.0.0 GA'd 2026-02-02 — months of production soak. Requires Go ≥ 1.25.0 |
 | **pgx** | `v5.10.0` | `pgxpool` directly — no `database/sql` wrapper. Requires Go ≥ 1.25.0 |
 | **sqlc** | `v1.31.1` | Generated code stops at the repository layer and goes no further. **Run as a binary, not imported**, so its own `go` directive imposes no floor on `go.mod` — `check-pins.sh go` prints one anyway, and it is not a constraint |
 | **golang-migrate** | `v4.19.1` · image `migrate/migrate` | The migration runner. Requires Go ≥ 1.24.0 as a library — **but it is run as a container**, so it imposes no floor on `go.mod` |
-| **golangci-lint** | `v2.12.2` | |
+| **golangci-lint** | `v2.13.0` | Needs go 1.26.0 — compatible with the `1.27.0` pin above |
 | **testcontainers-go** | `v0.44.0` | `make test-db` runs against a real PostgreSQL, and this is what starts it |
 | **OpenTelemetry Go** | `v1.45.0` | |
 

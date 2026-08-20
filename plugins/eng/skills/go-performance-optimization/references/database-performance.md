@@ -18,7 +18,7 @@ A missing index beats any Go-side tuning by orders of magnitude — check the qu
 
 - Keep DB-specific work in infra/repository; do not let handlers or usecases touch SQL.
 - `EXPLAIN (ANALYZE, BUFFERS)` the real query with production-like data when query time is the
-  suspected bottleneck; add the index or fix the query shape in a goose migration.
+  suspected bottleneck; add the index or fix the query shape in a golang-migrate migration.
 - Fix N+1 by adding an intent-named batch method to the repository interface
   (`FindByIDs`, `ListWithChildren`) when the N+1 behavior is measured — propose the interface
   change, implement it with one sqlc query (join or `= ANY($1)`).

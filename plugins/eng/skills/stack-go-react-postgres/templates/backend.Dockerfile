@@ -4,7 +4,7 @@
 # Go version out of the first line. ⚠ Keep the tag exact — a floating `golang:1-alpine`
 # cannot be checked against go.mod.
 
-FROM golang:1.26.6-alpine AS build
+FROM golang:1.27.0-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download

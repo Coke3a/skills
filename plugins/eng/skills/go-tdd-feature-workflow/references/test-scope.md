@@ -62,7 +62,7 @@ loop:
 - `mapPgError` translating real driver errors rather than hand-built ones
 - transaction boundaries and rollback
 
-Verify those separately — against a real Postgres with the project's goose migrations applied — and
+Verify those separately — against a real Postgres with the project's golang-migrate migrations applied — and
 record in `templates/test-summary.md` whether that happened.
 
 ## Cost and confidence

@@ -91,8 +91,8 @@ See `references/repository-sqlc.md` for the full boundary.
 cmd/
   api/
     main.go                  # composition root: config, pool, repos, usecases, handlers, listen
+migration/                   # golang-migrate pairs — schema source of truth for sqlc
 db/
-  migrations/                # goose migrations — schema source of truth for sqlc
   queries/                   # sqlc query .sql files
 sqlc.yaml
 internal/

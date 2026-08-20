@@ -1,6 +1,6 @@
 # Database Tool Choice: sqlc + pgx
 
-This architecture mandates **sqlc (with `sql_package: "pgx/v5"`) + pgx/pgxpool**, with **goose**
+This architecture mandates **sqlc (with `sql_package: "pgx/v5"`) + pgx/pgxpool**, with **golang-migrate**
 for migrations. This file records why, so the decision can be re-evaluated deliberately instead of
 re-litigated per feature.
 
@@ -40,7 +40,7 @@ infra, executed on the same pool, and keep it behind the repository interface.
 - Repository implementations use sqlc-generated queries; hand-written SQL strings appear only for
   features sqlc cannot express, live only inside `internal/infra/postgres`, and use parameterized
   arguments — never string concatenation.
-- Migrations are goose files in `db/migrations/`; sqlc reads them as its schema, which keeps
-  schema and queries verifiably in sync.
+- Migrations are golang-migrate pairs in `migration/`; sqlc reads them as its schema, which
+  keeps schema and queries verifiably in sync.
 - Re-evaluate this choice only at project level, with this file updated — not ad hoc inside a
   feature.

@@ -52,7 +52,7 @@ decide. See the ownership table in `references/error-handling.md`.
 
 ## sqlc project setup
 
-- `sqlc.yaml` at the project root; `db/migrations/` (goose) is the schema source of truth;
+- `sqlc.yaml` at the project root; `migration/` (golang-migrate) is the schema source of truth;
   `db/queries/*.sql` holds the queries.
 - Generated code goes to `internal/infra/postgres/gen` (package `gen`) with
   `sql_package: "pgx/v5"`. Never edit generated files.
@@ -261,6 +261,7 @@ pool, err := pgxpool.NewWithConfig(ctx, cfg)
 
 ## Migrations
 
-- Use goose; migrations live in `db/migrations/` and double as the sqlc schema source.
-- One migration per schema change, with `-- +goose Up` / `-- +goose Down` sections.
+- Use golang-migrate; migrations live in `migration/` and double as the sqlc schema source.
+- One migration per schema change, as a `{version}_{title}.up.sql` / `{version}_{title}.down.sql`
+  pair — never a single file with embedded up/down markers.
 - Keep migrations backward-compatible when practical (additive first, destructive later).

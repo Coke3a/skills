@@ -95,8 +95,8 @@ Both phases have the same three lanes — **contract · schema · interface**.
 
 `karpathy-guidelines` applies in both phases and at every stage.
 
-⚠ **Six skill lines are correct in their own context and wrong in this one** — goose vs
-golang-migrate, the singleton pool, the repository layer nobody tests, transactions under
+⚠ **Six skill lines are correct in their own context and wrong in this one** — go-clean-architecture's
+sqlc.yaml path assumption, the singleton pool, the repository layer nobody tests, transactions under
 RLS, Next.js-only React rules, and one platform's identity function. Read
 `references/skill-routing.md` before following any of them, and record the divergence as a
 decision rather than discovering it at `sqlc generate` time.
@@ -188,7 +188,7 @@ repository it gates; a freshness check does not.
 - `scripts/version-check.sh` — **copy into the project's own `scripts/`.** It is the body of
   the `make version-check` gate: Node must agree across `.nvmrc`, any Dockerfile that pins it,
   the CI workflow and the compose image tag; Go across `go.mod`, the Dockerfile and the CI
-  workflow. Floating tags fail it, which is the point. A `go 1.26` directive is treated as a
+  workflow. Floating tags fail it, which is the point. A `go 1.27` directive is treated as a
   legitimate minimum rather than a floating pin.
 
 ## Related skills

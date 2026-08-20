@@ -3,9 +3,11 @@
 # There is no ORM, so the generator reads the schema straight out of the migration
 # directory. sqlc supports golang-migrate natively and ignores every .down.sql.
 #
-# ⚠ coke-eng:go-clean-architecture ships a goose-flavoured sqlc.yaml pointing at
-#   backend/db/migrations/. Using it here produces a SECOND migrations directory that
-#   sqlc reads and nobody runs. These two paths are the fix.
+# ⚠ coke-eng:go-clean-architecture's own templates/sqlc.yaml is written for a
+#   standalone Go repo — it reads schema: "migration" from beside itself. In this
+#   monorepo sqlc.yaml lives in backend/, one level below migration/, so copying
+#   that file unedited here reads the wrong path. schema: "../migration" below is
+#   the fix; the tool (golang-migrate) already matches, only the depth differs.
 
 version: "2"
 sql:

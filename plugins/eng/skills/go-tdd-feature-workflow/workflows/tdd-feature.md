@@ -67,7 +67,7 @@
 - [ ] Write the sqlc queries and the `internal/infra/postgres` implementation against the port the
       tests discovered — use `coke-eng:go-clean-architecture`.
 - [ ] Confirm the compile-time interface check exists on the real implementation.
-- [ ] Verify persistence against a real database with the project's goose migrations. This is not
+- [ ] Verify persistence against a real database with the project's golang-migrate migrations. This is not
       part of the TDD loop; it is the gap the loop leaves.
 
 ## 8. Final verification

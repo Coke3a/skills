@@ -9,7 +9,7 @@
 
 ## 2. Candidate optimizations (smallest first)
 
-- [ ] Add the missing index (goose migration); re-run EXPLAIN to confirm it is used
+- [ ] Add the missing index (golang-migrate migration); re-run EXPLAIN to confirm it is used
 - [ ] Fix query shape: sargable predicates, needed columns only, pagination
 - [ ] Fix N+1: add an intent-named batch method to the repository interface
       (`FindByIDs` with `= ANY($1)`, or a join query) — propose the interface change first
