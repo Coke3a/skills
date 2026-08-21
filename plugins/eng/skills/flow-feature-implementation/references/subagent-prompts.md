@@ -116,8 +116,8 @@ Expected: <zero matches | matches in X.rs only | etc>
 - **Always:** `/karpathy-guidelines` — surgical scope, no speculative features,
   no defense-in-depth for single callers, every changed line must trace to spec.
 - **Implementation lens** (user-selected for this project): <list — e.g.,
-  `/coke-eng:rust-clean-architecture`, `/coke-eng:rust-performance-optimization`,
-  `/react-best-practices`, `/coke-eng:nextjs-app-architecture`, etc.>
+  `/coke-eng:rust-clean-architecture`, `/coke-eng:performance-optimization`,
+  `/coke-eng:tdd-feature-workflow`, `/react-best-practices`, etc.>
 - Brief: read the skill briefs if you don't already know them; apply their
   patterns idiomatically, but don't over-engineer to satisfy a skill if the
   task is small.
@@ -309,6 +309,6 @@ Three slots, two sourced from the project config (Phase 0), one always-on baseli
 Implementation skills and Review skills may overlap (e.g., `/react-best-practices` is useful in both slots). Both lists live in the project config so they don't get re-asked every invocation. The user can edit the JSON by hand or trigger a re-interview with "reconfigure".
 
 When dispatching, **filter the relevant subset** for the affected component — don't dump every skill into every prompt:
-- Implementer dispatch for a Rust file → only `/coke-eng:rust-*` entries from `implementation_skills`
-- Implementer dispatch for a `.tsx` file → only `/coke-eng:nextjs-*`, `/react-*` entries
+- Implementer dispatch for a Rust file → relevant `/coke-eng:rust-*` entries plus applicable cross-language workflow skills
+- Implementer dispatch for a `.tsx` file → relevant `/react-*` entries plus applicable cross-language workflow skills
 - Quality reviewer same logic against `review_skills`

@@ -1,6 +1,6 @@
 # TDD Test Review
 
-Use this reference to check whether tests followed `coke-eng:rust-tdd-feature-workflow`.
+Use this reference to check whether tests followed `coke-eng:tdd-feature-workflow`.
 
 ## Principles
 

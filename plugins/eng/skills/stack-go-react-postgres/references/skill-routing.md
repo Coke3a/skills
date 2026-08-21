@@ -8,10 +8,9 @@
 **The first question is not which skill. It is: does this project have a design yet?**
 
 The answer splits the work in two, and the skills split with it. **Phase A produces the
-artifacts Phase B consumes**, and Phase B is not merely inconvenient without them:
-`coke-eng:go-tdd-feature-workflow` opens with a **hard entry gate** that stops dead unless the
-endpoints, the request/response shapes and the schema are already written down somewhere
-quotable.
+artifacts Phase B consumes.** Phase B begins when the intended observable behavior is clear
+enough to express as acceptance criteria. Contract, schema, and interface artifacts are
+required only for the parts of the feature that actually depend on them.
 
 Both phases have the **same three lanes — contract · schema · interface.** Only what runs in
 each lane changes. Two skills appear in both phases, used for different halves of themselves;
@@ -27,9 +26,8 @@ changed line traces to a stated criterion, nothing speculative.
 design you can state as context.** What does not count is neither — and a project in that
 state has not reached Phase B.
 
-⚠ Two skills hold that to a stricter standard than *somebody knows*.
-`coke-eng:go-tdd-feature-workflow` needs its four facts **quotable from a source**, which stated
-context can be. `impeccable` needs an actual **file** — `PRODUCT.md` — and diverts to
+⚠ `impeccable` holds interface work to a stricter standard than *somebody knows*. It needs an
+actual **file** — `PRODUCT.md` — and diverts to
 `impeccable teach` when there is none, which is precisely the step that turns context into
 that file.
 
@@ -67,11 +65,10 @@ interface design at all. ⚠ The skill documents its loader as a
 the skill is installed per-user rather than vendored into the repository, that command is
 `~/.claude/skills/impeccable/scripts/…` instead.
 
-⚠ **Phase A's exit condition is written by Phase B, not by Phase A.** It is the four facts
-`coke-eng:go-tdd-feature-workflow` demands before it will write a line: **endpoints ·
-request/response shapes · database schema · one quotable sentence on what the feature is
-for.** If any of the four cannot be quoted from a document, design is not finished — and
-starting Phase B anyway only moves the stop from a document into a stack trace.
+⚠ **Phase A's exit condition is written by the behavior Phase B must implement.** The purpose
+and acceptance criteria must be clear. Add endpoint contracts, request/response shapes,
+database schema, and interface states when the feature actually touches those boundaries.
+Do not require irrelevant artifacts for a CLI, library, background task, or persistence-free change.
 
 ## Phase B · Implement — when the design exists
 
@@ -80,7 +77,7 @@ once** — not once per lane, and not once per batch.
 
 | Lane | Stage | Skill |
 |---|---|---|
-| **backend** | test first — the loop that decides the signatures | `coke-eng:go-tdd-feature-workflow` |
+| **backend** | test first — the loop that decides the signatures | `coke-eng:tdd-feature-workflow` |
 | **backend** | structure, naming, error taxonomy, the sqlc/pgx pattern | `coke-eng:go-clean-architecture` |
 | **db** | queries, indexes, RLS, locking, a slow plan | the postgres skill — its `query-` · `security-` · `lock-` · `data-` categories |
 | **frontend** | correctness and performance | `react-best-practices` |
@@ -106,7 +103,7 @@ time.
 |---|---|
 | ⚠ **`coke-eng:go-clean-architecture`'s `templates/sqlc.yaml` assumes a standalone repo** | Both skills use golang-migrate and a `migration/` directory now — the tool matches. What still differs: that skill's sqlc.yaml is written for a Go-only repo, so it reads `schema: "migration"` from beside itself. Here sqlc.yaml lives in `backend/`, one level below the repository root where `migration/` sits — copying that file unedited reads the wrong path and finds no schema. The two-line `templates/sqlc.yaml` here (`schema: "../migration"`) is the fix |
 | ⚠ **The same skill says the pgx pool is a singleton** | one pool per role — see `environments.md`. Composition root only; no layer boundary moves |
-| ⚠ **`coke-eng:go-tdd-feature-workflow` puts the repository layer out of scope, deliberately** | its handler tests wire a real usecase to a **fake** repository, so grants, RLS, constraints and pgx mapping are proven by **nothing in the skill set at all.** `make test-db` is where that closes — and is the reason that gate exists rather than being a nice-to-have |
+| ⚠ **`coke-eng:tdd-feature-workflow` chooses test scope from the behavior and risk** | when grants, RLS, constraints, transactions, or pgx mapping change, use the real database boundary; `make test-db` is this stack's canonical integration gate |
 | ⚠ **`coke-eng:go-clean-architecture` says to use a transaction only for multi-write atomicity** | *"Use a transaction only when one usecase requires multiple writes to commit atomically."* ⚠ **Under RLS that is false, and its canonical `gen.New(pool)` constructor is the shape that fails silently** — see `conventions.md` |
 | ⚠ **`react-best-practices` is written for Next.js in more categories than one** | below |
 | ⚠ **The postgres skill's RLS examples assume one platform's identity function — and call it bare in the predicate** | below, for the platform half. The *performance* half is the `(select …)` wrapper |
@@ -156,7 +153,7 @@ the query it was meant to scope.
 
 | | |
 |---|---|
-| ⚠ **`coke-eng:go-performance-optimization`** | measurement-first by its own first rule. Invoke it when a **stated budget has been measured and missed** — never speculatively, and never while building a feature |
+| ⚠ **`coke-eng:performance-optimization`** | measurement-first by its own first rule. Invoke it when a **stated budget has been measured and missed** — never speculatively, and never while building a feature |
 | ⚠ **CD, and any skill that names a deploy target** | where a deploy lands is a project decision, so no skill is named for it here |
 
 ⚠ **When a gate goes red, diagnose the failure. Never weaken the check to pass it.** A gate

@@ -17,10 +17,10 @@ description: Reviews Rust backend changes against Clean Architecture boundaries,
 ## Do not use this when
 
 - Initial architecture scaffolding → use `coke-eng:rust-clean-architecture`.
-- Running the TDD red/green/refactor loop → use `coke-eng:rust-tdd-feature-workflow`.
-- Setting up CI/CD or deployment → use `coke-eng:rust-ci-cd`.
+- Running the TDD red/green/refactor loop → use `coke-eng:tdd-feature-workflow`.
+- Setting up CI/CD or deployment → use `coke-eng:ci-cd-workflow`.
 - Formatting-only changes.
-- Full benchmarking, profiling, or load testing → use `coke-eng:rust-performance-optimization`.
+- Full benchmarking, profiling, or load testing → use `coke-eng:performance-optimization`.
 
 ## Core rules
 
@@ -74,9 +74,9 @@ description: Reviews Rust backend changes against Clean Architecture boundaries,
 ## Related skills
 
 - `coke-eng:rust-clean-architecture` — owns layer structure, naming, error flow, repository shape. This skill checks compliance.
-- `coke-eng:rust-tdd-feature-workflow` — owns TDD workflow and test placement. This skill checks test quality.
-- `coke-eng:rust-performance-optimization` — when an issue needs measured impact, defer to it.
-- `coke-eng:rust-ci-cd` — owns automation that runs the final verification commands.
+- `coke-eng:tdd-feature-workflow` — owns the TDD loop and test-scope decision. This skill checks test quality.
+- `coke-eng:performance-optimization` — when an issue needs measured impact, defer to it.
+- `coke-eng:ci-cd-workflow` — owns automation that runs the final verification commands.
 
 ## Final verification
 

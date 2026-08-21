@@ -1,0 +1,8 @@
+[
+  {"query": "Set up CI checks and artifact publishing for this Python service", "should_trigger": true},
+  {"query": "Our GitHub Actions deploy sometimes races itself; fix the pipeline", "should_trigger": true},
+  {"query": "Design staging promotion, smoke tests, and rollback for this monorepo", "should_trigger": true},
+  {"query": "Harden pipeline permissions and replace cloud secrets with OIDC", "should_trigger": true},
+  {"query": "Implement a payment feature in Rust", "should_trigger": false},
+  {"query": "Provision a Kubernetes cluster and VPC", "should_trigger": false}
+]
