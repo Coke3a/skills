@@ -62,8 +62,8 @@ Implementation and review skills are stable per-project (a Rust+Next.js monorepo
 {
   "implementation_skills": [
     "/coke-eng:rust-clean-architecture",
-    "/coke-eng:rust-performance-optimization",
-    "/coke-eng:nextjs-app-architecture",
+    "/coke-eng:performance-optimization",
+    "/coke-eng:tdd-feature-workflow",
     "/react-best-practices"
   ],
   "review_skills": [
@@ -76,7 +76,7 @@ Implementation and review skills are stable per-project (a Rust+Next.js monorepo
 }
 ```
 
-- **Flat lists, not partitioned by component.** The controller picks the subset relevant to each dispatched batch (e.g., for a Rust file, the implementer dispatch references only the `/coke-eng:rust-*` entries from `implementation_skills`).
+- **Flat lists, not partitioned by component.** The controller picks the subset relevant to each dispatched batch, including cross-language workflow skills when their activity applies.
 - **`verification_scope_default`:** `"full"` | `"tests-only"` | `"ask"`. If `"ask"`, the controller prompts per-invocation question 3 every time.
 - **`_comment` and `_updated_at`** are advisory; not used programmatically. The user may edit the file by hand at any time.
 
@@ -99,9 +99,9 @@ Implementation and review skills are stable per-project (a Rust+Next.js monorepo
 Ask via AskUserQuestion. State `/karpathy-guidelines` + `/scrutinize` are baseline. Then:
 
 - **Implementation skills** — for plan writer + implementer subagents. Free-form list (skill names with leading `/`). Examples per stack:
-  - Rust backend: `/coke-eng:rust-clean-architecture`, `/coke-eng:rust-performance-optimization`
-  - React / Next.js frontend: `/coke-eng:nextjs-app-architecture`, `/react-best-practices`
-  - TDD-driven repos: `/coke-eng:rust-tdd-feature-workflow`, `/coke-eng:nextjs-ui-tdd-workflow`
+  - Rust backend: `/coke-eng:rust-clean-architecture`; measured performance work: `/coke-eng:performance-optimization`
+  - React / Next.js frontend: `/react-best-practices`
+  - TDD-driven repos in any supported stack: `/coke-eng:tdd-feature-workflow`
   - Other: whatever the user names; empty list is OK
 - **Review skills** — for quality reviewer subagent. May overlap with implementation skills. Examples:
   - Rust backend: `/coke-eng:rust-code-review`

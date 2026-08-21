@@ -1,6 +1,6 @@
 ---
 name: ops-docker-vm-deploy
-description: Build a Docker image in GitHub Actions and deploy it to a plain Linux VM over SSH — DigitalOcean droplet, EC2, Hetzner, Contabo, any VPS — for an app in any language. Covers image tagging and registry push, the remote deploy script and its rollback, GitHub Environment secret scoping, host preparation, reverse proxy, port exposure, and testing the deploy script without a server. Use this whenever the user wants to set up, review, harden, or debug shipping a container to a server they own, including phrasings like "deploy to my droplet", "GitHub Actions docker deploy", "ssh deploy script", "CI/CD for my VPS", "deploy container to EC2", "why did my deploy not roll back", "set up CI/CD to deploy to my server", or "ship my docker image to a droplet" — even when they do not say "CI/CD" explicitly. Do not use for managed platforms that deploy themselves (Vercel, Netlify, Fly.io, Render, Railway, App Runner), for Kubernetes/ECS/Nomad orchestration, or for language-specific CI checks (Rust → coke-eng:rust-ci-cd).
+description: Build a Docker image in GitHub Actions and deploy it to a plain Linux VM over SSH — DigitalOcean droplet, EC2, Hetzner, Contabo, any VPS — for an app in any language. Covers image tagging and registry push, the remote deploy script and its rollback, GitHub Environment secret scoping, host preparation, reverse proxy, port exposure, and testing the deploy script without a server. Use this whenever the user wants to set up, review, harden, or debug shipping a container to a server they own, including phrasings like "deploy to my droplet", "GitHub Actions docker deploy", "ssh deploy script", "CI/CD for my VPS", "deploy container to EC2", "why did my deploy not roll back", "set up CI/CD to deploy to my server", or "ship my docker image to a droplet" — even when they do not say "CI/CD" explicitly. Do not use for managed platforms that deploy themselves (Vercel, Netlify, Fly.io, Render, Railway, App Runner), for Kubernetes/ECS/Nomad orchestration, or for general CI checks (use coke-eng:ci-cd-workflow).
 ---
 
 # Docker → VM Deploy
@@ -117,7 +117,7 @@ Adapt, do not copy blindly — every one has a placeholder that must change.
 
 ## Related skills
 
-- `coke-eng:rust-ci-cd` — Rust-specific CI checks feeding this pipeline.
+- `coke-eng:ci-cd-workflow` — language-neutral CI checks and artifact flow feeding this deployment.
 
 ## Definition of done
 

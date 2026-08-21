@@ -16,10 +16,10 @@ description: Guides Go backend feature architecture using Fiber v3, sqlc, pgx, a
 
 ## Do not use this when
 
-- Driving the red/green/refactor loop → use `coke-eng:go-tdd-feature-workflow`.
+- Driving the red/green/refactor loop → use `coke-eng:tdd-feature-workflow`.
 - Setting up GitHub Actions or deployment → use a CI/CD skill.
 - Producing a final review report → use a code review skill.
-- Profiling, benchmarking, or hot-path tuning → use `coke-eng:go-performance-optimization`.
+- Profiling, benchmarking, or hot-path tuning → use `coke-eng:performance-optimization`.
 
 ## Core rules
 
@@ -93,9 +93,9 @@ infra -> domain interfaces
 
 ## Related skills
 
-- `coke-eng:go-tdd-feature-workflow` — the red/green/refactor loop that fills these layers. It owns test
+- `coke-eng:tdd-feature-workflow` — the red/green/refactor loop that fills these layers. It owns test
   level, placement, and order; this skill owns where the code they drive out belongs.
-- `coke-eng:go-performance-optimization` — optimizing without breaking layer boundaries.
+- `coke-eng:performance-optimization` — optimizing without breaking layer boundaries.
 - `coke-eng:rust-clean-architecture` — the Rust counterpart this architecture mirrors.
 
 ## Definition of done

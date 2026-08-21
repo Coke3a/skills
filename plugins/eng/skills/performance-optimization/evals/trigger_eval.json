@@ -1,0 +1,8 @@
+[
+  {"query": "Profile this Go service and reduce p99 latency; keep a before/after benchmark", "should_trigger": true},
+  {"query": "Our Python worker memory keeps growing under load. Find the bottleneck and prove the fix", "should_trigger": true},
+  {"query": "The React bundle grew by 40%. Identify why and bring it back under the budget", "should_trigger": true},
+  {"query": "This PostgreSQL query is slow in production; inspect the plan before changing it", "should_trigger": true},
+  {"query": "Clean up this function and make the names nicer", "should_trigger": false},
+  {"query": "Set up CI to run cargo test", "should_trigger": false}
+]

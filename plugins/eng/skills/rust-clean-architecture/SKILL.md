@@ -16,10 +16,10 @@ description: Guides Rust backend feature architecture using Axum, Diesel, and Po
 
 ## Do not use this when
 
-- Driving the red/green/refactor loop → use `coke-eng:rust-tdd-feature-workflow`.
-- Setting up GitHub Actions or deployment → use `coke-eng:rust-ci-cd`.
+- Driving the red/green/refactor loop → use `coke-eng:tdd-feature-workflow`.
+- Setting up GitHub Actions or deployment → use `coke-eng:ci-cd-workflow`.
 - Producing a final review report → use `coke-eng:rust-code-review`.
-- Profiling, benchmarking, or hot-path tuning → use `coke-eng:rust-performance-optimization`.
+- Profiling, benchmarking, or hot-path tuning → use `coke-eng:performance-optimization`.
 
 ## Core rules
 
@@ -84,10 +84,10 @@ infra -> domain traits
 
 ## Related skills
 
-- `coke-eng:rust-tdd-feature-workflow` — test design and the red/green/refactor loop.
+- `coke-eng:tdd-feature-workflow` — test design and the red/green/refactor loop.
 - `coke-eng:rust-code-review` — final review against these rules.
-- `coke-eng:rust-performance-optimization` — optimizing without breaking layer boundaries.
-- `coke-eng:rust-ci-cd` — automation that ships the code produced under this skill.
+- `coke-eng:performance-optimization` — optimizing without breaking layer boundaries.
+- `coke-eng:ci-cd-workflow` — automation that ships the code produced under this skill.
 
 ## Definition of done
 

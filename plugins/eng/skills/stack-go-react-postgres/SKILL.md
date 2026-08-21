@@ -1,6 +1,6 @@
 ---
 name: stack-go-react-postgres
-description: The big-picture engineering baseline for a Go + React (Vite) + PostgreSQL project — repository layout, version pins and the compatibility traps that decide them, the local Docker Compose stack, local/staging/production environments, same-origin proxying through Caddy, database roles, the gate set, CI shape, and observability. Its other half is routing — it decides whether the project is still in design or already in implementation, and names which specialist skill owns each lane. Use this whenever someone starts or restructures a full-stack project, or asks how one should be put together — "set up a new Go + React project", "start a new project", "what versions should I pin", "how do I run this locally", "why does my session cookie not work in dev", "what should CI check", "which skill do I use for this" — and read it before any deep work so the specialist skill is invoked with the right structure around it. Do NOT use it to do the deep work — a Go feature is coke-eng:go-clean-architecture, a React component is react-best-practices, a query or a policy is the postgres skill, shipping to a server is coke-eng:ops-docker-vm-deploy, and Next.js is coke-eng:nextjs-app-architecture.
+description: The big-picture engineering baseline for a Go + React (Vite) + PostgreSQL project — repository layout, version pins and the compatibility traps that decide them, the local Docker Compose stack, local/staging/production environments, same-origin proxying through Caddy, database roles, the gate set, CI shape, and observability. Its other half is routing — it decides whether the project is still in design or already in implementation, and names which specialist skill owns each lane. Use this whenever someone starts or restructures a full-stack project, or asks how one should be put together — "set up a new Go + React project", "start a new project", "what versions should I pin", "how do I run this locally", "why does my session cookie not work in dev", "what should CI check", "which skill do I use for this" — and read it before any deep work so the specialist skill is invoked with the right structure around it. Do NOT use it to do the deep work — a Go feature is coke-eng:go-clean-architecture, a React component is react-best-practices, a query or a policy is the postgres skill, and shipping to a server is coke-eng:ops-docker-vm-deploy.
 ---
 
 # Full-Stack Baseline — Go + React (Vite)
@@ -20,7 +20,7 @@ it does not do the work.
 | It owns | It hands off |
 |---|---|
 | Where directories go and what each may never contain | Go feature architecture → `coke-eng:go-clean-architecture` |
-| Which versions, and the peer constraints that decide them | The Go test loop → `coke-eng:go-tdd-feature-workflow` |
+| Which versions, and the peer constraints that decide them | The feature test loop → `coke-eng:tdd-feature-workflow` |
 | The local stack, ports, env vars, same-origin | React correctness and performance → `react-best-practices` |
 | The proxy's four jobs | Screens, states, design system → `impeccable` |
 | Which roles connect to the database, and that it must be more than one | Queries, indexes, policies, locking → `postgres-best-practices:supabase-postgres-best-practices` |
@@ -47,7 +47,7 @@ a handler, a component or a query plan while inside this skill, you are in the w
 
 - The task is a single deep artifact — a handler, a component, a migration's SQL, a query
   plan, a policy. Route it (table above) and let the specialist own it.
-- The stack is Next.js → `coke-eng:nextjs-app-architecture`. This skill is Vite SPA + Go API.
+- The stack is Next.js. This skill is specifically Vite SPA + Go API.
 - The project has no product design and nobody can state one. That is not a structure
   problem; it is Phase A, below, and it comes first.
 - The question is where to deploy. That is deliberately out of scope — see `references/ci.md`.
@@ -66,10 +66,9 @@ a handler, a component or a query plan while inside this skill, you are in the w
 ## Routing — the first question is not which skill
 
 **It is: does this project have a design yet?** The answer splits the work in two, and the
-skills split with it. Phase A produces the artifacts Phase B consumes, and Phase B is not
-merely inconvenient without them — `coke-eng:go-tdd-feature-workflow` opens with a hard entry
-gate that stops dead unless the endpoints, the request/response shapes and the schema are
-already written down somewhere quotable.
+skills split with it. Phase A produces the artifacts Phase B consumes. Phase B starts when
+the intended behavior is clear enough to state acceptance criteria; endpoint, interface, and
+schema artifacts are required only for the parts of the feature that actually use them.
 
 **Either form of design counts: a document in the project, or a design you can state as
 context. What does not count is neither.**
@@ -88,7 +87,7 @@ Both phases have the same three lanes — **contract · schema · interface**.
 
 | Lane | Skill |
 |---|---|
-| backend, test first | `coke-eng:go-tdd-feature-workflow` |
+| backend, test first | `coke-eng:tdd-feature-workflow` |
 | backend, structure | `coke-eng:go-clean-architecture` |
 | db | the postgres skill, its `query-` · `security-` · `lock-` · `data-` categories |
 | frontend | `react-best-practices` · `impeccable` |

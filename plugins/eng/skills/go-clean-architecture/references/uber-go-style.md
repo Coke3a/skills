@@ -5,7 +5,7 @@ architecture relies on. The guide's own meta-rule applies: **above all else, be 
 apply style changes at package level or larger.
 
 Performance-specific rules (strconv over fmt, cached `[]byte` conversions, container capacity)
-live in `coke-eng:go-performance-optimization`; the guide scopes them to hot paths only.
+live in `coke-eng:performance-optimization`; the guide scopes them to hot paths only.
 
 ## Safety and correctness
 

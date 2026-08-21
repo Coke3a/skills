@@ -1,0 +1,9 @@
+[
+  {"query": "Add the booking overlap rule test-first, one acceptance criterion at a time", "should_trigger": true},
+  {"query": "Write a regression test for this Java bug, then make it pass", "should_trigger": true},
+  {"query": "Build the TypeScript parser using red green refactor", "should_trigger": true},
+  {"query": "Characterize this legacy behavior with tests before refactoring it", "should_trigger": true},
+  {"query": "Add tests to this feature I already finished", "should_trigger": false},
+  {"query": "Review whether these tests are good", "should_trigger": false},
+  {"query": "Configure GitHub Actions to run the test suite", "should_trigger": false}
+]
