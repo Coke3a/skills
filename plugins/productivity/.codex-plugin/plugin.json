@@ -1,0 +1,27 @@
+{
+  "name": "coke-productivity",
+  "version": "1.0.0",
+  "description": "Multi-repository workspace orientation, cross-session progress tracking, and community/forum reply drafting.",
+  "author": {
+    "name": "Coke3a",
+    "url": "https://github.com/Coke3a"
+  },
+  "repository": "https://github.com/Coke3a/skills",
+  "keywords": ["productivity", "workspace", "project-tracking", "communication"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Coke Productivity",
+    "shortDescription": "Workspace orientation and project momentum.",
+    "longDescription": "Provides workflows for orienting across repositories, tracking project progress between sessions, and writing useful community replies.",
+    "developerName": "Coke3a",
+    "category": "Productivity",
+    "capabilities": ["Skills"],
+    "websiteURL": "https://github.com/Coke3a/skills",
+    "defaultPrompt": [
+      "Orient me to this workspace and identify the next task.",
+      "Summarize project progress and propose the next steps.",
+      "Draft a constructive reply to this community post."
+    ],
+    "brandColor": "#059669"
+  }
+}
