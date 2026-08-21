@@ -1,0 +1,27 @@
+{
+  "name": "coke-eng",
+  "version": "2.0.0",
+  "description": "Engineering workflows for clean architecture, TDD, performance optimization, CI/CD, code review, feature delivery, deployment, and code comments.",
+  "author": {
+    "name": "Coke3a",
+    "url": "https://github.com/Coke3a"
+  },
+  "repository": "https://github.com/Coke3a/skills",
+  "keywords": ["engineering", "architecture", "tdd", "go", "rust"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Coke Engineering",
+    "shortDescription": "Engineering workflows for reliable delivery.",
+    "longDescription": "Guides architecture, feature delivery, testing, performance, review, CI/CD, deployment, and maintainable code across Go, Rust, and web stacks.",
+    "developerName": "Coke3a",
+    "category": "Development",
+    "capabilities": ["Skills"],
+    "websiteURL": "https://github.com/Coke3a/skills",
+    "defaultPrompt": [
+      "Plan and implement this feature with tests.",
+      "Review this change for architecture and performance risks.",
+      "Design a clean architecture for this service."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

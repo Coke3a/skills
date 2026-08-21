@@ -1,0 +1,44 @@
+{
+  "name": "coke-skills",
+  "interface": {
+    "displayName": "Coke Skills"
+  },
+  "plugins": [
+    {
+      "name": "coke-eng",
+      "source": {
+        "source": "local",
+        "path": "./plugins/eng"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "coke-product",
+      "source": {
+        "source": "local",
+        "path": "./plugins/product"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Design"
+    },
+    {
+      "name": "coke-productivity",
+      "source": {
+        "source": "local",
+        "path": "./plugins/productivity"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

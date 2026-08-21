@@ -1,0 +1,27 @@
+{
+  "name": "coke-product",
+  "version": "1.0.0",
+  "description": "Outcome-led positioning, landing page design and CRO, and outsider-perspective UX/UI review.",
+  "author": {
+    "name": "Coke3a",
+    "url": "https://github.com/Coke3a"
+  },
+  "repository": "https://github.com/Coke3a/skills",
+  "keywords": ["product", "design", "landing-page", "cro", "ux"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Coke Product",
+    "shortDescription": "Product positioning and interface critique.",
+    "longDescription": "Helps shape outcome-led messaging, design landing pages, and critique product interfaces from an outsider perspective.",
+    "developerName": "Coke3a",
+    "category": "Design",
+    "capabilities": ["Skills"],
+    "websiteURL": "https://github.com/Coke3a/skills",
+    "defaultPrompt": [
+      "Design a landing page that sells this outcome.",
+      "Critique this interface and propose focused improvements.",
+      "Turn this product feature into clear customer messaging."
+    ],
+    "brandColor": "#7C3AED"
+  }
+}
