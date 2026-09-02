@@ -12,7 +12,7 @@
     {
       "name": "coke-eng",
       "source": "./plugins/eng",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "development",
       "description": "Engineering workflows for Go and Rust clean architecture, language-neutral TDD, performance optimization and CI/CD, code review, feature delivery, Docker/VM deployment, and code comments.",
       "author": { "name": "Coke3a" }

@@ -1,6 +1,6 @@
 {
   "name": "coke-eng",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Engineering workflows for clean architecture, TDD, performance optimization, CI/CD, code review, feature delivery, deployment, and code comments.",
   "author": {
     "name": "Coke3a",

@@ -83,7 +83,7 @@ Both phases have the same three lanes — **contract · schema · interface**.
 | schema | the postgres skill, its `schema-` category → the first `migration/` pair |
 | interface | `impeccable shape` |
 
-**Phase B · implement** — `coke-eng:flow-feature-implementation` drives the whole feature once.
+**Phase B · implement** — run the lanes against the written design.
 
 | Lane | Skill |
 |---|---|
@@ -196,6 +196,5 @@ Names prefixed `coke-productivity:` or `coke-product:` ship in sibling plugins. 
 separately, or skip that step — nothing here depends on them being present.
 
 - `coke-productivity:agent-workspace-orientation` — run first in an unfamiliar or multi-repository workspace.
-- `coke-eng:flow-feature-implementation` — drives a feature from spec to code once Phase B starts.
 - `coke-eng:flow-spec-review` — check a design before trusting it.
 - `coke-eng:ops-docker-vm-deploy` — the deploy half this skill deliberately does not carry.

@@ -72,8 +72,7 @@ Do not require irrelevant artifacts for a CLI, library, background task, or pers
 
 ## Phase B · Implement — when the design exists
 
-Same three lanes, different skills. **`coke-eng:flow-feature-implementation` drives the whole feature
-once** — not once per lane, and not once per batch.
+Same three lanes, different skills.
 
 | Lane | Stage | Skill |
 |---|---|---|

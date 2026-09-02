@@ -24,7 +24,6 @@ and `ci-cd-`.
 | Skill | Use when |
 | --- | --- |
 | `ci-cd-workflow` | Designing or repairing validation, artifact promotion, deployment verification, and rollback across stacks |
-| `flow-feature-implementation` | Implementing a feature end-to-end from a written spec, across multiple batches with review gates |
 | `flow-spec-review` | Validating a spec against the real current system before anyone writes code |
 | `go-clean-architecture` | Go feature layout with Fiber v3, sqlc, pgx — handlers, usecases, domain, repositories |
 | `ops-docker-vm-deploy` | Shipping a Docker image from GitHub Actions to a plain Linux VM over SSH |
