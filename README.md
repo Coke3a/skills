@@ -179,6 +179,11 @@ and `agent-workspace-orientation` assume a workspace with a stable `project/` di
 them for your habits. Issues and ideas are welcome at
 [github.com/Coke3a/skills/issues](https://github.com/Coke3a/skills/issues).
 
+## License
+
+[MIT](LICENSE). Use, copy, and modify these skills freely, including commercially. Keep the
+copyright notice.
+
 ---
 
 ## Adding a skill
