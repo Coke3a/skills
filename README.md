@@ -4,8 +4,8 @@ Agent skills for the way I build backends with coding agents: check the spec, bu
 test-first, keep the architecture, ship it. They install into Claude Code, and the repo ships a
 Codex marketplace manifest too.
 
-I'm [Coke](https://github.com/Coke3a). I keep these skills in one repo so every project starts
-from the same habits instead of re-explaining them to the agent each time.
+I'm [Coke](https://github.com/Coke3a), and I maintain these. Each skill is a plain `SKILL.md`
+with its references and templates, so you can read one before you install it.
 
 ```
 /plugin marketplace add Coke3a/skills
