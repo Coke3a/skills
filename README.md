@@ -48,28 +48,19 @@ be unsafe. I'd rather the agent ask once than build on a guess.
 
 ---
 
-## What it looks like
+## Where `flow-spec-review` stops
 
-Abridged and illustrative. This is the shape of a `flow-spec-review` run, not a verbatim log.
+`flow-spec-review` has two hard stops, written into the skill:
 
-```
-You:    review specs/refund-flow.md before we implement it
+- **Testing scope can't be met.** If the tests the review needs can't run within the scope you
+  set, it stops and says what it couldn't test and why. You either widen the scope or
+  explicitly approve going on without that check.
+- **The spec's "before" doesn't match reality.** It reports what the spec says against what
+  testing showed. You either fix the spec or explicitly approve going on with the known
+  inaccuracy.
 
-Agent:  [flow-spec-review] The spec changes refunds from "full refund only" to
-        partial refunds. Is that right? What can I test, and where?
-You:    API tests against staging, nothing destructive.
-
-Agent:  Ran the existing refund tests and called the staging API.
-
-        GATE 2 — current state doesn't match the spec
-        Spec says:     "Today POST /refunds rejects any amount below the order total."
-        Reality shows: Staging accepts partial amounts and returns 201.
-
-        I'm stopping here. Is the spec outdated, or is staging ahead of production?
-```
-
-The skill goes on to a big-picture before/after for each change, and every change needs your
-approval before it moves forward. It never implements anything.
+Past those, every change in the spec is presented as a before/after and needs your approval
+before it moves on. It never implements anything.
 
 ---
 
