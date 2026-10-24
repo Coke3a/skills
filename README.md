@@ -1,8 +1,8 @@
 # Coke Skills
 
-Agent skills for the way I build backends with coding agents: check the spec, build it
-test-first, keep the architecture, ship it. They install into Claude Code, and the repo ships a
-Codex marketplace manifest too.
+Agent skills for building backends with coding agents: check the spec, build it test-first, keep
+the architecture, ship it. They install into Claude Code, and the repo ships a Codex marketplace
+manifest too.
 
 ```
 /plugin marketplace add Coke3a/skills
@@ -20,7 +20,7 @@ Codex: `.agents/plugins/marketplace.json` lists the same three plugins, each wit
 
 ---
 
-## What I care about
+## Principles
 
 **Verify, don't assume.** A skill that reviews a spec should check the spec against the running
 system first. `flow-spec-review` runs the existing tests, compares what the spec calls "current
@@ -30,7 +30,7 @@ a false premise.
 **A skill is only useful if it fires.** A description is a trigger, and triggers fail
 quietly. So the eval harness in `evals/` doesn't test a stand-in copy of a skill. It runs
 `claude -p` with every plugin you have installed competing, and records which skill won the
-prompt. When a skill loses, you see who beat it, because "another skill outranked mine" and "my
+prompt. When a skill loses, you see who beat it, because "another skill outranked it" and "the
 description doesn't match" need different fixes. Eight skills have prompt sets
 (`should_trigger` true and false) so far.
 
@@ -41,7 +41,7 @@ language prefix, like `go-clean-architecture` and `rust-clean-architecture`.
 
 **Stop at the decision that is yours.** Several skills hard-stop and ask rather than guess:
 when the test scope can't be met, when a product decision is missing, when a rollback would
-be unsafe. I'd rather the agent ask once than build on a guess.
+be unsafe. Asking once is cheaper than building on a guess.
 
 ---
 
@@ -63,7 +63,7 @@ before it moves on. It never implements anything.
 
 ## How the engineering skills fit together
 
-When I build a feature, I use three skills in order. Each one answers a different question.
+Building a feature uses three skills in order. Each one answers a different question.
 
 ```
  spec ──► flow-spec-review ──► tdd-feature-workflow ──► rust-code-review
@@ -75,19 +75,19 @@ When I build a feature, I use three skills in order. Each one answers a differen
 ```
 
 1. **`flow-spec-review` — is the spec right?** Before any code, it checks the spec against the
-   running system and walks me through every change as a before/after that I approve. It
-   never implements anything. What comes out is a spec I've signed off on. It's the heaviest
-   skill here (it needs a test environment and my approval on every change), so I use it for
-   non-trivial specs and skip it for small changes.
-2. **`tdd-feature-workflow` — build it one behavior at a time.** I take the approved spec's
-   acceptance criteria and implement them one by one, red then green then refactor. Each
+   running system and walks you through every change as a before/after that you approve. It
+   never implements anything. What comes out is a spec you've signed off on. It's the heaviest
+   skill here (it needs a test environment and your approval on every change), so it fits
+   non-trivial specs and is overkill for small changes.
+2. **`tdd-feature-workflow` — build it one behavior at a time.** The approved spec's
+   acceptance criteria are implemented one by one, red then green then refactor. Each
    criterion gets a test that failed for the intended reason, then the smallest code that
-   passes. That keeps the agent tied to the criteria I approved, and a missing product
+   passes. That keeps the agent tied to the approved criteria, and a missing product
    decision makes it stop and ask rather than invent one.
-3. **`go-clean-architecture` / `rust-clean-architecture` — keep my design.** TDD decides
+3. **`go-clean-architecture` / `rust-clean-architecture` — keep the design.** TDD decides
    *when* code gets written. These decide *where it lives*: dependency direction
    (handlers → usecases → domain), who owns which error, what a repository looks like. The
-   agent keeps to my layering instead of inventing a new one for each feature.
+   agent keeps to the same layering instead of inventing a new one for each feature.
 
 Afterwards, `rust-code-review` checks the result against the same boundaries, and
 `stack-go-react-postgres` is the entry point when the project doesn't exist yet. It decides
@@ -95,9 +95,9 @@ which of these skills runs first.
 
 Two things to know before you adopt this:
 
-- **The chain is manual.** The skills don't call each other. I carry the approved spec from
-  step 1 into step 2 myself, and each skill's "do not use for" list keeps them from
-  overlapping. This is a working order, not an automated pipeline.
+- **The chain is manual.** The skills don't call each other. You carry the approved spec from
+  step 1 into step 2, and each skill's "do not use for" list keeps them from overlapping.
+  This is a working order, not an automated pipeline.
 - **The architecture skills are for two specific stacks.** Go uses Fiber v3, sqlc, and pgx,
   and Rust uses Axum and Diesel. If your stack differs, take the layering rules and rewrite
   the templates.
@@ -161,10 +161,10 @@ Grouped by what you're trying to do. Each plugin is installed separately (see ab
 
 ## Take these as a starting point
 
-These skills reflect how I work, and a few are personal on purpose. `agent-project-progress`
+These skills are opinionated, and a few are personal on purpose. `agent-project-progress`
 and `agent-workspace-orientation` assume a workspace with a stable `project/` directory, and
-`writing-community-reply` is written around my own voice and rules. Fork the repo and rewrite
-them for your habits. Issues and ideas are welcome at
+`writing-community-reply` is written around one author's voice and rules. Fork the repo and
+rewrite them for your own habits. Issues and ideas are welcome at
 [github.com/Coke3a/skills/issues](https://github.com/Coke3a/skills/issues).
 
 ## License
