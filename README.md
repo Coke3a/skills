@@ -1,7 +1,7 @@
 # Coke Skills
 
-Agent skills I use when I work with coding agents — Go and Rust backends, shipping to a plain
-VPS, and the product thinking around it. They install into Claude Code, and the repo ships a
+Agent skills for the way I build backends with coding agents: check the spec, build it
+test-first, keep the architecture, ship it. They install into Claude Code, and the repo ships a
 Codex marketplace manifest too.
 
 I'm [Coke](https://github.com/Coke3a). I keep these skills in one repo so every project starts
